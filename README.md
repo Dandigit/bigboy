@@ -1,2 +1,2 @@
 # bigboy
-A work-in-progress gameboy emulator
+A work-in-progress Gameboy emulator.
