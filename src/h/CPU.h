@@ -282,6 +282,18 @@ public:
         // Bit-by-bit: 0 0 1 1 0 1 1 1
         SCF = 0b00110111,
 
+        // RLCA
+        // The contents of register A are rotated left by 1 bit position, and the sign
+        // bit (7) is copied into the carry flag.
+        // Bit-by-bit: 0 0 0 0 0 1 1 1
+        RLCA = 0b00000111,
+
+        // RLA
+        // The contents of register A are rotated left by 1 bit position through the
+        // carry flag.
+        // Bit-by-bit: 0 0 0 1 0 1 1 1
+        RLA = 0b00010111,
+
         // PREFIX:
         // Interpret the next byte as a prefix instruction (PrefixOpCode)
         // rather than a normal instruction (OpCode)
@@ -314,10 +326,10 @@ public:
             static constexpr uint8_t HALF_CARRY_FLAG_BYTE_POSITION = 5;
             static constexpr uint8_t CARRY_FLAG_BYTE_POSITION = 4;
 
-            bool zero;
-            bool subtract;
-            bool half_carry;
-            bool carry;
+            bool zero = false;
+            bool subtract = false;
+            bool half_carry = false;
+            bool carry = false;
 
             // We can treat a Flags object like a normal uint8_t
             Flags(uint8_t byte);
@@ -325,11 +337,11 @@ public:
         };
 
         // Accumulator and flags
-        uint8_t a;
-        Flags f;
+        uint8_t a = 0;
+        Flags f = 0;
 
         // General purpose
-        uint8_t b, c, d, e, h, l;
+        uint8_t b, c, d, e, h, l = 0;
 
         // Some instructions allow two 8 bit registers to be read as one 16 bit register
         // Referred to as AF (A & F), BC (B & C), DE (D & E) and HL (H & L)
@@ -427,6 +439,12 @@ private:
 
     void CCF();
     void SCF();
+
+    void rotateLeftToCarry(uint8_t& target);
+    void rotateLeftThroughCarry(uint8_t& target);
+
+    void RLCA();
+    void RLA();
 
 public:
     void reset();

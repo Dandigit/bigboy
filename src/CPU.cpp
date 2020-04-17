@@ -352,6 +352,12 @@ void CPU::step() {
         case OpCode::SCF:
             SCF();
             break;
+        case OpCode::RLCA:
+            RLCA();
+            break;
+        case OpCode::RLA:
+            RLA();
+            break;
         case OpCode::PREFIX:
             stepPrefix();
             break;
@@ -709,4 +715,42 @@ void CPU::SCF() {
 
     m_registers.f.subtract = false;
     m_registers.f.half_carry = false;
+}
+
+// Rotate `target` left 1 bit position, copying the sign bit to the carry flag and bit 0
+void CPU::rotateLeftToCarry(uint8_t &target) {
+    uint8_t signBit = target >> 7u;
+
+    target <<= 1u;
+    target ^= signBit;
+
+    m_registers.f.carry = signBit != 0;
+    m_registers.f.half_carry = false;
+    m_registers.f.subtract = false;
+}
+
+// Rotate `target` left 1 bit position through the carry flag,
+// copying the previous contents of the carry flag to bit 0
+void CPU::rotateLeftThroughCarry(uint8_t &target) {
+    uint8_t prevCarryFlag = (m_registers.f.carry ? 1 : 0);
+
+    std::bitset<9> value{target};
+    value[8] = prevCarryFlag;
+
+    value <<= 1u;
+    value[0] = prevCarryFlag;
+
+    target = static_cast<uint8_t>(value.to_ulong());
+
+    m_registers.f.carry = value[8];
+    m_registers.f.half_carry = false;
+    m_registers.f.subtract = false;
+}
+
+void CPU::RLCA() {
+    rotateLeftToCarry(m_registers.a);
+}
+
+void CPU::RLA() {
+    rotateLeftThroughCarry(m_registers.a);
 }
