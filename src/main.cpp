@@ -1,5 +1,5 @@
 #include <iostream>
-#include "h/CPU.h"
+#include "CPU.h"
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
