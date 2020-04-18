@@ -283,7 +283,7 @@ public:
         SCF = 0b00110111,
 
         // RLCA
-        // The contents of register A are rotated left by 1 bit position, and the sign
+        // The contents of register A are rotated left by 1 bit position, after the sign
         // bit (7) is copied into the carry flag.
         // Bit-by-bit: 0 0 0 0 0 1 1 1
         RLCA = 0b00000111,
@@ -293,6 +293,18 @@ public:
         // carry flag.
         // Bit-by-bit: 0 0 0 1 0 1 1 1
         RLA = 0b00010111,
+
+        // RRCA
+        // The contents of register A are rotated right by 1 bit position, after bit 0
+        // is copied into the carry flag.
+        // Bit-by-bit: 0 0 0 0 1 1 1 1
+        RRCA = 0b00001111,
+
+        // RRA
+        // The contents of register A are rotated right by 1 bit position through the
+        // carry flag.
+        // Bit-by-bit: 0 0 0 1 1 1 1 1
+        RRA = 0b00011111,
 
         // PREFIX:
         // Interpret the next byte as a prefix instruction (PrefixOpCode)
@@ -441,10 +453,21 @@ private:
     void SCF();
 
     void rotateLeftToCarry(uint8_t& target);
-    void rotateLeftThroughCarry(uint8_t& target);
 
     void RLCA();
+
+    void rotateLeftThroughCarry(uint8_t& target);
+
     void RLA();
+
+public:
+    void rotateRightToCarry(uint8_t& target);
+
+    void RRCA();
+
+    void rotateRightThroughCarry(uint8_t& target);
+
+    void RRA();
 
 public:
     void reset();

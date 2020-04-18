@@ -358,6 +358,12 @@ void CPU::step() {
         case OpCode::RLA:
             RLA();
             break;
+        case OpCode::RRCA:
+            RRCA();
+            break;
+        case OpCode::RRA:
+            RRA();
+            break;
         case OpCode::PREFIX:
             stepPrefix();
             break;
@@ -729,6 +735,10 @@ void CPU::rotateLeftToCarry(uint8_t &target) {
     m_registers.f.subtract = false;
 }
 
+void CPU::RLCA() {
+    rotateLeftToCarry(m_registers.a);
+}
+
 // Rotate `target` left 1 bit position through the carry flag,
 // copying the previous contents of the carry flag to bit 0
 void CPU::rotateLeftThroughCarry(uint8_t &target) {
@@ -747,10 +757,42 @@ void CPU::rotateLeftThroughCarry(uint8_t &target) {
     m_registers.f.subtract = false;
 }
 
-void CPU::RLCA() {
-    rotateLeftToCarry(m_registers.a);
-}
-
 void CPU::RLA() {
     rotateLeftThroughCarry(m_registers.a);
+}
+
+void CPU::rotateRightToCarry(uint8_t &target) {
+    uint8_t zerothBit = target & 1u;
+
+    target >>= 1u;
+    target ^= (zerothBit << 7u);
+
+    m_registers.f.carry = zerothBit != 0;
+    m_registers.f.half_carry = false;
+    m_registers.f.subtract = false;
+}
+
+void CPU::RRCA() {
+    rotateRightToCarry(m_registers.a);
+}
+
+void CPU::rotateRightThroughCarry(uint8_t &target) {
+    uint8_t prevCarryFlag = (m_registers.f.carry ? 1 : 0);
+
+    std::bitset<9> value{target};
+    value <<= 1u;
+    value[0] = prevCarryFlag;
+
+    value >>= 1u;
+    value[8] = prevCarryFlag;
+
+    target = static_cast<uint8_t>((value >> 1).to_ulong());
+
+    m_registers.f.carry = value[0];
+    m_registers.f.half_carry = false;
+    m_registers.f.subtract = false;
+}
+
+void CPU::RRA() {
+    rotateRightThroughCarry(m_registers.a);
 }
