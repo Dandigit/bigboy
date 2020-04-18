@@ -424,6 +424,30 @@ void CPU::stepPrefix() {
         case PrefixOpCode::RL_HL:
             RL_HL();
             break;
+        case PrefixOpCode::RRC_B:
+            RRC_r(ArithmeticTarget::B);
+            break;
+        case PrefixOpCode::RRC_C:
+            RRC_r(ArithmeticTarget::C);
+            break;
+        case PrefixOpCode::RRC_D:
+            RRC_r(ArithmeticTarget::D);
+            break;
+        case PrefixOpCode::RRC_E:
+            RRC_r(ArithmeticTarget::E);
+            break;
+        case PrefixOpCode::RRC_H:
+            RRC_r(ArithmeticTarget::H);
+            break;
+        case PrefixOpCode::RRC_L:
+            RRC_r(ArithmeticTarget::L);
+            break;
+        case PrefixOpCode::RRC_A:
+            RRC_r(ArithmeticTarget::A);
+            break;
+        case PrefixOpCode::RRC_HL:
+            RRC_HL();
+            break;
         default:
             std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
             exit(1);
@@ -772,7 +796,7 @@ void CPU::SCF() {
 }
 
 // Rotate `target` left 1 bit position, copying the sign bit to the carry flag and bit 0
-void CPU::rotateLeftToCarry(uint8_t &target) {
+void CPU::rotateLeft(uint8_t &target) {
     uint8_t signBit = target >> 7u;
 
     target <<= 1u;
@@ -784,24 +808,24 @@ void CPU::rotateLeftToCarry(uint8_t &target) {
 }
 
 void CPU::RLCA() {
-    rotateLeftToCarry(m_registers.a);
+    rotateLeft(m_registers.a);
 }
 
 void CPU::RLC_r(ArithmeticTarget target) {
     switch (target) {
-        case ArithmeticTarget::B: rotateLeftToCarry(m_registers.b); break;
-        case ArithmeticTarget::C: rotateLeftToCarry(m_registers.c); break;
-        case ArithmeticTarget::D: rotateLeftToCarry(m_registers.d); break;
-        case ArithmeticTarget::E: rotateLeftToCarry(m_registers.e); break;
-        case ArithmeticTarget::H: rotateLeftToCarry(m_registers.h); break;
-        case ArithmeticTarget::L: rotateLeftToCarry(m_registers.l); break;
-        case ArithmeticTarget::A: rotateLeftToCarry(m_registers.a); break;
+        case ArithmeticTarget::B: rotateLeft(m_registers.b); break;
+        case ArithmeticTarget::C: rotateLeft(m_registers.c); break;
+        case ArithmeticTarget::D: rotateLeft(m_registers.d); break;
+        case ArithmeticTarget::E: rotateLeft(m_registers.e); break;
+        case ArithmeticTarget::H: rotateLeft(m_registers.h); break;
+        case ArithmeticTarget::L: rotateLeft(m_registers.l); break;
+        case ArithmeticTarget::A: rotateLeft(m_registers.a); break;
     }
 }
 
 void CPU::RLC_HL() {
     uint8_t dummy = m_bus.readByte(m_registers.getHL());
-    rotateLeftToCarry(dummy);
+    rotateLeft(dummy);
     m_bus.writeByte(m_registers.getHL(), dummy);
 }
 
@@ -845,7 +869,7 @@ void CPU::RL_HL() {
     m_bus.writeByte(m_registers.getHL(), dummy);
 }
 
-void CPU::rotateRightToCarry(uint8_t &target) {
+void CPU::rotateRight(uint8_t &target) {
     uint8_t zerothBit = target & 1u;
 
     target >>= 1u;
@@ -857,7 +881,25 @@ void CPU::rotateRightToCarry(uint8_t &target) {
 }
 
 void CPU::RRCA() {
-    rotateRightToCarry(m_registers.a);
+    rotateRight(m_registers.a);
+}
+
+void CPU::RRC_r(ArithmeticTarget target) {
+    switch (target) {
+        case ArithmeticTarget::B: rotateRight(m_registers.b); break;
+        case ArithmeticTarget::C: rotateRight(m_registers.c); break;
+        case ArithmeticTarget::D: rotateRight(m_registers.d); break;
+        case ArithmeticTarget::E: rotateRight(m_registers.e); break;
+        case ArithmeticTarget::H: rotateRight(m_registers.h); break;
+        case ArithmeticTarget::L: rotateRight(m_registers.l); break;
+        case ArithmeticTarget::A: rotateRight(m_registers.a); break;
+    }
+}
+
+void CPU::RRC_HL() {
+    uint8_t dummy = m_bus.readByte(m_registers.getHL());
+    rotateRight(dummy);
+    m_bus.writeByte(m_registers.getHL(), dummy);
 }
 
 void CPU::rotateRightThroughCarry(uint8_t &target) {
