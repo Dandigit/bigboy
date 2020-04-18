@@ -325,6 +325,12 @@ public:
         RLC_H = 0b00000100,
         RLC_L = 0b00000101,
         RLC_A = 0b00000111,
+
+        // RLC HL
+        // The byte at the memory address specified in the register pair HL are rotated
+        // left by 1 bit position, after the sign bit (7) is copied into the carry flag.
+        // Bit-by-bit (after 0xCB): 0 0 0 0 0 1 1 0
+        RLC_HL = 0b00000110,
     };
 
     enum class ArithmeticTarget : uint8_t {
@@ -467,6 +473,7 @@ private:
 
     void RLCA();
     void RLC_r(ArithmeticTarget target);
+    void RLC_HL();
 
     void rotateLeftThroughCarry(uint8_t& target);
 

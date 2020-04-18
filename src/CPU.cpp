@@ -397,6 +397,9 @@ void CPU::stepPrefix() {
         case PrefixOpCode::RLC_A:
             RLC_r(ArithmeticTarget::A);
             break;
+        case PrefixOpCode::RLC_HL:
+            RLC_HL();
+            break;
         default:
             std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
             exit(1);
@@ -770,6 +773,12 @@ void CPU::RLC_r(ArithmeticTarget target) {
         case ArithmeticTarget::L: rotateLeftToCarry(m_registers.l); break;
         case ArithmeticTarget::A: rotateLeftToCarry(m_registers.a); break;
     }
+}
+
+void CPU::RLC_HL() {
+    uint8_t dummy = m_registers.getHL();
+    rotateLeftToCarry(dummy);
+    m_bus.writeByte(m_registers.getHL(), dummy);
 }
 
 // Rotate `target` left 1 bit position through the carry flag,
