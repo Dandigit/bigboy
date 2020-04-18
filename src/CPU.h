@@ -313,7 +313,18 @@ public:
     };
 
     enum class PrefixOpCode {
-
+        // RLC r
+        // The contents of the register r are rotated left by 1 bit position, after the
+        // sign bit (7) is copied into the carry flag. Register r may be any of B, C, D,
+        // E, H, L or A.
+        // Bit-by-bit (after 0xCB): 0 0 0 0 0 <r r r>
+        RLC_B = 0b00000000,
+        RLC_C = 0b00000001,
+        RLC_D = 0b00000010,
+        RLC_E = 0b00000011,
+        RLC_H = 0b00000100,
+        RLC_L = 0b00000101,
+        RLC_A = 0b00000111,
     };
 
     enum class ArithmeticTarget : uint8_t {
@@ -455,6 +466,7 @@ private:
     void rotateLeftToCarry(uint8_t& target);
 
     void RLCA();
+    void RLC_r(ArithmeticTarget target);
 
     void rotateLeftThroughCarry(uint8_t& target);
 
