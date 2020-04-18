@@ -400,6 +400,30 @@ void CPU::stepPrefix() {
         case PrefixOpCode::RLC_HL:
             RLC_HL();
             break;
+        case PrefixOpCode::RL_B:
+            RL_r(ArithmeticTarget::B);
+            break;
+        case PrefixOpCode::RL_C:
+            RL_r(ArithmeticTarget::C);
+            break;
+        case PrefixOpCode::RL_D:
+            RL_r(ArithmeticTarget::D);
+            break;
+        case PrefixOpCode::RL_E:
+            RL_r(ArithmeticTarget::E);
+            break;
+        case PrefixOpCode::RL_H:
+            RL_r(ArithmeticTarget::H);
+            break;
+        case PrefixOpCode::RL_L:
+            RL_r(ArithmeticTarget::L);
+            break;
+        case PrefixOpCode::RL_A:
+            RL_r(ArithmeticTarget::A);
+            break;
+        case PrefixOpCode::RL_HL:
+            RL_HL();
+            break;
         default:
             std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
             exit(1);
@@ -776,7 +800,7 @@ void CPU::RLC_r(ArithmeticTarget target) {
 }
 
 void CPU::RLC_HL() {
-    uint8_t dummy = m_registers.getHL();
+    uint8_t dummy = m_bus.readByte(m_registers.getHL());
     rotateLeftToCarry(dummy);
     m_bus.writeByte(m_registers.getHL(), dummy);
 }
@@ -801,6 +825,24 @@ void CPU::rotateLeftThroughCarry(uint8_t &target) {
 
 void CPU::RLA() {
     rotateLeftThroughCarry(m_registers.a);
+}
+
+void CPU::RL_r(ArithmeticTarget target) {
+    switch (target) {
+        case ArithmeticTarget::B: rotateLeftThroughCarry(m_registers.b); break;
+        case ArithmeticTarget::C: rotateLeftThroughCarry(m_registers.c); break;
+        case ArithmeticTarget::D: rotateLeftThroughCarry(m_registers.d); break;
+        case ArithmeticTarget::E: rotateLeftThroughCarry(m_registers.e); break;
+        case ArithmeticTarget::H: rotateLeftThroughCarry(m_registers.h); break;
+        case ArithmeticTarget::L: rotateLeftThroughCarry(m_registers.l); break;
+        case ArithmeticTarget::A: rotateLeftThroughCarry(m_registers.a); break;
+    }
+}
+
+void CPU::RL_HL() {
+    uint8_t dummy = m_bus.readByte(m_registers.getHL());
+    rotateLeftThroughCarry(dummy);
+    m_bus.writeByte(m_registers.getHL(), dummy);
 }
 
 void CPU::rotateRightToCarry(uint8_t &target) {
