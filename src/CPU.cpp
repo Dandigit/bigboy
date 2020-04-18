@@ -448,6 +448,30 @@ void CPU::stepPrefix() {
         case PrefixOpCode::RRC_HL:
             RRC_HL();
             break;
+        case PrefixOpCode::RR_B:
+            RR_r(ArithmeticTarget::B);
+            break;
+        case PrefixOpCode::RR_C:
+            RR_r(ArithmeticTarget::C);
+            break;
+        case PrefixOpCode::RR_D:
+            RR_r(ArithmeticTarget::D);
+            break;
+        case PrefixOpCode::RR_E:
+            RR_r(ArithmeticTarget::E);
+            break;
+        case PrefixOpCode::RR_H:
+            RR_r(ArithmeticTarget::H);
+            break;
+        case PrefixOpCode::RR_L:
+            RR_r(ArithmeticTarget::L);
+            break;
+        case PrefixOpCode::RR_A:
+            RR_r(ArithmeticTarget::A);
+            break;
+        case PrefixOpCode::RR_HL:
+            RR_HL();
+            break;
         default:
             std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
             exit(1);
@@ -921,4 +945,22 @@ void CPU::rotateRightThroughCarry(uint8_t &target) {
 
 void CPU::RRA() {
     rotateRightThroughCarry(m_registers.a);
+}
+
+void CPU::RR_r(ArithmeticTarget target) {
+    switch (target) {
+        case ArithmeticTarget::B: rotateRightThroughCarry(m_registers.b); break;
+        case ArithmeticTarget::C: rotateRightThroughCarry(m_registers.c); break;
+        case ArithmeticTarget::D: rotateRightThroughCarry(m_registers.d); break;
+        case ArithmeticTarget::E: rotateRightThroughCarry(m_registers.e); break;
+        case ArithmeticTarget::H: rotateRightThroughCarry(m_registers.h); break;
+        case ArithmeticTarget::L: rotateRightThroughCarry(m_registers.l); break;
+        case ArithmeticTarget::A: rotateRightThroughCarry(m_registers.a); break;
+    }
+}
+
+void CPU::RR_HL() {
+    uint8_t dummy = m_bus.readByte(m_registers.getHL());
+    rotateRightThroughCarry(dummy);
+    m_bus.writeByte(m_registers.getHL(), dummy);
 }

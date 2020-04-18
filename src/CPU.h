@@ -366,7 +366,25 @@ public:
         // The byte at the memory address specified in the register pair HL is rotated
         // right by 1 bit position, after bit 0 is copied into the carry flag.
         // Bit-by-bit (after 0xCB): 0 0 0 0 1 1 1 0
-        RRC_HL = 0b00001110
+        RRC_HL = 0b00001110,
+
+        // RR r
+        // The contents of the register r are rotated right by 1 bit position through the
+        // carry flag. Register r may be any of B, C, D, E, H, L or A.
+        // Bit-by-bit (after 0xCB): 0 0 0 1 1 <r r r>
+        RR_B = 0b00011000,
+        RR_C = 0b00011001,
+        RR_D = 0b00011010,
+        RR_E = 0b00011011,
+        RR_H = 0b00011100,
+        RR_L = 0b00011101,
+        RR_A = 0b00011111,
+
+        // RR HL
+        // The byte at the memory address specified in the register pair HL is rotated
+        // right by 1 bit position through the carry flag.
+        // Bit-by-bit (after 0xCB): 0 0 0 1 1 1 1 0
+        RR_HL = 0b00011110
     };
 
     enum class ArithmeticTarget : uint8_t {
@@ -526,6 +544,8 @@ private:
     void rotateRightThroughCarry(uint8_t& target);
 
     void RRA();
+    void RR_r(ArithmeticTarget target);
+    void RR_HL();
 
 public:
     void reset();
