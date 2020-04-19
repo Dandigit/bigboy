@@ -423,6 +423,24 @@ public:
         // into the carry flag.
         // Bit-by-bit (after 0xCB): 0 0 1 0 1 1 1 0
         SRA_HL = 0b00101110,
+
+        // SRL r
+        // The contents of the register r are shifted right by 1 bit position, after bit 0
+        // is copied into the carry flag. Register r may be any of B, C, D, E, H, L or A.
+        // Bit-by-bit (after 0xCB): 0 0 1 1 1 <r r r>
+        SRL_B = 0b00111000,
+        SRL_C = 0b00111001,
+        SRL_D = 0b00111010,
+        SRL_E = 0b00111011,
+        SRL_H = 0b00111100,
+        SRL_L = 0b00111101,
+        SRL_A = 0b00111111,
+
+        // SRL HL
+        // The byte at the memory address specified in the register pair HL is shifted right
+        // by 1 bit position, after bit 0 is copied into the carry flag.
+        // Bit-by-bit (after 0xCB): 0 0 1 1 1 1 1 0
+        SRL_HL = 0b00111110
     };
 
     enum class ArithmeticTarget : uint8_t {
@@ -594,6 +612,11 @@ private:
 
     void SRA_r(ArithmeticTarget target);
     void SRA_HL();
+
+    void shiftRight(uint8_t& target);
+
+    void SRL_r(ArithmeticTarget target);
+    void SRL_HL();
 
 public:
     void reset();

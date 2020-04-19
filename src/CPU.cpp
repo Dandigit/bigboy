@@ -520,6 +520,30 @@ void CPU::stepPrefix() {
         case PrefixOpCode::SRA_HL:
             SRA_HL();
             break;
+        case PrefixOpCode::SRL_B:
+            SRL_r(ArithmeticTarget::B);
+            break;
+        case PrefixOpCode::SRL_C:
+            SRL_r(ArithmeticTarget::C);
+            break;
+        case PrefixOpCode::SRL_D:
+            SRL_r(ArithmeticTarget::D);
+            break;
+        case PrefixOpCode::SRL_E:
+            SRL_r(ArithmeticTarget::E);
+            break;
+        case PrefixOpCode::SRL_H:
+            SRL_r(ArithmeticTarget::H);
+            break;
+        case PrefixOpCode::SRL_L:
+            SRL_r(ArithmeticTarget::L);
+            break;
+        case PrefixOpCode::SRL_A:
+            SRL_r(ArithmeticTarget::A);
+            break;
+        case PrefixOpCode::SRL_HL:
+            SRL_HL();
+            break;
         default:
             std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
             exit(1);
@@ -1076,5 +1100,34 @@ void CPU::SRA_r(ArithmeticTarget target) {
 void CPU::SRA_HL() {
     uint8_t dummy = m_bus.readByte(m_registers.getHL());
     shiftTailRight(dummy);
+    m_bus.writeByte(m_registers.getHL(), dummy);
+}
+
+// Shift `target` to the right by 1 bit position, after copying bit 0 into the carry flag
+void CPU::shiftRight(uint8_t& target) {
+    m_registers.f.carry = (target & 1u) != 0;
+
+    target >>= 1u;
+
+    m_registers.f.zero = target == 0;
+    m_registers.f.half_carry = false;
+    m_registers.f.subtract = false;
+}
+
+void CPU::SRL_r(ArithmeticTarget target) {
+    switch (target) {
+        case ArithmeticTarget::B: shiftRight(m_registers.b); break;
+        case ArithmeticTarget::C: shiftRight(m_registers.c); break;
+        case ArithmeticTarget::D: shiftRight(m_registers.d); break;
+        case ArithmeticTarget::E: shiftRight(m_registers.e); break;
+        case ArithmeticTarget::H: shiftRight(m_registers.h); break;
+        case ArithmeticTarget::L: shiftRight(m_registers.l); break;
+        case ArithmeticTarget::A: shiftRight(m_registers.a); break;
+    }
+}
+
+void CPU::SRL_HL() {
+    uint8_t dummy = m_bus.readByte(m_registers.getHL());
+    shiftRight(dummy);
     m_bus.writeByte(m_registers.getHL(), dummy);
 }
