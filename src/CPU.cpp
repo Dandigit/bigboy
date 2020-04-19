@@ -964,3 +964,32 @@ void CPU::RR_HL() {
     rotateRightThroughCarry(dummy);
     m_bus.writeByte(m_registers.getHL(), dummy);
 }
+
+// Shift `target` to the left by 1 bit position, after copying bit 7 into the carry flag
+void CPU::shiftLeft(uint8_t& target) {
+    m_registers.f.carry = (target >> 7u) != 0;
+
+    target <<= 1u;
+
+    m_registers.f.zero = target == 0;
+    m_registers.f.half_carry = false;
+    m_registers.f.subtract = false;
+}
+
+void CPU::SLA_r(ArithmeticTarget target) {
+    switch (target) {
+        case ArithmeticTarget::B: shiftLeft(m_registers.b); break;
+        case ArithmeticTarget::C: shiftLeft(m_registers.c); break;
+        case ArithmeticTarget::D: shiftLeft(m_registers.d); break;
+        case ArithmeticTarget::E: shiftLeft(m_registers.e); break;
+        case ArithmeticTarget::H: shiftLeft(m_registers.h); break;
+        case ArithmeticTarget::L: shiftLeft(m_registers.l); break;
+        case ArithmeticTarget::A: shiftLeft(m_registers.a); break;
+    }
+}
+
+void CPU::SLA_HL() {
+    uint8_t dummy = m_bus.readByte(m_registers.getHL());
+    shiftLeft(dummy);
+    m_bus.writeByte(m_registers.getHL(), dummy);
+}
