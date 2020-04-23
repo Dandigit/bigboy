@@ -1,8 +1,10 @@
 # Googletest
 add_subdirectory(googletest)
+set(GOOGLETEST_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/googletest/include PARENT_SCOPE)
 
 # SFML
 add_subdirectory(SFML)
+set(SFML_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/SFML/include)
 
 #set(SFML_BINARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/SFML/build/lib")
 #set(SFML_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/SFML/include")

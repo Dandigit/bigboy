@@ -9,14 +9,14 @@ CPU::Registers::Flags::Flags(uint8_t byte) {
     carry = ((byte >> CARRY_FLAG_BYTE_POSITION) & 0b1) != 0;
 }
 
-CPU::Registers::Flags::operator uint8_t() {
+CPU::Registers::Flags::operator uint8_t() const {
     return (zero ? 1 : 0) << ZERO_FLAG_BYTE_POSITION |
             (subtract ? 1 : 0) << SUBTRACT_FLAG_BYTE_POSITION |
             (half_carry ? 1 : 0) << HALF_CARRY_FLAG_BYTE_POSITION |
             (carry ? 1 : 0) << CARRY_FLAG_BYTE_POSITION;
 }
 
-uint16_t CPU::Registers::getAF() {
+uint16_t CPU::Registers::getAF() const {
     return static_cast<uint16_t>(a) << 8
             | static_cast<uint16_t>(f);
 }
@@ -26,7 +26,7 @@ void CPU::Registers::setAF(uint16_t value) {
     f = static_cast<uint8_t>(value & 0xFF00);
 }
 
-uint16_t CPU::Registers::getBC() {
+uint16_t CPU::Registers::getBC() const {
     return static_cast<uint16_t>(b) << 8
            | static_cast<uint16_t>(c);
 }
@@ -36,7 +36,7 @@ void CPU::Registers::setBC(uint16_t value) {
     c = static_cast<uint8_t>(value & 0xFF00);
 }
 
-uint16_t CPU::Registers::getDE() {
+uint16_t CPU::Registers::getDE() const {
     return static_cast<uint16_t>(d) << 8
            | static_cast<uint16_t>(e);
 }
@@ -46,7 +46,7 @@ void CPU::Registers::setDE(uint16_t value) {
     e = static_cast<uint8_t>(value & 0xFF00);
 }
 
-uint16_t CPU::Registers::getHL() {
+uint16_t CPU::Registers::getHL() const {
     return static_cast<uint16_t>(h) << 8
            | static_cast<uint16_t>(l);
 }
@@ -65,6 +65,15 @@ uint8_t CPU::MemoryBus::readByte(uint16_t address) {
 
 void CPU::MemoryBus::writeByte(uint16_t address, uint8_t value) {
     m_memory[address] = value;
+}
+
+CPU::Registers& CPU::registers() {
+    return m_registers;
+}
+
+void CPU::load(const std::array<uint8_t, 0xFFFF>& memory) {
+    m_bus = MemoryBus{memory};
+    m_pc = 0;
 }
 
 void CPU::exec() {
@@ -351,6 +360,9 @@ void CPU::step() {
             break;
         case OpCode::SCF:
             SCF();
+            break;
+        case OpCode::NOP:
+            NOP();
             break;
         case OpCode::RLCA:
             RLCA();
@@ -889,6 +901,10 @@ void CPU::SCF() {
 
     m_registers.f.subtract = false;
     m_registers.f.half_carry = false;
+}
+
+void CPU::NOP() {
+    // Nothing!
 }
 
 // Rotate `target` left 1 bit position, copying the sign bit to the carry flag and bit 0

@@ -8,459 +8,459 @@
 #include <cstdint>
 #include <array>
 
+enum class OpCode : uint8_t {
+    // ADD A, r:
+    // The contents of register r are added to the contents of register A
+    // (the Accumulator) and the result is stored in register A. Register
+    // r can be any of B, C, D, E, H, L, or A.
+    // Bit-by-bit: 1 0 0 0 0 <r r r>
+    ADDA_B = 0b10000000,
+    ADDA_C = 0b10000001,
+    ADDA_D = 0b10000010,
+    ADDA_E = 0b10000011,
+    ADDA_H = 0b10000100,
+    ADDA_L = 0b10000101,
+    ADDA_A = 0b10000111,
+
+    // ADD A, n:
+    // Byte n is read as an integer and added to the contents of register
+    // A, and the result is stored in register A.
+    // Bit-by-bit: 1 1 0 0 0 1 1 0 <n n n n n n n n>
+    ADDA_n = 0b11000110,
+
+    // ADD A, HL:
+    // The byte at the memory address specified in the virtual 16-bit
+    // register HL is added to the contents of register A and the result
+    // is stored in register A.
+    ADDA_HL = 0b10000110,
+
+    // ADC A, r:
+    // The contents of register r as well as the state of the carry flag
+    // (0 or 1 for true or false respectively) are added to the contents
+    // of register A and the result is stored in register A. Register r
+    // may be any of B, C, D, H, L, or A.
+    // Bit-by-bit: 1 0 0 0 1 <r r r>
+    ADCA_B = 0b10001000,
+    ADCA_C = 0b10001001,
+    ADCA_D = 0b10001010,
+    ADCA_E = 0b10001011,
+    ADCA_H = 0b10001100,
+    ADCA_L = 0b10001101,
+    ADCA_A = 0b10001111,
+
+    // ADC A, n
+    // Byte n is read as an integer and added to the contents of register
+    // A along with the value of the carry flag. The result is then stored
+    // in register A.
+    // Bit-by-bit: 1 1 0 0 1 1 1 0 <n n n n n n n n>
+    ADCA_n = 0b11001110,
+
+    // ADC A, HL
+    // The byte at the memory address specified in the virtual 16-bit
+    // register HL along with the value of the carry flag are added to the
+    // register A and the result is stored in register A.
+    ADCA_HL = 0b10001110,
+
+    // SUB, r
+    // The contents of the register r are subtracted from the contents of
+    // register A, and the result is stored in register A. Register r may be
+    // any of B, C, D, E, H, L, or A.
+    // Bit-by-bit: 1 0 0 1 0 <r r r>
+    SUB_B = 0b10010000,
+    SUB_C = 0b10010001,
+    SUB_D = 0b10010010,
+    SUB_E = 0b10010011,
+    SUB_H = 0b10010100,
+    SUB_L = 0b10010101,
+    SUB_A = 0b10010111,
+
+    // SUB, n
+    // Byte n is read as an integer and subtracted from the contents of
+    // register A, and the result is stored in register A.
+    // Bit-by-bit: 1 1 0 1 0 1 1 0 <n n n n n n n n>
+    SUB_n = 0b11010110,
+
+    // SUB, HL
+    // The byte at the memory address specified in the virtual 16-bit
+    // register HL is subtracted from the register A and the result is
+    // stored in register A.
+    // Bit-by-bit: 1 0 0 1 0 1 1 0
+    SUB_HL = 0b10010110,
+
+    // SBC A, r
+    // The contents of the register r along with the value of the carry
+    // flag are both subtracted from the register A, and the result is
+    // stored in register A. Register r may be any of B, C, D, E, H, L or A.
+    // Bit-by-bit: 1 0 0 1 1 <r r r>
+    SBCA_B = 0b10011000,
+    SBCA_C = 0b10011001,
+    SBCA_D = 0b10011010,
+    SBCA_E = 0b10011011,
+    SBCA_H = 0b10011100,
+    SBCA_L = 0b10011101,
+    SBCA_A = 0b10011111,
+
+    // SBC A, n
+    // Byte n is read as an integer and along with the value of the carry
+    // flag, it is subtracted from register A, and the result is stored in
+    // register A.
+    // Bit-by-bit: 1 1 0 1 1 1 1 0 <n n n n n n n n>
+    SBCA_n = 0b11011110,
+
+    // SBC A, HL
+    // The byte at the memory address specified in the virtual 16-bit
+    // register HL and the value of the carry flag are both subtracted from
+    // the register A, and the result is stored in register A.
+    // Bit-by-bit: 1 0 0 1 1 1 1 0
+    SBCA_HL = 0b10011110,
+
+    // AND, r
+    // A bitwise AND operation is performed between the contents of the
+    // register r and the contents of the register A, and the result is
+    // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
+    // Bit-by-bit: 1 0 1 0 0 <r r r>
+    AND_B = 0b10100000,
+    AND_C = 0b10100001,
+    AND_D = 0b10100010,
+    AND_E = 0b10100011,
+    AND_H = 0b10100100,
+    AND_L = 0b10100101,
+    AND_A = 0b10100111,
+
+    // AND, n
+    // A bitwise AND operation is performed between the byte n and the
+    // contents of register A, and the result is stored in register A.
+    // Bit-by-bit: 1 1 1 0 0 1 1 0 <n n n n n n n n>
+    AND_n = 0b11100110,
+
+    // AND, HL
+    // A bitwise AND operation is performed between the byte at the memory
+    // address specified in the virtual 16-bit register HL and the contents
+    // of register A, and the result is stored in register A.
+    // Bit-by-bit: 1 0 1 0 0 1 1 0
+    AND_HL = 0b10100110,
+
+    // OR, r
+    // A bitwise OR operation is performed between the contents of the
+    // register r and the contents of the register A, and the result is
+    // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
+    // Bit-by-bit: 1 0 1 1 0 <r r r>
+    OR_B = 0b10110000,
+    OR_C = 0b10110001,
+    OR_D = 0b10110010,
+    OR_E = 0b10110011,
+    OR_H = 0b10110100,
+    OR_L = 0b10110101,
+    OR_A = 0b10110111,
+
+    // OR, n
+    // A bitwise OR operation is performed between the byte n and the
+    // contents of register A, and the result is stored in register A.
+    // Bit-by-bit: 1 1 1 1 0 1 1 0 <n n n n n n n n>
+    OR_n = 0b11110110,
+
+    // OR, HL
+    // A bitwise OR operation is performed between the byte at the memory
+    // address specified in the virtual 16-bit register HL and the contents
+    // of register A, and the result is stored in register A.
+    // Bit-by-bit: 1 0 1 1 0 1 1 0
+    OR_HL = 0b10110110,
+
+    // XOR, r
+    // A bitwise XOR operation is performed between the contents of the
+    // register r and the contents of the register A, and the result is
+    // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
+    // Bit-by-bit: 1 0 1 0 1 <r r r>
+    XOR_B = 0b10101000,
+    XOR_C = 0b10101001,
+    XOR_D = 0b10101010,
+    XOR_E = 0b10101011,
+    XOR_H = 0b10101100,
+    XOR_L = 0b10101101,
+    XOR_A = 0b10101111,
+
+    // XOR, n
+    // A bitwise XOR operation is performed between the byte n and the
+    // contents of register A, and the result is stored in register A.
+    // Bit-by-bit: 1 1 1 0 1 1 1 0 <n n n n n n n n>
+    XOR_n = 0b11101110,
+
+    // XOR, HL
+    // A bitwise XOR operation is performed between the byte at the memory
+    // address specified in the virtual 16-bit register HL and the contents
+    // of register A, and the result is stored in register A.
+    // Bit-by-bit: 1 0 1 0 1 1 1 0
+    XOR_HL = 0b10101110,
+
+    // CP, r
+    // The contents of register R are compared with (subtracted from) the
+    // register A, setting the appropriate flags but not storing the result.
+    // Register r may be any of B, C, D, E, H, L or A.
+    // Bit-by-bit: 1 0 1 1 1 <r r r>
+    CP_B = 0b10111000,
+    CP_D = 0b10111001,
+    CP_C = 0b10111010,
+    CP_E = 0b10111011,
+    CP_H = 0b10111100,
+    CP_L = 0b10111101,
+    CP_A = 0b10111111,
+
+    // CP, n
+    // The byte n is compared with (subtracted from) the register A, setting
+    // the appropriate flags but not storing the result.
+    // Bit-by-bit: 1 1 1 1 1 1 1 0 <b b b b b b b b>
+    CP_n = 0b11111110,
+
+    // CP, HL
+    // The byte at the memory address specified in the register HL is compared
+    // with (subtracted from) the register A, setting the appropriate flags but
+    // not storing the result.
+    // Bit-by-bit: 1 0 1 1 1 1 1 0
+    CP_HL = 0b10111110,
+
+    // INC, r
+    // The register r is incremented by 1. Register r may be any of B, C, D, E,
+    // H, L or A.
+    // Bit-by-bit: 0 0 <r r r> 1 0 0
+    INC_B = 0b00000100,
+    INC_C = 0b00001100,
+    INC_D = 0b00010100,
+    INC_E = 0b00011100,
+    INC_H = 0b00100100,
+    INC_L = 0b00101100,
+    INC_A = 0b00111100,
+
+    // INC, HL
+    // The byte at the memory address specified in the register HL is incremented
+    // by 1.
+    // Bit-by-bit: 0 0 1 1 0 1 0 0
+    INC_HL = 0b00110100,
+
+    // DEC, r
+    // The register r is decremented by 1. Register r may be any of B, C, D, E,
+    // H, L or A.
+    // Bit-by-bit: 0 0 <r r r> 1 0 1
+    DEC_B = 0b00000101,
+    DEC_C = 0b00001101,
+    DEC_D = 0b00010101,
+    DEC_E = 0b00011101,
+    DEC_H = 0b00100101,
+    DEC_L = 0b00101101,
+    DEC_A = 0b00111101,
+
+    // DEC, HL
+    // The byte at the memory address specified in the register HL is decremented
+    // by 1.
+    // Bit-by-bit: 0 0 1 1 0 1 0 1
+    DEC_HL = 0b00110101,
+
+    // DAA
+    // The results of the previous operation as stored in the Accumulator and flags
+    // are retroactively adjusted to become a BCD (binary coded decimal) operation,
+    // where the lower and upper nibbles of the bytes in the operation are treated as
+    // two individual decimal digits, rather than the whole byte as one binary number.
+    // It does this by adding or subtracting 6 from the Accumulator's lower nibble,
+    // upper nibble or both, based on whether the last operation was a subtraction
+    // (n flag), and whether a carry and/or half carry occurred (c and h flags).
+    // Bit-by-bit = 0 0 1 0 0 1 1 1
+    DAA = 0b00100111,
+
+    // CPL
+    // The contents of register A are inverted (one's complement).
+    // Bit-by-bit: 0 0 1 0 1 1 1 1
+    CPL = 0b00101111,
+
+    // CCF
+    // The carry flag is inverted.
+    // Bit-by-bit: 0 0 1 1 1 1 1 1
+    CCF = 0b00111111,
+
+    // SCF
+    // The carry flag is set.
+    // Bit-by-bit: 0 0 1 1 0 1 1 1
+    SCF = 0b00110111,
+
+    // NOP
+    // The CPU performs no operation during this cycle.
+    // Bit-by-bit: 0 0 0 0 0 0 0 0
+    NOP = 0b00000000,
+
+    // TODO: HALT
+    // CPU operation is suspended until an interrupt or reset is recieved. While in
+    // this halted state, NOPs are executed to maintain memory refresh logic.
+    // Bit-by-bit: 0 1 1 1 0 1 1 0
+    HALT = 0b01110110,
+
+    // TODO: STOP
+    // CPU operation is stopped.
+    // Bit-by-bit: 0 0 0 1 0 0 0 0
+    STOP = 0b00010000,
+
+    // TODO: DI
+
+    // RLCA
+    // The contents of register A are rotated left by 1 bit position, after the sign
+    // bit (7) is copied into the carry flag.
+    // Bit-by-bit: 0 0 0 0 0 1 1 1
+    RLCA = 0b00000111,
+
+    // RLA
+    // The contents of register A are rotated left by 1 bit position through the
+    // carry flag.
+    // Bit-by-bit: 0 0 0 1 0 1 1 1
+    RLA = 0b00010111,
+
+    // RRCA
+    // The contents of register A are rotated right by 1 bit position, after bit 0
+    // is copied into the carry flag.
+    // Bit-by-bit: 0 0 0 0 1 1 1 1
+    RRCA = 0b00001111,
+
+    // RRA
+    // The contents of register A are rotated right by 1 bit position through the
+    // carry flag.
+    // Bit-by-bit: 0 0 0 1 1 1 1 1
+    RRA = 0b00011111,
+
+    // PREFIX:
+    // Interpret the next byte as a prefix instruction (PrefixOpCode)
+    // rather than a normal instruction (OpCode)
+    PREFIX = 0b11001011
+};
+
+enum class PrefixOpCode {
+    // RLC r
+    // The contents of the register r are rotated left by 1 bit position, after the
+    // sign bit (7) is copied into the carry flag. Register r may be any of B, C, D,
+    // E, H, L or A.
+    // Bit-by-bit (after 0xCB): 0 0 0 0 0 <r r r>
+    RLC_B = 0b00000000,
+    RLC_C = 0b00000001,
+    RLC_D = 0b00000010,
+    RLC_E = 0b00000011,
+    RLC_H = 0b00000100,
+    RLC_L = 0b00000101,
+    RLC_A = 0b00000111,
+
+    // RLC HL
+    // The byte at the memory address specified in the register pair HL is rotated
+    // left by 1 bit position, after the sign bit (7) is copied into the carry flag.
+    // Bit-by-bit (after 0xCB): 0 0 0 0 0 1 1 0
+    RLC_HL = 0b00000110,
+
+    // RL r
+    // The contents of the register r are rotated left by 1 bit position through the
+    // carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Bit-by-bit (after 0xCB): 0 0 0 1 0 <r r r>
+    RL_B = 0b00010000,
+    RL_C = 0b00010001,
+    RL_D = 0b00010010,
+    RL_E = 0b00010011,
+    RL_H = 0b00010100,
+    RL_L = 0b00010101,
+    RL_A = 0b00010111,
+
+    // RL HL
+    // The byte at the memory address specified in the register pair HL is rotated
+    // left by 1 bit position through the carry flag.
+    // Bit-by-bit (after 0xCB): 0 0 0 1 0 1 1 0
+    RL_HL = 0b00010110,
+
+    // RRC r
+    // The contents of the register r are rotated left by 1 bit position, after bit
+    // 0 is copied into the carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Bit-by-bit (after 0xCB): 0 0 0 0 1 <r r r>
+    RRC_B = 0b00001000,
+    RRC_C = 0b00001001,
+    RRC_D = 0b00001010,
+    RRC_E = 0b00001011,
+    RRC_H = 0b00001100,
+    RRC_L = 0b00001101,
+    RRC_A = 0b00001111,
+
+    // RRC HL
+    // The byte at the memory address specified in the register pair HL is rotated
+    // right by 1 bit position, after bit 0 is copied into the carry flag.
+    // Bit-by-bit (after 0xCB): 0 0 0 0 1 1 1 0
+    RRC_HL = 0b00001110,
+
+    // RR r
+    // The contents of the register r are rotated right by 1 bit position through the
+    // carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Bit-by-bit (after 0xCB): 0 0 0 1 1 <r r r>
+    RR_B = 0b00011000,
+    RR_C = 0b00011001,
+    RR_D = 0b00011010,
+    RR_E = 0b00011011,
+    RR_H = 0b00011100,
+    RR_L = 0b00011101,
+    RR_A = 0b00011111,
+
+    // RR HL
+    // The byte at the memory address specified in the register pair HL is rotated
+    // right by 1 bit position through the carry flag.
+    // Bit-by-bit (after 0xCB): 0 0 0 1 1 1 1 0
+    RR_HL = 0b00011110,
+
+    // SLA r
+    // The contents of the register r are shifted left by 1 bit position, after bit
+    // 7 is copied to the carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Bit-by-bit (after 0xCB): 0 0 1 0 0 <r r r>
+    SLA_B = 0b00100000,
+    SLA_C = 0b00100001,
+    SLA_D = 0b00100010,
+    SLA_E = 0b00100011,
+    SLA_H = 0b00100100,
+    SLA_L = 0b00100101,
+    SLA_A = 0b00100111,
+
+    // SLA HL
+    // The byte at the memory address specified in the register pair HL is shifted
+    // left by 1 bit position, after bit 7 is copied to the carry flag.
+    // Bit-by-bit (after 0xCB): 0 0 1 0 0 1 1 0
+    SLA_HL = 0b00100110,
+
+    // SRA r
+    // The lower 7 bits (0-6) of the register r are shifted right by 1 bit position,
+    // after bit 0 is copied into the carry flag. Register r may be any of B, C, D,
+    // E, H, L or A.
+    // Bit-by-bit (after 0xCB): 0 0 1 0 1 <r r r>
+    SRA_B = 0b00101000,
+    SRA_C = 0b00101001,
+    SRA_D = 0b00101010,
+    SRA_E = 0b00101011,
+    SRA_H = 0b00101100,
+    SRA_L = 0b00101101,
+    SRA_A = 0b00101111,
+
+    // SRA HL
+    // The lower 7 bits (0-6) of the byte at the memory address specified in the
+    // register pair HL are shifted right by 1 bi position, after bit 0 is copied
+    // into the carry flag.
+    // Bit-by-bit (after 0xCB): 0 0 1 0 1 1 1 0
+    SRA_HL = 0b00101110,
+
+    // SRL r
+    // The contents of the register r are shifted right by 1 bit position, after bit 0
+    // is copied into the carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Bit-by-bit (after 0xCB): 0 0 1 1 1 <r r r>
+    SRL_B = 0b00111000,
+    SRL_C = 0b00111001,
+    SRL_D = 0b00111010,
+    SRL_E = 0b00111011,
+    SRL_H = 0b00111100,
+    SRL_L = 0b00111101,
+    SRL_A = 0b00111111,
+
+    // SRL HL
+    // The byte at the memory address specified in the register pair HL is shifted right
+    // by 1 bit position, after bit 0 is copied into the carry flag.
+    // Bit-by-bit (after 0xCB): 0 0 1 1 1 1 1 0
+    SRL_HL = 0b00111110
+};
+
 class CPU {
 public:
-    enum class OpCode : uint8_t {
-        // ADD A, r:
-        // The contents of register r are added to the contents of register A
-        // (the Accumulator) and the result is stored in register A. Register
-        // r can be any of B, C, D, E, H, L, or A.
-        // Bit-by-bit: 1 0 0 0 0 <r r r>
-        ADDA_B = 0b10000000,
-        ADDA_C = 0b10000001,
-        ADDA_D = 0b10000010,
-        ADDA_E = 0b10000011,
-        ADDA_H = 0b10000100,
-        ADDA_L = 0b10000101,
-        ADDA_A = 0b10000111,
-
-        // ADD A, n:
-        // Byte n is read as an integer and added to the contents of register
-        // A, and the result is stored in register A.
-        // Bit-by-bit: 1 1 0 0 0 1 1 0 <n n n n n n n n>
-        ADDA_n = 0b11000110,
-
-        // ADD A, HL:
-        // The byte at the memory address specified in the virtual 16-bit
-        // register HL is added to the contents of register A and the result
-        // is stored in register A.
-        ADDA_HL = 0b10000110,
-
-        // ADC A, r:
-        // The contents of register r as well as the state of the carry flag
-        // (0 or 1 for true or false respectively) are added to the contents
-        // of register A and the result is stored in register A. Register r
-        // may be any of B, C, D, H, L, or A.
-        // Bit-by-bit: 1 0 0 0 1 <r r r>
-        ADCA_B = 0b10001000,
-        ADCA_C = 0b10001001,
-        ADCA_D = 0b10001010,
-        ADCA_E = 0b10001011,
-        ADCA_H = 0b10001100,
-        ADCA_L = 0b10001101,
-        ADCA_A = 0b10001111,
-
-        // ADC A, n
-        // Byte n is read as an integer and added to the contents of register
-        // A along with the value of the carry flag. The result is then stored
-        // in register A.
-        // Bit-by-bit: 1 1 0 0 1 1 1 0 <n n n n n n n n>
-        ADCA_n = 0b11001110,
-
-        // ADC A, HL
-        // The byte at the memory address specified in the virtual 16-bit
-        // register HL along with the value of the carry flag are added to the
-        // register A and the result is stored in register A.
-        ADCA_HL = 0b10001110,
-
-        // SUB, r
-        // The contents of the register r are subtracted from the contents of
-        // register A, and the result is stored in register A. Register r may be
-        // any of B, C, D, E, H, L, or A.
-        // Bit-by-bit: 1 0 0 1 0 <r r r>
-        SUB_B = 0b10010000,
-        SUB_C = 0b10010001,
-        SUB_D = 0b10010010,
-        SUB_E = 0b10010011,
-        SUB_H = 0b10010100,
-        SUB_L = 0b10010101,
-        SUB_A = 0b10010111,
-
-        // SUB, n
-        // Byte n is read as an integer and subtracted from the contents of
-        // register A, and the result is stored in register A.
-        // Bit-by-bit: 1 1 0 1 0 1 1 0 <n n n n n n n n>
-        SUB_n = 0b11010110,
-
-        // SUB, HL
-        // The byte at the memory address specified in the virtual 16-bit
-        // register HL is subtracted from the register A and the result is
-        // stored in register A.
-        // Bit-by-bit: 1 0 0 1 0 1 1 0
-        SUB_HL = 0b10010110,
-
-        // SBC A, r
-        // The contents of the register r along with the value of the carry
-        // flag are both subtracted from the register A, and the result is
-        // stored in register A. Register r may be any of B, C, D, E, H, L or A.
-        // Bit-by-bit: 1 0 0 1 1 <r r r>
-        SBCA_B = 0b10011000,
-        SBCA_C = 0b10011001,
-        SBCA_D = 0b10011010,
-        SBCA_E = 0b10011011,
-        SBCA_H = 0b10011100,
-        SBCA_L = 0b10011101,
-        SBCA_A = 0b10011111,
-
-        // SBC A, n
-        // Byte n is read as an integer and along with the value of the carry
-        // flag, it is subtracted from register A, and the result is stored in
-        // register A.
-        // Bit-by-bit: 1 1 0 1 1 1 1 0 <n n n n n n n n>
-        SBCA_n = 0b11011110,
-
-        // SBC A, HL
-        // The byte at the memory address specified in the virtual 16-bit
-        // register HL and the value of the carry flag are both subtracted from
-        // the register A, and the result is stored in register A.
-        // Bit-by-bit: 1 0 0 1 1 1 1 0
-        SBCA_HL = 0b10011110,
-
-        // AND, r
-        // A bitwise AND operation is performed between the contents of the
-        // register r and the contents of the register A, and the result is
-        // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
-        // Bit-by-bit: 1 0 1 0 0 <r r r>
-        AND_B = 0b10100000,
-        AND_C = 0b10100001,
-        AND_D = 0b10100010,
-        AND_E = 0b10100011,
-        AND_H = 0b10100100,
-        AND_L = 0b10100101,
-        AND_A = 0b10100111,
-
-        // AND, n
-        // A bitwise AND operation is performed between the byte n and the
-        // contents of register A, and the result is stored in register A.
-        // Bit-by-bit: 1 1 1 0 0 1 1 0 <n n n n n n n n>
-        AND_n = 0b11100110,
-
-        // AND, HL
-        // A bitwise AND operation is performed between the byte at the memory
-        // address specified in the virtual 16-bit register HL and the contents
-        // of register A, and the result is stored in register A.
-        // Bit-by-bit: 1 0 1 0 0 1 1 0
-        AND_HL = 0b10100110,
-
-        // OR, r
-        // A bitwise OR operation is performed between the contents of the
-        // register r and the contents of the register A, and the result is
-        // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
-        // Bit-by-bit: 1 0 1 1 0 <r r r>
-        OR_B = 0b10110000,
-        OR_C = 0b10110001,
-        OR_D = 0b10110010,
-        OR_E = 0b10110011,
-        OR_H = 0b10110100,
-        OR_L = 0b10110101,
-        OR_A = 0b10110111,
-
-        // OR, n
-        // A bitwise OR operation is performed between the byte n and the
-        // contents of register A, and the result is stored in register A.
-        // Bit-by-bit: 1 1 1 1 0 1 1 0 <n n n n n n n n>
-        OR_n = 0b11110110,
-
-        // OR, HL
-        // A bitwise OR operation is performed between the byte at the memory
-        // address specified in the virtual 16-bit register HL and the contents
-        // of register A, and the result is stored in register A.
-        // Bit-by-bit: 1 0 1 1 0 1 1 0
-        OR_HL = 0b10110110,
-
-        // XOR, r
-        // A bitwise XOR operation is performed between the contents of the
-        // register r and the contents of the register A, and the result is
-        // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
-        // Bit-by-bit: 1 0 1 0 1 <r r r>
-        XOR_B = 0b10101000,
-        XOR_C = 0b10101001,
-        XOR_D = 0b10101010,
-        XOR_E = 0b10101011,
-        XOR_H = 0b10101100,
-        XOR_L = 0b10101101,
-        XOR_A = 0b10101111,
-
-        // XOR, n
-        // A bitwise XOR operation is performed between the byte n and the
-        // contents of register A, and the result is stored in register A.
-        // Bit-by-bit: 1 1 1 0 1 1 1 0 <n n n n n n n n>
-        XOR_n = 0b11101110,
-
-        // XOR, HL
-        // A bitwise XOR operation is performed between the byte at the memory
-        // address specified in the virtual 16-bit register HL and the contents
-        // of register A, and the result is stored in register A.
-        // Bit-by-bit: 1 0 1 0 1 1 1 0
-        XOR_HL = 0b10101110,
-
-        // CP, r
-        // The contents of register R are compared with (subtracted from) the
-        // register A, setting the appropriate flags but not storing the result.
-        // Register r may be any of B, C, D, E, H, L or A.
-        // Bit-by-bit: 1 0 1 1 1 <r r r>
-        CP_B = 0b10111000,
-        CP_D = 0b10111001,
-        CP_C = 0b10111010,
-        CP_E = 0b10111011,
-        CP_H = 0b10111100,
-        CP_L = 0b10111101,
-        CP_A = 0b10111111,
-
-        // CP, n
-        // The byte n is compared with (subtracted from) the register A, setting
-        // the appropriate flags but not storing the result.
-        // Bit-by-bit: 1 1 1 1 1 1 1 0 <b b b b b b b b>
-        CP_n = 0b11111110,
-
-        // CP, HL
-        // The byte at the memory address specified in the register HL is compared
-        // with (subtracted from) the register A, setting the appropriate flags but
-        // not storing the result.
-        // Bit-by-bit: 1 0 1 1 1 1 1 0
-        CP_HL = 0b10111110,
-
-        // INC, r
-        // The register r is incremented by 1. Register r may be any of B, C, D, E,
-        // H, L or A.
-        // Bit-by-bit: 0 0 <r r r> 1 0 0
-        INC_B = 0b00000100,
-        INC_C = 0b00001100,
-        INC_D = 0b00010100,
-        INC_E = 0b00011100,
-        INC_H = 0b00100100,
-        INC_L = 0b00101100,
-        INC_A = 0b00111100,
-
-        // INC, HL
-        // The byte at the memory address specified in the register HL is incremented
-        // by 1.
-        // Bit-by-bit: 0 0 1 1 0 1 0 0
-        INC_HL = 0b00110100,
-
-        // DEC, r
-        // The register r is decremented by 1. Register r may be any of B, C, D, E,
-        // H, L or A.
-        // Bit-by-bit: 0 0 <r r r> 1 0 1
-        DEC_B = 0b00000101,
-        DEC_C = 0b00001101,
-        DEC_D = 0b00010101,
-        DEC_E = 0b00011101,
-        DEC_H = 0b00100101,
-        DEC_L = 0b00101101,
-        DEC_A = 0b00111101,
-
-        // DEC, HL
-        // The byte at the memory address specified in the register HL is decremented
-        // by 1.
-        // Bit-by-bit: 0 0 1 1 0 1 0 1
-        DEC_HL = 0b00110101,
-
-        // DAA
-        // The results of the previous operation as stored in the Accumulator and flags
-        // are retroactively adjusted to become a BCD (binary coded decimal) operation,
-        // where the lower and upper nibbles of the bytes in the operation are treated as
-        // two individual decimal digits, rather than the whole byte as one binary number.
-        // It does this by adding or subtracting 6 from the Accumulator's lower nibble,
-        // upper nibble or both, based on whether the last operation was a subtraction
-        // (n flag), and whether a carry and/or half carry occurred (c and h flags).
-        // Bit-by-bit = 0 0 1 0 0 1 1 1
-        DAA = 0b00100111,
-
-        // CPL
-        // The contents of register A are inverted (one's complement).
-        // Bit-by-bit: 0 0 1 0 1 1 1 1
-        CPL = 0b00101111,
-
-        // CCF
-        // The carry flag is inverted.
-        // Bit-by-bit: 0 0 1 1 1 1 1 1
-        CCF = 0b00111111,
-
-        // SCF
-        // The carry flag is set.
-        // Bit-by-bit: 0 0 1 1 0 1 1 1
-        SCF = 0b00110111,
-
-        // TODO: NOP
-        // The CPU performs no operation during this cycle.
-        // Bit-by-bit: 0 0 0 0 0 0 0 0
-        NOP = 0b00000000,
-
-        // TODO: HALT
-        // CPU operation is suspended until an interrupt or reset is recieved. While in
-        // this halted state, NOPs are executed to maintain memory refresh logic.
-        // Bit-by-bit: 0 1 1 1 0 1 1 0
-        HALT = 0b01110110,
-
-        // TODO: STOP
-        // CPU operation is stopped.
-        // Bit-by-bit: 0 0 0 1 0 0 0 0
-        STOP = 0b00010000,
-
-        // TODO: DI
-
-        // RLCA
-        // The contents of register A are rotated left by 1 bit position, after the sign
-        // bit (7) is copied into the carry flag.
-        // Bit-by-bit: 0 0 0 0 0 1 1 1
-        RLCA = 0b00000111,
-
-        // RLA
-        // The contents of register A are rotated left by 1 bit position through the
-        // carry flag.
-        // Bit-by-bit: 0 0 0 1 0 1 1 1
-        RLA = 0b00010111,
-
-        // RRCA
-        // The contents of register A are rotated right by 1 bit position, after bit 0
-        // is copied into the carry flag.
-        // Bit-by-bit: 0 0 0 0 1 1 1 1
-        RRCA = 0b00001111,
-
-        // RRA
-        // The contents of register A are rotated right by 1 bit position through the
-        // carry flag.
-        // Bit-by-bit: 0 0 0 1 1 1 1 1
-        RRA = 0b00011111,
-
-        // PREFIX:
-        // Interpret the next byte as a prefix instruction (PrefixOpCode)
-        // rather than a normal instruction (OpCode)
-        PREFIX = 0b11001011
-    };
-
-    enum class PrefixOpCode {
-        // RLC r
-        // The contents of the register r are rotated left by 1 bit position, after the
-        // sign bit (7) is copied into the carry flag. Register r may be any of B, C, D,
-        // E, H, L or A.
-        // Bit-by-bit (after 0xCB): 0 0 0 0 0 <r r r>
-        RLC_B = 0b00000000,
-        RLC_C = 0b00000001,
-        RLC_D = 0b00000010,
-        RLC_E = 0b00000011,
-        RLC_H = 0b00000100,
-        RLC_L = 0b00000101,
-        RLC_A = 0b00000111,
-
-        // RLC HL
-        // The byte at the memory address specified in the register pair HL is rotated
-        // left by 1 bit position, after the sign bit (7) is copied into the carry flag.
-        // Bit-by-bit (after 0xCB): 0 0 0 0 0 1 1 0
-        RLC_HL = 0b00000110,
-
-        // RL r
-        // The contents of the register r are rotated left by 1 bit position through the
-        // carry flag. Register r may be any of B, C, D, E, H, L or A.
-        // Bit-by-bit (after 0xCB): 0 0 0 1 0 <r r r>
-        RL_B = 0b00010000,
-        RL_C = 0b00010001,
-        RL_D = 0b00010010,
-        RL_E = 0b00010011,
-        RL_H = 0b00010100,
-        RL_L = 0b00010101,
-        RL_A = 0b00010111,
-
-        // RL HL
-        // The byte at the memory address specified in the register pair HL is rotated
-        // left by 1 bit position through the carry flag.
-        // Bit-by-bit (after 0xCB): 0 0 0 1 0 1 1 0
-        RL_HL = 0b00010110,
-
-        // RRC r
-        // The contents of the register r are rotated left by 1 bit position, after bit
-        // 0 is copied into the carry flag. Register r may be any of B, C, D, E, H, L or A.
-        // Bit-by-bit (after 0xCB): 0 0 0 0 1 <r r r>
-        RRC_B = 0b00001000,
-        RRC_C = 0b00001001,
-        RRC_D = 0b00001010,
-        RRC_E = 0b00001011,
-        RRC_H = 0b00001100,
-        RRC_L = 0b00001101,
-        RRC_A = 0b00001111,
-
-        // RRC HL
-        // The byte at the memory address specified in the register pair HL is rotated
-        // right by 1 bit position, after bit 0 is copied into the carry flag.
-        // Bit-by-bit (after 0xCB): 0 0 0 0 1 1 1 0
-        RRC_HL = 0b00001110,
-
-        // RR r
-        // The contents of the register r are rotated right by 1 bit position through the
-        // carry flag. Register r may be any of B, C, D, E, H, L or A.
-        // Bit-by-bit (after 0xCB): 0 0 0 1 1 <r r r>
-        RR_B = 0b00011000,
-        RR_C = 0b00011001,
-        RR_D = 0b00011010,
-        RR_E = 0b00011011,
-        RR_H = 0b00011100,
-        RR_L = 0b00011101,
-        RR_A = 0b00011111,
-
-        // RR HL
-        // The byte at the memory address specified in the register pair HL is rotated
-        // right by 1 bit position through the carry flag.
-        // Bit-by-bit (after 0xCB): 0 0 0 1 1 1 1 0
-        RR_HL = 0b00011110,
-
-        // SLA r
-        // The contents of the register r are shifted left by 1 bit position, after bit
-        // 7 is copied to the carry flag. Register r may be any of B, C, D, E, H, L or A.
-        // Bit-by-bit (after 0xCB): 0 0 1 0 0 <r r r>
-        SLA_B = 0b00100000,
-        SLA_C = 0b00100001,
-        SLA_D = 0b00100010,
-        SLA_E = 0b00100011,
-        SLA_H = 0b00100100,
-        SLA_L = 0b00100101,
-        SLA_A = 0b00100111,
-
-        // SLA HL
-        // The byte at the memory address specified in the register pair HL is shifted
-        // left by 1 bit position, after bit 7 is copied to the carry flag.
-        // Bit-by-bit (after 0xCB): 0 0 1 0 0 1 1 0
-        SLA_HL = 0b00100110,
-
-        // SRA r
-        // The lower 7 bits (0-6) of the register r are shifted right by 1 bit position,
-        // after bit 0 is copied into the carry flag. Register r may be any of B, C, D,
-        // E, H, L or A.
-        // Bit-by-bit (after 0xCB): 0 0 1 0 1 <r r r>
-        SRA_B = 0b00101000,
-        SRA_C = 0b00101001,
-        SRA_D = 0b00101010,
-        SRA_E = 0b00101011,
-        SRA_H = 0b00101100,
-        SRA_L = 0b00101101,
-        SRA_A = 0b00101111,
-
-        // SRA HL
-        // The lower 7 bits (0-6) of the byte at the memory address specified in the
-        // register pair HL are shifted right by 1 bi position, after bit 0 is copied
-        // into the carry flag.
-        // Bit-by-bit (after 0xCB): 0 0 1 0 1 1 1 0
-        SRA_HL = 0b00101110,
-
-        // SRL r
-        // The contents of the register r are shifted right by 1 bit position, after bit 0
-        // is copied into the carry flag. Register r may be any of B, C, D, E, H, L or A.
-        // Bit-by-bit (after 0xCB): 0 0 1 1 1 <r r r>
-        SRL_B = 0b00111000,
-        SRL_C = 0b00111001,
-        SRL_D = 0b00111010,
-        SRL_E = 0b00111011,
-        SRL_H = 0b00111100,
-        SRL_L = 0b00111101,
-        SRL_A = 0b00111111,
-
-        // SRL HL
-        // The byte at the memory address specified in the register pair HL is shifted right
-        // by 1 bit position, after bit 0 is copied into the carry flag.
-        // Bit-by-bit (after 0xCB): 0 0 1 1 1 1 1 0
-        SRL_HL = 0b00111110
-    };
-
     enum class ArithmeticTarget : uint8_t {
         B,
         C,
@@ -490,7 +490,8 @@ public:
 
             // We can treat a Flags object like a normal uint8_t
             Flags(uint8_t byte);
-            operator uint8_t();
+
+            operator uint8_t() const;
         };
 
         // Accumulator and flags
@@ -502,13 +503,20 @@ public:
 
         // Some instructions allow two 8 bit registers to be read as one 16 bit register
         // Referred to as AF (A & F), BC (B & C), DE (D & E) and HL (H & L)
-        uint16_t getAF();
+        uint16_t getAF() const;
+
         void setAF(uint16_t value);
-        uint16_t getBC();
+
+        uint16_t getBC() const;
+
         void setBC(uint16_t value);
-        uint16_t getDE();
+
+        uint16_t getDE() const;
+
         void setDE(uint16_t value);
-        uint16_t getHL();
+
+        uint16_t getHL() const;
+
         void setHL(uint16_t value);
     };
 
@@ -517,9 +525,11 @@ public:
 
     public:
         MemoryBus() = default;
+
         explicit MemoryBus(std::array<uint8_t, 0xFFFF> memory);
 
         uint8_t readByte(uint16_t address);
+
         void writeByte(uint16_t address, uint8_t value);
     };
 
@@ -536,114 +546,153 @@ private:
     void add(uint8_t value);
 
     void ADDA_r(ArithmeticTarget target);
+
     void ADDA_n();
+
     void ADDA_HL();
 
     void addWithCarry(uint8_t value);
 
     void ADCA_r(ArithmeticTarget target);
+
     void ADCA_n();
+
     void ADCA_HL();
 
     void subtract(uint8_t value);
 
     void SUB_r(ArithmeticTarget target);
+
     void SUB_n();
+
     void SUB_HL();
 
     void subtractWithCarry(uint8_t value);
 
     void SBCA_r(ArithmeticTarget target);
+
     void SBCA_n();
+
     void SBCA_HL();
 
     void bitwiseAnd(uint8_t value);
 
     void AND_r(ArithmeticTarget target);
+
     void AND_n();
+
     void AND_HL();
 
     void bitwiseOr(uint8_t value);
 
     void OR_r(ArithmeticTarget target);
+
     void OR_n();
+
     void OR_HL();
 
     void bitwiseXor(uint8_t value);
 
     void XOR_r(ArithmeticTarget target);
+
     void XOR_n();
+
     void XOR_HL();
 
     void compare(uint8_t value);
 
     void CP_r(ArithmeticTarget target);
+
     void CP_n();
+
     void CP_HL();
 
-    void increment(uint8_t& target);
+    void increment(uint8_t &target);
 
     void INC_r(ArithmeticTarget target);
+
     void INC_HL();
 
-    void decrement(uint8_t& target);
+    void decrement(uint8_t &target);
 
     void DEC_r(ArithmeticTarget target);
+
     void DEC_HL();
 
     void DAA();
+
     void CPL();
 
     void CCF();
+
     void SCF();
 
     void NOP();
+
     void HALT();
 
-    void rotateLeft(uint8_t& target);
+    void rotateLeft(uint8_t &target);
 
     void RLCA();
+
     void RLC_r(ArithmeticTarget target);
+
     void RLC_HL();
 
-    void rotateLeftThroughCarry(uint8_t& target);
+    void rotateLeftThroughCarry(uint8_t &target);
 
     void RLA();
+
     void RL_r(ArithmeticTarget target);
+
     void RL_HL();
 
-    void rotateRight(uint8_t& target);
+    void rotateRight(uint8_t &target);
 
     void RRCA();
+
     void RRC_r(ArithmeticTarget target);
+
     void RRC_HL();
 
-    void rotateRightThroughCarry(uint8_t& target);
+    void rotateRightThroughCarry(uint8_t &target);
 
     void RRA();
+
     void RR_r(ArithmeticTarget target);
+
     void RR_HL();
 
-    void shiftLeft(uint8_t& target);
+    void shiftLeft(uint8_t &target);
 
     void SLA_r(ArithmeticTarget target);
+
     void SLA_HL();
 
-    void shiftTailRight(uint8_t& target);
+    void shiftTailRight(uint8_t &target);
 
     void SRA_r(ArithmeticTarget target);
+
     void SRA_HL();
 
-    void shiftRight(uint8_t& target);
+    void shiftRight(uint8_t &target);
 
     void SRL_r(ArithmeticTarget target);
+
     void SRL_HL();
 
 public:
-    void reset();
+    void load(const std::array<uint8_t, 0xFFFF> &memory);
+
     void exec();
+
     void step();
+
     void stepPrefix();
+
+    void reset();
+
+    Registers &registers();
 };
 
 /*
