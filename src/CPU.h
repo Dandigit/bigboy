@@ -282,6 +282,24 @@ public:
         // Bit-by-bit: 0 0 1 1 0 1 1 1
         SCF = 0b00110111,
 
+        // TODO: NOP
+        // The CPU performs no operation during this cycle.
+        // Bit-by-bit: 0 0 0 0 0 0 0 0
+        NOP = 0b00000000,
+
+        // TODO: HALT
+        // CPU operation is suspended until an interrupt or reset is recieved. While in
+        // this halted state, NOPs are executed to maintain memory refresh logic.
+        // Bit-by-bit: 0 1 1 1 0 1 1 0
+        HALT = 0b01110110,
+
+        // TODO: STOP
+        // CPU operation is stopped.
+        // Bit-by-bit: 0 0 0 1 0 0 0 0
+        STOP = 0b00010000,
+
+        // TODO: DI
+
         // RLCA
         // The contents of register A are rotated left by 1 bit position, after the sign
         // bit (7) is copied into the carry flag.
@@ -578,6 +596,9 @@ private:
 
     void CCF();
     void SCF();
+
+    void NOP();
+    void HALT();
 
     void rotateLeft(uint8_t& target);
 

@@ -8,6 +8,8 @@ constexpr unsigned long WINDOW_HEIGHT = 160;
 constexpr unsigned long WINDOW_WIDTH = 144;
 
 int main() {
+    std::cout << std::bitset<8>{0x10};
+
     // Create the main window
     sf::RenderWindow window{sf::VideoMode{WINDOW_HEIGHT, WINDOW_WIDTH}, "Bigboy"};
 
