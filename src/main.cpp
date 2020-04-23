@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "CPU.h"
+#include <bigboy/CPU/CPU.h>
 
 constexpr unsigned long WINDOW_HEIGHT = 160;
 constexpr unsigned long WINDOW_WIDTH = 144;

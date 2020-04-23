@@ -1,6 +1,7 @@
 #include <iostream>
 #include <bitset>
-#include "CPU.h"
+
+#include <bigboy/CPU/CPU.h>
 
 CPU::Registers::Flags::Flags(uint8_t byte) {
     zero = ((byte >> ZERO_FLAG_BYTE_POSITION) & 0b1) != 0;
