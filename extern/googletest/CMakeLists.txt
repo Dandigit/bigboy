@@ -1,4 +1,4 @@
-# Added for the Bigboy project.
+# Added for the Bigboy project, see BIGBOY.md.
 set(GOOGLETEST_VERSION 1.10.0)
 
 ########################################################################

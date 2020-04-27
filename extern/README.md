@@ -6,4 +6,5 @@ their name. Any changes made to the library by the Bigboy project will be listed
 file in its root directory.
 
 ## Versions
+- googletest: 1.10.0
 - SFML: 2.5.1
