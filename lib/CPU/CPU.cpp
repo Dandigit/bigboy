@@ -17,6 +17,18 @@ CPU::Registers::Flags::operator uint8_t() const {
             (carry ? 1 : 0) << CARRY_FLAG_BYTE_POSITION;
 }
 
+uint8_t& CPU::Registers::get(TargetRegister target) {
+    switch (target) {
+        case TargetRegister::B: return b;
+        case TargetRegister::C: return c;
+        case TargetRegister::D: return d;
+        case TargetRegister::E: return e;
+        case TargetRegister::H: return h;
+        case TargetRegister::L: return l;
+        case TargetRegister::A: return a;
+    }
+}
+
 uint16_t CPU::Registers::getAF() const {
     return static_cast<uint16_t>(a) << 8
             | static_cast<uint16_t>(f);
@@ -86,6 +98,153 @@ void CPU::exec() {
 void CPU::step() {
     auto current = static_cast<OpCode>(m_bus.readByte(m_pc++));
     switch (current) {
+        case OpCode::LD_B_B:
+            LD_r_r(TargetRegister::B, TargetRegister::B);
+            break;
+        case OpCode::LD_B_C:
+            LD_r_r(TargetRegister::B, TargetRegister::C);
+            break;
+        case OpCode::LD_B_D:
+            LD_r_r(TargetRegister::B, TargetRegister::D);
+            break;
+        case OpCode::LD_B_E:
+            LD_r_r(TargetRegister::B, TargetRegister::E);
+            break;
+        case OpCode::LD_B_H:
+            LD_r_r(TargetRegister::B, TargetRegister::H);
+            break;
+        case OpCode::LD_B_L:
+            LD_r_r(TargetRegister::B, TargetRegister::L);
+            break;
+        case OpCode::LD_B_A:
+            LD_r_r(TargetRegister::B, TargetRegister::A);
+            break;
+        case OpCode::LD_C_B:
+            LD_r_r(TargetRegister::C, TargetRegister::B);
+            break;
+        case OpCode::LD_C_C:
+            LD_r_r(TargetRegister::C, TargetRegister::C);
+            break;
+        case OpCode::LD_C_D:
+            LD_r_r(TargetRegister::C, TargetRegister::D);
+            break;
+        case OpCode::LD_C_E:
+            LD_r_r(TargetRegister::C, TargetRegister::E);
+            break;
+        case OpCode::LD_C_H:
+            LD_r_r(TargetRegister::C, TargetRegister::H);
+            break;
+        case OpCode::LD_C_L:
+            LD_r_r(TargetRegister::C, TargetRegister::L);
+            break;
+        case OpCode::LD_C_A:
+            LD_r_r(TargetRegister::C, TargetRegister::A);
+            break;
+        case OpCode::LD_D_B:
+            LD_r_r(TargetRegister::D, TargetRegister::B);
+            break;
+        case OpCode::LD_D_C:
+            LD_r_r(TargetRegister::D, TargetRegister::C);
+            break;
+        case OpCode::LD_D_D:
+            LD_r_r(TargetRegister::D, TargetRegister::D);
+            break;
+        case OpCode::LD_D_E:
+            LD_r_r(TargetRegister::D, TargetRegister::E);
+            break;
+        case OpCode::LD_D_H:
+            LD_r_r(TargetRegister::D, TargetRegister::H);
+            break;
+        case OpCode::LD_D_L:
+            LD_r_r(TargetRegister::D, TargetRegister::L);
+            break;
+        case OpCode::LD_D_A:
+            LD_r_r(TargetRegister::D, TargetRegister::A);
+            break;
+        case OpCode::LD_E_B:
+            LD_r_r(TargetRegister::E, TargetRegister::B);
+            break;
+        case OpCode::LD_E_C:
+            LD_r_r(TargetRegister::E, TargetRegister::C);
+            break;
+        case OpCode::LD_E_D:
+            LD_r_r(TargetRegister::E, TargetRegister::D);
+            break;
+        case OpCode::LD_E_E:
+            LD_r_r(TargetRegister::E, TargetRegister::E);
+            break;
+        case OpCode::LD_E_H:
+            LD_r_r(TargetRegister::E, TargetRegister::H);
+            break;
+        case OpCode::LD_E_L:
+            LD_r_r(TargetRegister::E, TargetRegister::L);
+            break;
+        case OpCode::LD_E_A:
+            LD_r_r(TargetRegister::E, TargetRegister::A);
+            break;
+        case OpCode::LD_H_B:
+            LD_r_r(TargetRegister::H, TargetRegister::B);
+            break;
+        case OpCode::LD_H_C:
+            LD_r_r(TargetRegister::H, TargetRegister::C);
+            break;
+        case OpCode::LD_H_D:
+            LD_r_r(TargetRegister::H, TargetRegister::D);
+            break;
+        case OpCode::LD_H_E:
+            LD_r_r(TargetRegister::H, TargetRegister::E);
+            break;
+        case OpCode::LD_H_H:
+            LD_r_r(TargetRegister::H, TargetRegister::H);
+            break;
+        case OpCode::LD_H_L:
+            LD_r_r(TargetRegister::H, TargetRegister::L);
+            break;
+        case OpCode::LD_H_A:
+            LD_r_r(TargetRegister::H, TargetRegister::A);
+            break;
+        case OpCode::LD_L_B:
+            LD_r_r(TargetRegister::L, TargetRegister::B);
+            break;
+        case OpCode::LD_L_C:
+            LD_r_r(TargetRegister::L, TargetRegister::C);
+            break;
+        case OpCode::LD_L_D:
+            LD_r_r(TargetRegister::L, TargetRegister::D);
+            break;
+        case OpCode::LD_L_E:
+            LD_r_r(TargetRegister::L, TargetRegister::E);
+            break;
+        case OpCode::LD_L_H:
+            LD_r_r(TargetRegister::L, TargetRegister::H);
+            break;
+        case OpCode::LD_L_L:
+            LD_r_r(TargetRegister::L, TargetRegister::L);
+            break;
+        case OpCode::LD_L_A:
+            LD_r_r(TargetRegister::L, TargetRegister::A);
+            break;
+        case OpCode::LD_A_B:
+            LD_r_r(TargetRegister::A, TargetRegister::B);
+            break;
+        case OpCode::LD_A_C:
+            LD_r_r(TargetRegister::A, TargetRegister::C);
+            break;
+        case OpCode::LD_A_D:
+            LD_r_r(TargetRegister::A, TargetRegister::D);
+            break;
+        case OpCode::LD_A_E:
+            LD_r_r(TargetRegister::A, TargetRegister::E);
+            break;
+        case OpCode::LD_A_H:
+            LD_r_r(TargetRegister::A, TargetRegister::H);
+            break;
+        case OpCode::LD_A_L:
+            LD_r_r(TargetRegister::A, TargetRegister::L);
+            break;
+        case OpCode::LD_A_A:
+            LD_r_r(TargetRegister::A, TargetRegister::A);
+            break;
         case OpCode::ADDA_B:
             ADDA_r(TargetRegister::B);
             break;
@@ -1137,6 +1296,14 @@ void CPU::stepPrefix() {
             std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
             exit(1);
     }
+}
+
+void CPU::load(uint8_t& target, uint8_t value) {
+    target = value;
+}
+
+void CPU::LD_r_r(TargetRegister target, TargetRegister value) {
+    load(m_registers.get(target), m_registers.get(value));
 }
 
 // Add `value` to the register A, and set/reset the necessary flags
