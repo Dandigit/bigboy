@@ -546,139 +546,107 @@ private:
     void add(uint8_t value);
 
     void ADDA_r(ArithmeticTarget target);
-
     void ADDA_n();
-
     void ADDA_HL();
 
     void addWithCarry(uint8_t value);
 
     void ADCA_r(ArithmeticTarget target);
-
     void ADCA_n();
-
     void ADCA_HL();
 
     void subtract(uint8_t value);
 
     void SUB_r(ArithmeticTarget target);
-
     void SUB_n();
-
     void SUB_HL();
 
     void subtractWithCarry(uint8_t value);
 
     void SBCA_r(ArithmeticTarget target);
-
     void SBCA_n();
-
     void SBCA_HL();
 
     void bitwiseAnd(uint8_t value);
 
     void AND_r(ArithmeticTarget target);
-
     void AND_n();
-
     void AND_HL();
 
     void bitwiseOr(uint8_t value);
 
     void OR_r(ArithmeticTarget target);
-
     void OR_n();
-
     void OR_HL();
 
     void bitwiseXor(uint8_t value);
 
     void XOR_r(ArithmeticTarget target);
-
     void XOR_n();
-
     void XOR_HL();
 
     void compare(uint8_t value);
 
     void CP_r(ArithmeticTarget target);
-
     void CP_n();
-
     void CP_HL();
 
     void increment(uint8_t &target);
 
     void INC_r(ArithmeticTarget target);
-
     void INC_HL();
 
     void decrement(uint8_t &target);
 
     void DEC_r(ArithmeticTarget target);
-
     void DEC_HL();
 
     void DAA();
-
     void CPL();
 
     void CCF();
-
     void SCF();
 
     void NOP();
-
     void HALT();
 
     void rotateLeft(uint8_t &target);
 
     void RLCA();
-
     void RLC_r(ArithmeticTarget target);
-
     void RLC_HL();
 
     void rotateLeftThroughCarry(uint8_t &target);
 
     void RLA();
-
     void RL_r(ArithmeticTarget target);
-
     void RL_HL();
 
     void rotateRight(uint8_t &target);
 
     void RRCA();
-
     void RRC_r(ArithmeticTarget target);
-
     void RRC_HL();
 
     void rotateRightThroughCarry(uint8_t &target);
 
     void RRA();
-
     void RR_r(ArithmeticTarget target);
-
     void RR_HL();
 
     void shiftLeft(uint8_t &target);
 
     void SLA_r(ArithmeticTarget target);
-
     void SLA_HL();
 
     void shiftTailRight(uint8_t &target);
 
     void SRA_r(ArithmeticTarget target);
-
     void SRA_HL();
 
     void shiftRight(uint8_t &target);
 
     void SRL_r(ArithmeticTarget target);
-
     void SRL_HL();
 
 public:
@@ -687,7 +655,6 @@ public:
     void exec();
 
     void step();
-
     void stepPrefix();
 
     void reset();
