@@ -81,6 +81,19 @@ enum class OpCode : uint8_t {
     LD_L_n = 0b00101110,
     LD_A_n = 0b00111110,
 
+    // LD r, HL
+    // The byte at the memory address stored in the register pair HL is
+    // loaded into register r. Register r may be any of B, C, D, E, H, L
+    // or A.
+    // Bit-by-bit: 0 1 <r r r> 1 1 0
+    LD_B_HL = 0b01000110,
+    LD_C_HL = 0b01001110,
+    LD_D_HL = 0b01010110,
+    LD_E_HL = 0b01011110,
+    LD_H_HL = 0b01100110,
+    LD_L_HL = 0b01101110,
+    LD_A_HL = 0b01111110,
+
     // ADD A, r:
     // The contents of register r are added to the contents of register A
     // (the Accumulator) and the result is stored in register A. Register
@@ -869,6 +882,7 @@ private:
 
     void LD_r_r(TargetRegister target, TargetRegister value);
     void LD_r_n(TargetRegister target);
+    void LD_r_HL(TargetRegister target);
 
     void add(uint8_t value);
 

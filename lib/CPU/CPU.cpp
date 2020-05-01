@@ -266,6 +266,27 @@ void CPU::step() {
         case OpCode::LD_A_n:
             LD_r_n(TargetRegister::A);
             break;
+        case OpCode::LD_B_HL:
+            LD_r_HL(TargetRegister::B);
+            break;
+        case OpCode::LD_C_HL:
+            LD_r_HL(TargetRegister::C);
+            break;
+        case OpCode::LD_D_HL:
+            LD_r_HL(TargetRegister::D);
+            break;
+        case OpCode::LD_E_HL:
+            LD_r_HL(TargetRegister::E);
+            break;
+        case OpCode::LD_H_HL:
+            LD_r_HL(TargetRegister::H);
+            break;
+        case OpCode::LD_L_HL:
+            LD_r_HL(TargetRegister::L);
+            break;
+        case OpCode::LD_A_HL:
+            LD_r_HL(TargetRegister::A);
+            break;
         case OpCode::ADDA_B:
             ADDA_r(TargetRegister::B);
             break;
@@ -1329,6 +1350,10 @@ void CPU::LD_r_r(TargetRegister target, TargetRegister value) {
 
 void CPU::LD_r_n(TargetRegister target) {
     load(m_registers.get(target), m_bus.readByte(m_pc++));
+}
+
+void CPU::LD_r_HL(TargetRegister target) {
+    load(m_registers.get(target), m_bus.readByte(m_registers.getHL()));
 }
 
 // Add `value` to the register A, and set/reset the necessary flags
