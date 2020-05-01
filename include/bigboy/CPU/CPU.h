@@ -538,6 +538,86 @@ enum class PrefixOpCode {
     BIT_5_HL = 0b01101110,
     BIT_6_HL = 0b01110110,
     BIT_7_HL = 0b01111110,
+
+    // SET b, r
+    // The bit at position b of the register r is set. Register r may be any of B, C, D,
+    // E, H, L or A.
+    // Bit-by-bit (after 0xCB): 1 1 <b b b> <r r r>
+    SET_0_B = 0b11000000,
+    SET_1_B = 0b11001000,
+    SET_2_B = 0b11010000,
+    SET_3_B = 0b11011000,
+    SET_4_B = 0b11100000,
+    SET_5_B = 0b11101000,
+    SET_6_B = 0b11110000,
+    SET_7_B = 0b11111000,
+
+    SET_0_C = 0b11000001,
+    SET_1_C = 0b11001001,
+    SET_2_C = 0b11010001,
+    SET_3_C = 0b11011001,
+    SET_4_C = 0b11100001,
+    SET_5_C = 0b11101001,
+    SET_6_C = 0b11110001,
+    SET_7_C = 0b11111001,
+
+    SET_0_D = 0b11000010,
+    SET_1_D = 0b11001010,
+    SET_2_D = 0b11010010,
+    SET_3_D = 0b11011010,
+    SET_4_D = 0b11100010,
+    SET_5_D = 0b11101010,
+    SET_6_D = 0b11110010,
+    SET_7_D = 0b11111010,
+
+    SET_0_E = 0b11000011,
+    SET_1_E = 0b11001011,
+    SET_2_E = 0b11010011,
+    SET_3_E = 0b11011011,
+    SET_4_E = 0b11100011,
+    SET_5_E = 0b11101011,
+    SET_6_E = 0b11110011,
+    SET_7_E = 0b11111011,
+
+    SET_0_H = 0b11000100,
+    SET_1_H = 0b11001100,
+    SET_2_H = 0b11010100,
+    SET_3_H = 0b11011100,
+    SET_4_H = 0b11100100,
+    SET_5_H = 0b11101100,
+    SET_6_H = 0b11110100,
+    SET_7_H = 0b11111100,
+
+    SET_0_L = 0b11000101,
+    SET_1_L = 0b11001101,
+    SET_2_L = 0b11010101,
+    SET_3_L = 0b11011101,
+    SET_4_L = 0b11100101,
+    SET_5_L = 0b11101101,
+    SET_6_L = 0b11110101,
+    SET_7_L = 0b11111101,
+
+    SET_0_A = 0b11000111,
+    SET_1_A = 0b11001111,
+    SET_2_A = 0b11010111,
+    SET_3_A = 0b11011111,
+    SET_4_A = 0b11100111,
+    SET_5_A = 0b11101111,
+    SET_6_A = 0b11110111,
+    SET_7_A = 0b11111111,
+
+    // SET b, HL
+    // The bit at position b of the byte at the memory address stored in the register
+    // pair HL is set.
+    // Bit-by-bit (after 0xCB): 1 1 <b b b> 1 1 0
+    SET_0_HL = 0b11000110,
+    SET_1_HL = 0b11001110,
+    SET_2_HL = 0b11010110,
+    SET_3_HL = 0b11011110,
+    SET_4_HL = 0b11100110,
+    SET_5_HL = 0b11101110,
+    SET_6_HL = 0b11110110,
+    SET_7_HL = 0b11111110,
 };
 
 class CPU {
@@ -745,6 +825,11 @@ private:
 
     void BIT_b_r(TargetBit bit, TargetRegister reg);
     void BIT_b_HL(TargetBit bit);
+
+    void setBit(TargetBit bit, uint8_t& target);
+
+    void SET_b_r(TargetBit bit, TargetRegister reg);
+    void SET_b_HL(TargetBit bit);
 
 public:
     void load(const std::array<uint8_t, 0xFFFF> &memory);
