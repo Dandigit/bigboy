@@ -87,25 +87,25 @@ void CPU::step() {
     auto current = static_cast<OpCode>(m_bus.readByte(m_pc++));
     switch (current) {
         case OpCode::ADDA_B:
-            ADDA_r(ArithmeticTarget::B);
+            ADDA_r(TargetRegister::B);
             break;
         case OpCode::ADDA_C:
-            ADDA_r(ArithmeticTarget::C);
+            ADDA_r(TargetRegister::C);
             break;
         case OpCode::ADDA_D:
-            ADDA_r(ArithmeticTarget::D);
+            ADDA_r(TargetRegister::D);
             break;
         case OpCode::ADDA_E:
-            ADDA_r(ArithmeticTarget::E);
+            ADDA_r(TargetRegister::E);
             break;
         case OpCode::ADDA_H:
-            ADDA_r(ArithmeticTarget::H);
+            ADDA_r(TargetRegister::H);
             break;
         case OpCode::ADDA_L:
-            ADDA_r(ArithmeticTarget::L);
+            ADDA_r(TargetRegister::L);
             break;
         case OpCode::ADDA_A:
-            ADDA_r(ArithmeticTarget::A);
+            ADDA_r(TargetRegister::A);
             break;
         case OpCode::ADDA_n:
             ADDA_n();
@@ -114,25 +114,25 @@ void CPU::step() {
             ADDA_HL();
             break;
         case OpCode::ADCA_B:
-            ADCA_r(ArithmeticTarget::B);
+            ADCA_r(TargetRegister::B);
             break;
         case OpCode::ADCA_C:
-            ADCA_r(ArithmeticTarget::C);
+            ADCA_r(TargetRegister::C);
             break;
         case OpCode::ADCA_D:
-            ADCA_r(ArithmeticTarget::D);
+            ADCA_r(TargetRegister::D);
             break;
         case OpCode::ADCA_E:
-            ADCA_r(ArithmeticTarget::E);
+            ADCA_r(TargetRegister::E);
             break;
         case OpCode::ADCA_H:
-            ADCA_r(ArithmeticTarget::H);
+            ADCA_r(TargetRegister::H);
             break;
         case OpCode::ADCA_L:
-            ADCA_r(ArithmeticTarget::L);
+            ADCA_r(TargetRegister::L);
             break;
         case OpCode::ADCA_A:
-            ADCA_r(ArithmeticTarget::A);
+            ADCA_r(TargetRegister::A);
             break;
         case OpCode::ADCA_n:
             ADCA_n();
@@ -141,25 +141,25 @@ void CPU::step() {
             ADCA_HL();
             break;
         case OpCode::SUB_B:
-            SUB_r(ArithmeticTarget::B);
+            SUB_r(TargetRegister::B);
             break;
         case OpCode::SUB_C:
-            SUB_r(ArithmeticTarget::C);
+            SUB_r(TargetRegister::C);
             break;
         case OpCode::SUB_D:
-            SUB_r(ArithmeticTarget::D);
+            SUB_r(TargetRegister::D);
             break;
         case OpCode::SUB_E:
-            SUB_r(ArithmeticTarget::E);
+            SUB_r(TargetRegister::E);
             break;
         case OpCode::SUB_H:
-            SUB_r(ArithmeticTarget::H);
+            SUB_r(TargetRegister::H);
             break;
         case OpCode::SUB_L:
-            SUB_r(ArithmeticTarget::L);
+            SUB_r(TargetRegister::L);
             break;
         case OpCode::SUB_A:
-            SUB_r(ArithmeticTarget::A);
+            SUB_r(TargetRegister::A);
             break;
         case OpCode::SUB_n:
             SUB_n();
@@ -168,25 +168,25 @@ void CPU::step() {
             SUB_HL();
             break;
         case OpCode::SBCA_B:
-            SBCA_r(ArithmeticTarget::B);
+            SBCA_r(TargetRegister::B);
             break;
         case OpCode::SBCA_C:
-            SBCA_r(ArithmeticTarget::C);
+            SBCA_r(TargetRegister::C);
             break;
         case OpCode::SBCA_D:
-            SBCA_r(ArithmeticTarget::D);
+            SBCA_r(TargetRegister::D);
             break;
         case OpCode::SBCA_E:
-            SBCA_r(ArithmeticTarget::E);
+            SBCA_r(TargetRegister::E);
             break;
         case OpCode::SBCA_H:
-            SBCA_r(ArithmeticTarget::H);
+            SBCA_r(TargetRegister::H);
             break;
         case OpCode::SBCA_L:
-            SBCA_r(ArithmeticTarget::L);
+            SBCA_r(TargetRegister::L);
             break;
         case OpCode::SBCA_A:
-            SBCA_r(ArithmeticTarget::A);
+            SBCA_r(TargetRegister::A);
             break;
         case OpCode::SBCA_n:
             SBCA_n();
@@ -195,25 +195,25 @@ void CPU::step() {
             SBCA_HL();
             break;
         case OpCode::AND_B:
-            AND_r(ArithmeticTarget::B);
+            AND_r(TargetRegister::B);
             break;
         case OpCode::AND_C:
-            AND_r(ArithmeticTarget::C);
+            AND_r(TargetRegister::C);
             break;
         case OpCode::AND_D:
-            AND_r(ArithmeticTarget::D);
+            AND_r(TargetRegister::D);
             break;
         case OpCode::AND_E:
-            AND_r(ArithmeticTarget::E);
+            AND_r(TargetRegister::E);
             break;
         case OpCode::AND_H:
-            AND_r(ArithmeticTarget::H);
+            AND_r(TargetRegister::H);
             break;
         case OpCode::AND_L:
-            AND_r(ArithmeticTarget::L);
+            AND_r(TargetRegister::L);
             break;
         case OpCode::AND_A:
-            AND_r(ArithmeticTarget::A);
+            AND_r(TargetRegister::A);
             break;
         case OpCode::AND_n:
             AND_n();
@@ -222,25 +222,25 @@ void CPU::step() {
             AND_HL();
             break;
         case OpCode::OR_B:
-            OR_r(ArithmeticTarget::B);
+            OR_r(TargetRegister::B);
             break;
         case OpCode::OR_C:
-            OR_r(ArithmeticTarget::C);
+            OR_r(TargetRegister::C);
             break;
         case OpCode::OR_D:
-            OR_r(ArithmeticTarget::D);
+            OR_r(TargetRegister::D);
             break;
         case OpCode::OR_E:
-            OR_r(ArithmeticTarget::E);
+            OR_r(TargetRegister::E);
             break;
         case OpCode::OR_H:
-            OR_r(ArithmeticTarget::H);
+            OR_r(TargetRegister::H);
             break;
         case OpCode::OR_L:
-            OR_r(ArithmeticTarget::L);
+            OR_r(TargetRegister::L);
             break;
         case OpCode::OR_A:
-            OR_r(ArithmeticTarget::A);
+            OR_r(TargetRegister::A);
             break;
         case OpCode::OR_n:
             OR_n();
@@ -249,25 +249,25 @@ void CPU::step() {
             OR_HL();
             break;
         case OpCode::XOR_B:
-            XOR_r(ArithmeticTarget::B);
+            XOR_r(TargetRegister::B);
             break;
         case OpCode::XOR_C:
-            XOR_r(ArithmeticTarget::C);
+            XOR_r(TargetRegister::C);
             break;
         case OpCode::XOR_D:
-            XOR_r(ArithmeticTarget::D);
+            XOR_r(TargetRegister::D);
             break;
         case OpCode::XOR_E:
-            XOR_r(ArithmeticTarget::E);
+            XOR_r(TargetRegister::E);
             break;
         case OpCode::XOR_H:
-            XOR_r(ArithmeticTarget::H);
+            XOR_r(TargetRegister::H);
             break;
         case OpCode::XOR_L:
-            XOR_r(ArithmeticTarget::L);
+            XOR_r(TargetRegister::L);
             break;
         case OpCode::XOR_A:
-            XOR_r(ArithmeticTarget::A);
+            XOR_r(TargetRegister::A);
             break;
         case OpCode::XOR_n:
             XOR_n();
@@ -276,25 +276,25 @@ void CPU::step() {
             XOR_HL();
             break;
         case OpCode::CP_B:
-            CP_r(ArithmeticTarget::B);
+            CP_r(TargetRegister::B);
             break;
         case OpCode::CP_C:
-            CP_r(ArithmeticTarget::C);
+            CP_r(TargetRegister::C);
             break;
         case OpCode::CP_D:
-            CP_r(ArithmeticTarget::D);
+            CP_r(TargetRegister::D);
             break;
         case OpCode::CP_E:
-            CP_r(ArithmeticTarget::E);
+            CP_r(TargetRegister::E);
             break;
         case OpCode::CP_H:
-            CP_r(ArithmeticTarget::H);
+            CP_r(TargetRegister::H);
             break;
         case OpCode::CP_L:
-            CP_r(ArithmeticTarget::L);
+            CP_r(TargetRegister::L);
             break;
         case OpCode::CP_A:
-            CP_r(ArithmeticTarget::A);
+            CP_r(TargetRegister::A);
             break;
         case OpCode::CP_n:
             CP_n();
@@ -303,49 +303,49 @@ void CPU::step() {
             CP_HL();
             break;
         case OpCode::INC_B:
-            INC_r(ArithmeticTarget::B);
+            INC_r(TargetRegister::B);
             break;
         case OpCode::INC_C:
-            INC_r(ArithmeticTarget::C);
+            INC_r(TargetRegister::C);
             break;
         case OpCode::INC_D:
-            INC_r(ArithmeticTarget::D);
+            INC_r(TargetRegister::D);
             break;
         case OpCode::INC_E:
-            INC_r(ArithmeticTarget::E);
+            INC_r(TargetRegister::E);
             break;
         case OpCode::INC_H:
-            INC_r(ArithmeticTarget::H);
+            INC_r(TargetRegister::H);
             break;
         case OpCode::INC_L:
-            INC_r(ArithmeticTarget::L);
+            INC_r(TargetRegister::L);
             break;
         case OpCode::INC_A:
-            INC_r(ArithmeticTarget::A);
+            INC_r(TargetRegister::A);
             break;
         case OpCode::INC_HL:
             INC_HL();
             break;
         case OpCode::DEC_B:
-            DEC_r(ArithmeticTarget::B);
+            DEC_r(TargetRegister::B);
             break;
         case OpCode::DEC_C:
-            DEC_r(ArithmeticTarget::C);
+            DEC_r(TargetRegister::C);
             break;
         case OpCode::DEC_D:
-            DEC_r(ArithmeticTarget::D);
+            DEC_r(TargetRegister::D);
             break;
         case OpCode::DEC_E:
-            DEC_r(ArithmeticTarget::E);
+            DEC_r(TargetRegister::E);
             break;
         case OpCode::DEC_H:
-            DEC_r(ArithmeticTarget::H);
+            DEC_r(TargetRegister::H);
             break;
         case OpCode::DEC_L:
-            DEC_r(ArithmeticTarget::L);
+            DEC_r(TargetRegister::L);
             break;
         case OpCode::DEC_A:
-            DEC_r(ArithmeticTarget::A);
+            DEC_r(TargetRegister::A);
             break;
         case OpCode::DEC_HL:
             DEC_HL();
@@ -390,172 +390,364 @@ void CPU::stepPrefix() {
     auto current = static_cast<PrefixOpCode>(m_pc++);
     switch (current) {
         case PrefixOpCode::RLC_B:
-            RLC_r(ArithmeticTarget::B);
+            RLC_r(TargetRegister::B);
             break;
         case PrefixOpCode::RLC_C:
-            RLC_r(ArithmeticTarget::C);
+            RLC_r(TargetRegister::C);
             break;
         case PrefixOpCode::RLC_D:
-            RLC_r(ArithmeticTarget::D);
+            RLC_r(TargetRegister::D);
             break;
         case PrefixOpCode::RLC_E:
-            RLC_r(ArithmeticTarget::E);
+            RLC_r(TargetRegister::E);
             break;
         case PrefixOpCode::RLC_H:
-            RLC_r(ArithmeticTarget::H);
+            RLC_r(TargetRegister::H);
             break;
         case PrefixOpCode::RLC_L:
-            RLC_r(ArithmeticTarget::L);
+            RLC_r(TargetRegister::L);
             break;
         case PrefixOpCode::RLC_A:
-            RLC_r(ArithmeticTarget::A);
+            RLC_r(TargetRegister::A);
             break;
         case PrefixOpCode::RLC_HL:
             RLC_HL();
             break;
         case PrefixOpCode::RL_B:
-            RL_r(ArithmeticTarget::B);
+            RL_r(TargetRegister::B);
             break;
         case PrefixOpCode::RL_C:
-            RL_r(ArithmeticTarget::C);
+            RL_r(TargetRegister::C);
             break;
         case PrefixOpCode::RL_D:
-            RL_r(ArithmeticTarget::D);
+            RL_r(TargetRegister::D);
             break;
         case PrefixOpCode::RL_E:
-            RL_r(ArithmeticTarget::E);
+            RL_r(TargetRegister::E);
             break;
         case PrefixOpCode::RL_H:
-            RL_r(ArithmeticTarget::H);
+            RL_r(TargetRegister::H);
             break;
         case PrefixOpCode::RL_L:
-            RL_r(ArithmeticTarget::L);
+            RL_r(TargetRegister::L);
             break;
         case PrefixOpCode::RL_A:
-            RL_r(ArithmeticTarget::A);
+            RL_r(TargetRegister::A);
             break;
         case PrefixOpCode::RL_HL:
             RL_HL();
             break;
         case PrefixOpCode::RRC_B:
-            RRC_r(ArithmeticTarget::B);
+            RRC_r(TargetRegister::B);
             break;
         case PrefixOpCode::RRC_C:
-            RRC_r(ArithmeticTarget::C);
+            RRC_r(TargetRegister::C);
             break;
         case PrefixOpCode::RRC_D:
-            RRC_r(ArithmeticTarget::D);
+            RRC_r(TargetRegister::D);
             break;
         case PrefixOpCode::RRC_E:
-            RRC_r(ArithmeticTarget::E);
+            RRC_r(TargetRegister::E);
             break;
         case PrefixOpCode::RRC_H:
-            RRC_r(ArithmeticTarget::H);
+            RRC_r(TargetRegister::H);
             break;
         case PrefixOpCode::RRC_L:
-            RRC_r(ArithmeticTarget::L);
+            RRC_r(TargetRegister::L);
             break;
         case PrefixOpCode::RRC_A:
-            RRC_r(ArithmeticTarget::A);
+            RRC_r(TargetRegister::A);
             break;
         case PrefixOpCode::RRC_HL:
             RRC_HL();
             break;
         case PrefixOpCode::RR_B:
-            RR_r(ArithmeticTarget::B);
+            RR_r(TargetRegister::B);
             break;
         case PrefixOpCode::RR_C:
-            RR_r(ArithmeticTarget::C);
+            RR_r(TargetRegister::C);
             break;
         case PrefixOpCode::RR_D:
-            RR_r(ArithmeticTarget::D);
+            RR_r(TargetRegister::D);
             break;
         case PrefixOpCode::RR_E:
-            RR_r(ArithmeticTarget::E);
+            RR_r(TargetRegister::E);
             break;
         case PrefixOpCode::RR_H:
-            RR_r(ArithmeticTarget::H);
+            RR_r(TargetRegister::H);
             break;
         case PrefixOpCode::RR_L:
-            RR_r(ArithmeticTarget::L);
+            RR_r(TargetRegister::L);
             break;
         case PrefixOpCode::RR_A:
-            RR_r(ArithmeticTarget::A);
+            RR_r(TargetRegister::A);
             break;
         case PrefixOpCode::RR_HL:
             RR_HL();
             break;
         case PrefixOpCode::SLA_B:
-            SLA_r(ArithmeticTarget::B);
+            SLA_r(TargetRegister::B);
             break;
         case PrefixOpCode::SLA_C:
-            SLA_r(ArithmeticTarget::C);
+            SLA_r(TargetRegister::C);
             break;
         case PrefixOpCode::SLA_D:
-            SLA_r(ArithmeticTarget::D);
+            SLA_r(TargetRegister::D);
             break;
         case PrefixOpCode::SLA_E:
-            SLA_r(ArithmeticTarget::E);
+            SLA_r(TargetRegister::E);
             break;
         case PrefixOpCode::SLA_H:
-            SLA_r(ArithmeticTarget::H);
+            SLA_r(TargetRegister::H);
             break;
         case PrefixOpCode::SLA_L:
-            SLA_r(ArithmeticTarget::L);
+            SLA_r(TargetRegister::L);
             break;
         case PrefixOpCode::SLA_A:
-            SLA_r(ArithmeticTarget::A);
+            SLA_r(TargetRegister::A);
             break;
         case PrefixOpCode::SLA_HL:
             SLA_HL();
             break;
         case PrefixOpCode::SRA_B:
-            SRA_r(ArithmeticTarget::B);
+            SRA_r(TargetRegister::B);
             break;
         case PrefixOpCode::SRA_C:
-            SRA_r(ArithmeticTarget::C);
+            SRA_r(TargetRegister::C);
             break;
         case PrefixOpCode::SRA_D:
-            SRA_r(ArithmeticTarget::D);
+            SRA_r(TargetRegister::D);
             break;
         case PrefixOpCode::SRA_E:
-            SRA_r(ArithmeticTarget::E);
+            SRA_r(TargetRegister::E);
             break;
         case PrefixOpCode::SRA_H:
-            SRA_r(ArithmeticTarget::H);
+            SRA_r(TargetRegister::H);
             break;
         case PrefixOpCode::SRA_L:
-            SRA_r(ArithmeticTarget::L);
+            SRA_r(TargetRegister::L);
             break;
         case PrefixOpCode::SRA_A:
-            SRA_r(ArithmeticTarget::A);
+            SRA_r(TargetRegister::A);
             break;
         case PrefixOpCode::SRA_HL:
             SRA_HL();
             break;
         case PrefixOpCode::SRL_B:
-            SRL_r(ArithmeticTarget::B);
+            SRL_r(TargetRegister::B);
             break;
         case PrefixOpCode::SRL_C:
-            SRL_r(ArithmeticTarget::C);
+            SRL_r(TargetRegister::C);
             break;
         case PrefixOpCode::SRL_D:
-            SRL_r(ArithmeticTarget::D);
+            SRL_r(TargetRegister::D);
             break;
         case PrefixOpCode::SRL_E:
-            SRL_r(ArithmeticTarget::E);
+            SRL_r(TargetRegister::E);
             break;
         case PrefixOpCode::SRL_H:
-            SRL_r(ArithmeticTarget::H);
+            SRL_r(TargetRegister::H);
             break;
         case PrefixOpCode::SRL_L:
-            SRL_r(ArithmeticTarget::L);
+            SRL_r(TargetRegister::L);
             break;
         case PrefixOpCode::SRL_A:
-            SRL_r(ArithmeticTarget::A);
+            SRL_r(TargetRegister::A);
             break;
         case PrefixOpCode::SRL_HL:
             SRL_HL();
+            break;
+        case PrefixOpCode::BIT_0_B:
+            BIT_b_r(TargetBit::BIT0, TargetRegister::B);
+            break;
+        case PrefixOpCode::BIT_1_B:
+            BIT_b_r(TargetBit::BIT1, TargetRegister::B);
+            break;
+        case PrefixOpCode::BIT_2_B:
+            BIT_b_r(TargetBit::BIT2, TargetRegister::B);
+            break;
+        case PrefixOpCode::BIT_3_B:
+            BIT_b_r(TargetBit::BIT3, TargetRegister::B);
+            break;
+        case PrefixOpCode::BIT_4_B:
+            BIT_b_r(TargetBit::BIT4, TargetRegister::B);
+            break;
+        case PrefixOpCode::BIT_5_B:
+            BIT_b_r(TargetBit::BIT5, TargetRegister::B);
+            break;
+        case PrefixOpCode::BIT_6_B:
+            BIT_b_r(TargetBit::BIT6, TargetRegister::B);
+            break;
+        case PrefixOpCode::BIT_7_B:
+            BIT_b_r(TargetBit::BIT7, TargetRegister::B);
+            break;
+        case PrefixOpCode::BIT_0_C:
+            BIT_b_r(TargetBit::BIT0, TargetRegister::C);
+            break;
+        case PrefixOpCode::BIT_1_C:
+            BIT_b_r(TargetBit::BIT1, TargetRegister::C);
+            break;
+        case PrefixOpCode::BIT_2_C:
+            BIT_b_r(TargetBit::BIT2, TargetRegister::C);
+            break;
+        case PrefixOpCode::BIT_3_C:
+            BIT_b_r(TargetBit::BIT3, TargetRegister::C);
+            break;
+        case PrefixOpCode::BIT_4_C:
+            BIT_b_r(TargetBit::BIT4, TargetRegister::C);
+            break;
+        case PrefixOpCode::BIT_5_C:
+            BIT_b_r(TargetBit::BIT5, TargetRegister::C);
+            break;
+        case PrefixOpCode::BIT_6_C:
+            BIT_b_r(TargetBit::BIT6, TargetRegister::C);
+            break;
+        case PrefixOpCode::BIT_7_C:
+            BIT_b_r(TargetBit::BIT7, TargetRegister::C);
+            break;
+        case PrefixOpCode::BIT_0_D:
+            BIT_b_r(TargetBit::BIT0, TargetRegister::D);
+            break;
+        case PrefixOpCode::BIT_1_D:
+            BIT_b_r(TargetBit::BIT1, TargetRegister::D);
+            break;
+        case PrefixOpCode::BIT_2_D:
+            BIT_b_r(TargetBit::BIT2, TargetRegister::D);
+            break;
+        case PrefixOpCode::BIT_3_D:
+            BIT_b_r(TargetBit::BIT3, TargetRegister::D);
+            break;
+        case PrefixOpCode::BIT_4_D:
+            BIT_b_r(TargetBit::BIT4, TargetRegister::D);
+            break;
+        case PrefixOpCode::BIT_5_D:
+            BIT_b_r(TargetBit::BIT5, TargetRegister::D);
+            break;
+        case PrefixOpCode::BIT_6_D:
+            BIT_b_r(TargetBit::BIT6, TargetRegister::D);
+            break;
+        case PrefixOpCode::BIT_7_D:
+            BIT_b_r(TargetBit::BIT7, TargetRegister::D);
+            break;
+        case PrefixOpCode::BIT_0_E:
+            BIT_b_r(TargetBit::BIT0, TargetRegister::E);
+            break;
+        case PrefixOpCode::BIT_1_E:
+            BIT_b_r(TargetBit::BIT1, TargetRegister::E);
+            break;
+        case PrefixOpCode::BIT_2_E:
+            BIT_b_r(TargetBit::BIT2, TargetRegister::E);
+            break;
+        case PrefixOpCode::BIT_3_E:
+            BIT_b_r(TargetBit::BIT3, TargetRegister::E);
+            break;
+        case PrefixOpCode::BIT_4_E:
+            BIT_b_r(TargetBit::BIT4, TargetRegister::E);
+            break;
+        case PrefixOpCode::BIT_5_E:
+            BIT_b_r(TargetBit::BIT5, TargetRegister::E);
+            break;
+        case PrefixOpCode::BIT_6_E:
+            BIT_b_r(TargetBit::BIT6, TargetRegister::E);
+            break;
+        case PrefixOpCode::BIT_7_E:
+            BIT_b_r(TargetBit::BIT7, TargetRegister::E);
+            break;
+        case PrefixOpCode::BIT_0_H:
+            BIT_b_r(TargetBit::BIT0, TargetRegister::H);
+            break;
+        case PrefixOpCode::BIT_1_H:
+            BIT_b_r(TargetBit::BIT1, TargetRegister::H);
+            break;
+        case PrefixOpCode::BIT_2_H:
+            BIT_b_r(TargetBit::BIT2, TargetRegister::H);
+            break;
+        case PrefixOpCode::BIT_3_H:
+            BIT_b_r(TargetBit::BIT3, TargetRegister::H);
+            break;
+        case PrefixOpCode::BIT_4_H:
+            BIT_b_r(TargetBit::BIT4, TargetRegister::H);
+            break;
+        case PrefixOpCode::BIT_5_H:
+            BIT_b_r(TargetBit::BIT5, TargetRegister::H);
+            break;
+        case PrefixOpCode::BIT_6_H:
+            BIT_b_r(TargetBit::BIT6, TargetRegister::H);
+            break;
+        case PrefixOpCode::BIT_7_H:
+            BIT_b_r(TargetBit::BIT7, TargetRegister::H);
+            break;
+        case PrefixOpCode::BIT_0_L:
+            BIT_b_r(TargetBit::BIT0, TargetRegister::L);
+            break;
+        case PrefixOpCode::BIT_1_L:
+            BIT_b_r(TargetBit::BIT1, TargetRegister::L);
+            break;
+        case PrefixOpCode::BIT_2_L:
+            BIT_b_r(TargetBit::BIT2, TargetRegister::L);
+            break;
+        case PrefixOpCode::BIT_3_L:
+            BIT_b_r(TargetBit::BIT3, TargetRegister::L);
+            break;
+        case PrefixOpCode::BIT_4_L:
+            BIT_b_r(TargetBit::BIT4, TargetRegister::L);
+            break;
+        case PrefixOpCode::BIT_5_L:
+            BIT_b_r(TargetBit::BIT5, TargetRegister::L);
+            break;
+        case PrefixOpCode::BIT_6_L:
+            BIT_b_r(TargetBit::BIT6, TargetRegister::L);
+            break;
+        case PrefixOpCode::BIT_7_L:
+            BIT_b_r(TargetBit::BIT7, TargetRegister::L);
+            break;
+        case PrefixOpCode::BIT_0_A:
+            BIT_b_r(TargetBit::BIT0, TargetRegister::A);
+            break;
+        case PrefixOpCode::BIT_1_A:
+            BIT_b_r(TargetBit::BIT1, TargetRegister::A);
+            break;
+        case PrefixOpCode::BIT_2_A:
+            BIT_b_r(TargetBit::BIT2, TargetRegister::A);
+            break;
+        case PrefixOpCode::BIT_3_A:
+            BIT_b_r(TargetBit::BIT3, TargetRegister::A);
+            break;
+        case PrefixOpCode::BIT_4_A:
+            BIT_b_r(TargetBit::BIT4, TargetRegister::A);
+            break;
+        case PrefixOpCode::BIT_5_A:
+            BIT_b_r(TargetBit::BIT5, TargetRegister::A);
+            break;
+        case PrefixOpCode::BIT_6_A:
+            BIT_b_r(TargetBit::BIT6, TargetRegister::A);
+            break;
+        case PrefixOpCode::BIT_7_A:
+            BIT_b_r(TargetBit::BIT7, TargetRegister::A);
+            break;
+        case PrefixOpCode::BIT_0_HL:
+            BIT_b_HL(TargetBit::BIT0);
+            break;
+        case PrefixOpCode::BIT_1_HL:
+            BIT_b_HL(TargetBit::BIT1);
+            break;
+        case PrefixOpCode::BIT_2_HL:
+            BIT_b_HL(TargetBit::BIT2);
+            break;
+        case PrefixOpCode::BIT_3_HL:
+            BIT_b_HL(TargetBit::BIT3);
+            break;
+        case PrefixOpCode::BIT_4_HL:
+            BIT_b_HL(TargetBit::BIT4);
+            break;
+        case PrefixOpCode::BIT_5_HL:
+            BIT_b_HL(TargetBit::BIT5);
+            break;
+        case PrefixOpCode::BIT_6_HL:
+            BIT_b_HL(TargetBit::BIT6);
+            break;
+        case PrefixOpCode::BIT_7_HL:
+            BIT_b_HL(TargetBit::BIT7);
             break;
         default:
             std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
@@ -575,15 +767,15 @@ void CPU::add(uint8_t value) {
     m_registers.a = result;
 }
 
-void CPU::ADDA_r(CPU::ArithmeticTarget target) {
+void CPU::ADDA_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: add(m_registers.b); break;
-        case ArithmeticTarget::C: add(m_registers.c); break;
-        case ArithmeticTarget::D: add(m_registers.d); break;
-        case ArithmeticTarget::E: add(m_registers.e); break;
-        case ArithmeticTarget::H: add(m_registers.h); break;
-        case ArithmeticTarget::L: add(m_registers.l); break;
-        case ArithmeticTarget::A: add(m_registers.a); break;
+        case TargetRegister::B: add(m_registers.b); break;
+        case TargetRegister::C: add(m_registers.c); break;
+        case TargetRegister::D: add(m_registers.d); break;
+        case TargetRegister::E: add(m_registers.e); break;
+        case TargetRegister::H: add(m_registers.h); break;
+        case TargetRegister::L: add(m_registers.l); break;
+        case TargetRegister::A: add(m_registers.a); break;
     }
 }
 
@@ -600,15 +792,15 @@ void CPU::addWithCarry(uint8_t value) {
     add(value + (m_registers.f.carry ? 1 : 0));
 }
 
-void CPU::ADCA_r(CPU::ArithmeticTarget target) {
+void CPU::ADCA_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: addWithCarry(m_registers.b); break;
-        case ArithmeticTarget::C: addWithCarry(m_registers.c); break;
-        case ArithmeticTarget::D: addWithCarry(m_registers.d); break;
-        case ArithmeticTarget::E: addWithCarry(m_registers.e); break;
-        case ArithmeticTarget::H: addWithCarry(m_registers.h); break;
-        case ArithmeticTarget::L: addWithCarry(m_registers.l); break;
-        case ArithmeticTarget::A: addWithCarry(m_registers.a); break;
+        case TargetRegister::B: addWithCarry(m_registers.b); break;
+        case TargetRegister::C: addWithCarry(m_registers.c); break;
+        case TargetRegister::D: addWithCarry(m_registers.d); break;
+        case TargetRegister::E: addWithCarry(m_registers.e); break;
+        case TargetRegister::H: addWithCarry(m_registers.h); break;
+        case TargetRegister::L: addWithCarry(m_registers.l); break;
+        case TargetRegister::A: addWithCarry(m_registers.a); break;
     }
 }
 
@@ -633,15 +825,15 @@ void CPU::subtract(uint8_t value) {
     m_registers.a = result;
 }
 
-void CPU::SUB_r(CPU::ArithmeticTarget target) {
+void CPU::SUB_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: subtract(m_registers.b); break;
-        case ArithmeticTarget::C: subtract(m_registers.c); break;
-        case ArithmeticTarget::D: subtract(m_registers.d); break;
-        case ArithmeticTarget::E: subtract(m_registers.e); break;
-        case ArithmeticTarget::H: subtract(m_registers.h); break;
-        case ArithmeticTarget::L: subtract(m_registers.l); break;
-        case ArithmeticTarget::A: subtract(m_registers.a); break;
+        case TargetRegister::B: subtract(m_registers.b); break;
+        case TargetRegister::C: subtract(m_registers.c); break;
+        case TargetRegister::D: subtract(m_registers.d); break;
+        case TargetRegister::E: subtract(m_registers.e); break;
+        case TargetRegister::H: subtract(m_registers.h); break;
+        case TargetRegister::L: subtract(m_registers.l); break;
+        case TargetRegister::A: subtract(m_registers.a); break;
     }
 }
 
@@ -657,15 +849,15 @@ void CPU::subtractWithCarry(uint8_t value) {
     subtract(value + (m_registers.f.carry ? 1 : 0));
 }
 
-void CPU::SBCA_r(CPU::ArithmeticTarget target) {
+void CPU::SBCA_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: subtractWithCarry(m_registers.b); break;
-        case ArithmeticTarget::C: subtractWithCarry(m_registers.c); break;
-        case ArithmeticTarget::D: subtractWithCarry(m_registers.d); break;
-        case ArithmeticTarget::E: subtractWithCarry(m_registers.e); break;
-        case ArithmeticTarget::H: subtractWithCarry(m_registers.h); break;
-        case ArithmeticTarget::L: subtractWithCarry(m_registers.l); break;
-        case ArithmeticTarget::A: subtractWithCarry(m_registers.a); break;
+        case TargetRegister::B: subtractWithCarry(m_registers.b); break;
+        case TargetRegister::C: subtractWithCarry(m_registers.c); break;
+        case TargetRegister::D: subtractWithCarry(m_registers.d); break;
+        case TargetRegister::E: subtractWithCarry(m_registers.e); break;
+        case TargetRegister::H: subtractWithCarry(m_registers.h); break;
+        case TargetRegister::L: subtractWithCarry(m_registers.l); break;
+        case TargetRegister::A: subtractWithCarry(m_registers.a); break;
     }
 }
 
@@ -686,15 +878,15 @@ void CPU::bitwiseAnd(uint8_t value) {
     m_registers.f.half_carry = true;
 }
 
-void CPU::AND_r(CPU::ArithmeticTarget target) {
+void CPU::AND_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: bitwiseAnd(m_registers.b); break;
-        case ArithmeticTarget::C: bitwiseAnd(m_registers.c); break;
-        case ArithmeticTarget::D: bitwiseAnd(m_registers.d); break;
-        case ArithmeticTarget::E: bitwiseAnd(m_registers.e); break;
-        case ArithmeticTarget::H: bitwiseAnd(m_registers.h); break;
-        case ArithmeticTarget::L: bitwiseAnd(m_registers.l); break;
-        case ArithmeticTarget::A: bitwiseAnd(m_registers.a); break;
+        case TargetRegister::B: bitwiseAnd(m_registers.b); break;
+        case TargetRegister::C: bitwiseAnd(m_registers.c); break;
+        case TargetRegister::D: bitwiseAnd(m_registers.d); break;
+        case TargetRegister::E: bitwiseAnd(m_registers.e); break;
+        case TargetRegister::H: bitwiseAnd(m_registers.h); break;
+        case TargetRegister::L: bitwiseAnd(m_registers.l); break;
+        case TargetRegister::A: bitwiseAnd(m_registers.a); break;
     }
 }
 
@@ -715,15 +907,15 @@ void CPU::bitwiseOr(uint8_t value) {
     m_registers.f.half_carry = false;
 }
 
-void CPU::OR_r(CPU::ArithmeticTarget target) {
+void CPU::OR_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: bitwiseOr(m_registers.b); break;
-        case ArithmeticTarget::C: bitwiseOr(m_registers.c); break;
-        case ArithmeticTarget::D: bitwiseOr(m_registers.d); break;
-        case ArithmeticTarget::E: bitwiseOr(m_registers.e); break;
-        case ArithmeticTarget::H: bitwiseOr(m_registers.h); break;
-        case ArithmeticTarget::L: bitwiseOr(m_registers.l); break;
-        case ArithmeticTarget::A: bitwiseOr(m_registers.a); break;
+        case TargetRegister::B: bitwiseOr(m_registers.b); break;
+        case TargetRegister::C: bitwiseOr(m_registers.c); break;
+        case TargetRegister::D: bitwiseOr(m_registers.d); break;
+        case TargetRegister::E: bitwiseOr(m_registers.e); break;
+        case TargetRegister::H: bitwiseOr(m_registers.h); break;
+        case TargetRegister::L: bitwiseOr(m_registers.l); break;
+        case TargetRegister::A: bitwiseOr(m_registers.a); break;
     }
 }
 
@@ -744,15 +936,15 @@ void CPU::bitwiseXor(uint8_t value) {
     m_registers.f.half_carry = false;
 }
 
-void CPU::XOR_r(CPU::ArithmeticTarget target) {
+void CPU::XOR_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: bitwiseXor(m_registers.b); break;
-        case ArithmeticTarget::C: bitwiseXor(m_registers.c); break;
-        case ArithmeticTarget::D: bitwiseXor(m_registers.d); break;
-        case ArithmeticTarget::E: bitwiseXor(m_registers.e); break;
-        case ArithmeticTarget::H: bitwiseXor(m_registers.h); break;
-        case ArithmeticTarget::L: bitwiseXor(m_registers.l); break;
-        case ArithmeticTarget::A: bitwiseXor(m_registers.a); break;
+        case TargetRegister::B: bitwiseXor(m_registers.b); break;
+        case TargetRegister::C: bitwiseXor(m_registers.c); break;
+        case TargetRegister::D: bitwiseXor(m_registers.d); break;
+        case TargetRegister::E: bitwiseXor(m_registers.e); break;
+        case TargetRegister::H: bitwiseXor(m_registers.h); break;
+        case TargetRegister::L: bitwiseXor(m_registers.l); break;
+        case TargetRegister::A: bitwiseXor(m_registers.a); break;
     }
 }
 
@@ -775,15 +967,15 @@ void CPU::compare(uint8_t value) {
     m_registers.f.half_carry = (m_registers.a & 0x0F) < (value & 0x0F);
 }
 
-void CPU::CP_r(CPU::ArithmeticTarget target) {
+void CPU::CP_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: compare(m_registers.b); break;
-        case ArithmeticTarget::C: compare(m_registers.c); break;
-        case ArithmeticTarget::D: compare(m_registers.d); break;
-        case ArithmeticTarget::E: compare(m_registers.e); break;
-        case ArithmeticTarget::H: compare(m_registers.h); break;
-        case ArithmeticTarget::L: compare(m_registers.l); break;
-        case ArithmeticTarget::A: compare(m_registers.a); break;
+        case TargetRegister::B: compare(m_registers.b); break;
+        case TargetRegister::C: compare(m_registers.c); break;
+        case TargetRegister::D: compare(m_registers.d); break;
+        case TargetRegister::E: compare(m_registers.e); break;
+        case TargetRegister::H: compare(m_registers.h); break;
+        case TargetRegister::L: compare(m_registers.l); break;
+        case TargetRegister::A: compare(m_registers.a); break;
     }
 }
 
@@ -805,15 +997,15 @@ void CPU::increment(uint8_t &target) {
     target = result;
 }
 
-void CPU::INC_r(CPU::ArithmeticTarget target) {
+void CPU::INC_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: increment(m_registers.b); break;
-        case ArithmeticTarget::C: increment(m_registers.c); break;
-        case ArithmeticTarget::D: increment(m_registers.d); break;
-        case ArithmeticTarget::E: increment(m_registers.e); break;
-        case ArithmeticTarget::H: increment(m_registers.h); break;
-        case ArithmeticTarget::L: increment(m_registers.l); break;
-        case ArithmeticTarget::A: increment(m_registers.a); break;
+        case TargetRegister::B: increment(m_registers.b); break;
+        case TargetRegister::C: increment(m_registers.c); break;
+        case TargetRegister::D: increment(m_registers.d); break;
+        case TargetRegister::E: increment(m_registers.e); break;
+        case TargetRegister::H: increment(m_registers.h); break;
+        case TargetRegister::L: increment(m_registers.l); break;
+        case TargetRegister::A: increment(m_registers.a); break;
     }
 }
 
@@ -833,15 +1025,15 @@ void CPU::decrement(uint8_t& target) {
     target = result;
 }
 
-void CPU::DEC_r(CPU::ArithmeticTarget target) {
+void CPU::DEC_r(CPU::TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: decrement(m_registers.b); break;
-        case ArithmeticTarget::C: decrement(m_registers.c); break;
-        case ArithmeticTarget::D: decrement(m_registers.d); break;
-        case ArithmeticTarget::E: decrement(m_registers.e); break;
-        case ArithmeticTarget::H: decrement(m_registers.h); break;
-        case ArithmeticTarget::L: decrement(m_registers.l); break;
-        case ArithmeticTarget::A: decrement(m_registers.a); break;
+        case TargetRegister::B: decrement(m_registers.b); break;
+        case TargetRegister::C: decrement(m_registers.c); break;
+        case TargetRegister::D: decrement(m_registers.d); break;
+        case TargetRegister::E: decrement(m_registers.e); break;
+        case TargetRegister::H: decrement(m_registers.h); break;
+        case TargetRegister::L: decrement(m_registers.l); break;
+        case TargetRegister::A: decrement(m_registers.a); break;
     }
 }
 
@@ -924,15 +1116,15 @@ void CPU::RLCA() {
     rotateLeft(m_registers.a);
 }
 
-void CPU::RLC_r(ArithmeticTarget target) {
+void CPU::RLC_r(TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: rotateLeft(m_registers.b); break;
-        case ArithmeticTarget::C: rotateLeft(m_registers.c); break;
-        case ArithmeticTarget::D: rotateLeft(m_registers.d); break;
-        case ArithmeticTarget::E: rotateLeft(m_registers.e); break;
-        case ArithmeticTarget::H: rotateLeft(m_registers.h); break;
-        case ArithmeticTarget::L: rotateLeft(m_registers.l); break;
-        case ArithmeticTarget::A: rotateLeft(m_registers.a); break;
+        case TargetRegister::B: rotateLeft(m_registers.b); break;
+        case TargetRegister::C: rotateLeft(m_registers.c); break;
+        case TargetRegister::D: rotateLeft(m_registers.d); break;
+        case TargetRegister::E: rotateLeft(m_registers.e); break;
+        case TargetRegister::H: rotateLeft(m_registers.h); break;
+        case TargetRegister::L: rotateLeft(m_registers.l); break;
+        case TargetRegister::A: rotateLeft(m_registers.a); break;
     }
 }
 
@@ -964,15 +1156,15 @@ void CPU::RLA() {
     rotateLeftThroughCarry(m_registers.a);
 }
 
-void CPU::RL_r(ArithmeticTarget target) {
+void CPU::RL_r(TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: rotateLeftThroughCarry(m_registers.b); break;
-        case ArithmeticTarget::C: rotateLeftThroughCarry(m_registers.c); break;
-        case ArithmeticTarget::D: rotateLeftThroughCarry(m_registers.d); break;
-        case ArithmeticTarget::E: rotateLeftThroughCarry(m_registers.e); break;
-        case ArithmeticTarget::H: rotateLeftThroughCarry(m_registers.h); break;
-        case ArithmeticTarget::L: rotateLeftThroughCarry(m_registers.l); break;
-        case ArithmeticTarget::A: rotateLeftThroughCarry(m_registers.a); break;
+        case TargetRegister::B: rotateLeftThroughCarry(m_registers.b); break;
+        case TargetRegister::C: rotateLeftThroughCarry(m_registers.c); break;
+        case TargetRegister::D: rotateLeftThroughCarry(m_registers.d); break;
+        case TargetRegister::E: rotateLeftThroughCarry(m_registers.e); break;
+        case TargetRegister::H: rotateLeftThroughCarry(m_registers.h); break;
+        case TargetRegister::L: rotateLeftThroughCarry(m_registers.l); break;
+        case TargetRegister::A: rotateLeftThroughCarry(m_registers.a); break;
     }
 }
 
@@ -997,15 +1189,15 @@ void CPU::RRCA() {
     rotateRight(m_registers.a);
 }
 
-void CPU::RRC_r(ArithmeticTarget target) {
+void CPU::RRC_r(TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: rotateRight(m_registers.b); break;
-        case ArithmeticTarget::C: rotateRight(m_registers.c); break;
-        case ArithmeticTarget::D: rotateRight(m_registers.d); break;
-        case ArithmeticTarget::E: rotateRight(m_registers.e); break;
-        case ArithmeticTarget::H: rotateRight(m_registers.h); break;
-        case ArithmeticTarget::L: rotateRight(m_registers.l); break;
-        case ArithmeticTarget::A: rotateRight(m_registers.a); break;
+        case TargetRegister::B: rotateRight(m_registers.b); break;
+        case TargetRegister::C: rotateRight(m_registers.c); break;
+        case TargetRegister::D: rotateRight(m_registers.d); break;
+        case TargetRegister::E: rotateRight(m_registers.e); break;
+        case TargetRegister::H: rotateRight(m_registers.h); break;
+        case TargetRegister::L: rotateRight(m_registers.l); break;
+        case TargetRegister::A: rotateRight(m_registers.a); break;
     }
 }
 
@@ -1036,15 +1228,15 @@ void CPU::RRA() {
     rotateRightThroughCarry(m_registers.a);
 }
 
-void CPU::RR_r(ArithmeticTarget target) {
+void CPU::RR_r(TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: rotateRightThroughCarry(m_registers.b); break;
-        case ArithmeticTarget::C: rotateRightThroughCarry(m_registers.c); break;
-        case ArithmeticTarget::D: rotateRightThroughCarry(m_registers.d); break;
-        case ArithmeticTarget::E: rotateRightThroughCarry(m_registers.e); break;
-        case ArithmeticTarget::H: rotateRightThroughCarry(m_registers.h); break;
-        case ArithmeticTarget::L: rotateRightThroughCarry(m_registers.l); break;
-        case ArithmeticTarget::A: rotateRightThroughCarry(m_registers.a); break;
+        case TargetRegister::B: rotateRightThroughCarry(m_registers.b); break;
+        case TargetRegister::C: rotateRightThroughCarry(m_registers.c); break;
+        case TargetRegister::D: rotateRightThroughCarry(m_registers.d); break;
+        case TargetRegister::E: rotateRightThroughCarry(m_registers.e); break;
+        case TargetRegister::H: rotateRightThroughCarry(m_registers.h); break;
+        case TargetRegister::L: rotateRightThroughCarry(m_registers.l); break;
+        case TargetRegister::A: rotateRightThroughCarry(m_registers.a); break;
     }
 }
 
@@ -1065,15 +1257,15 @@ void CPU::shiftLeft(uint8_t& target) {
     m_registers.f.subtract = false;
 }
 
-void CPU::SLA_r(ArithmeticTarget target) {
+void CPU::SLA_r(TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: shiftLeft(m_registers.b); break;
-        case ArithmeticTarget::C: shiftLeft(m_registers.c); break;
-        case ArithmeticTarget::D: shiftLeft(m_registers.d); break;
-        case ArithmeticTarget::E: shiftLeft(m_registers.e); break;
-        case ArithmeticTarget::H: shiftLeft(m_registers.h); break;
-        case ArithmeticTarget::L: shiftLeft(m_registers.l); break;
-        case ArithmeticTarget::A: shiftLeft(m_registers.a); break;
+        case TargetRegister::B: shiftLeft(m_registers.b); break;
+        case TargetRegister::C: shiftLeft(m_registers.c); break;
+        case TargetRegister::D: shiftLeft(m_registers.d); break;
+        case TargetRegister::E: shiftLeft(m_registers.e); break;
+        case TargetRegister::H: shiftLeft(m_registers.h); break;
+        case TargetRegister::L: shiftLeft(m_registers.l); break;
+        case TargetRegister::A: shiftLeft(m_registers.a); break;
     }
 }
 
@@ -1102,15 +1294,15 @@ void CPU::shiftTailRight(uint8_t& target) {
     m_registers.f.subtract = false;
 }
 
-void CPU::SRA_r(ArithmeticTarget target) {
+void CPU::SRA_r(TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: shiftTailRight(m_registers.b); break;
-        case ArithmeticTarget::C: shiftTailRight(m_registers.c); break;
-        case ArithmeticTarget::D: shiftTailRight(m_registers.d); break;
-        case ArithmeticTarget::E: shiftTailRight(m_registers.e); break;
-        case ArithmeticTarget::H: shiftTailRight(m_registers.h); break;
-        case ArithmeticTarget::L: shiftTailRight(m_registers.l); break;
-        case ArithmeticTarget::A: shiftTailRight(m_registers.a); break;
+        case TargetRegister::B: shiftTailRight(m_registers.b); break;
+        case TargetRegister::C: shiftTailRight(m_registers.c); break;
+        case TargetRegister::D: shiftTailRight(m_registers.d); break;
+        case TargetRegister::E: shiftTailRight(m_registers.e); break;
+        case TargetRegister::H: shiftTailRight(m_registers.h); break;
+        case TargetRegister::L: shiftTailRight(m_registers.l); break;
+        case TargetRegister::A: shiftTailRight(m_registers.a); break;
     }
 }
 
@@ -1131,15 +1323,15 @@ void CPU::shiftRight(uint8_t& target) {
     m_registers.f.subtract = false;
 }
 
-void CPU::SRL_r(ArithmeticTarget target) {
+void CPU::SRL_r(TargetRegister target) {
     switch (target) {
-        case ArithmeticTarget::B: shiftRight(m_registers.b); break;
-        case ArithmeticTarget::C: shiftRight(m_registers.c); break;
-        case ArithmeticTarget::D: shiftRight(m_registers.d); break;
-        case ArithmeticTarget::E: shiftRight(m_registers.e); break;
-        case ArithmeticTarget::H: shiftRight(m_registers.h); break;
-        case ArithmeticTarget::L: shiftRight(m_registers.l); break;
-        case ArithmeticTarget::A: shiftRight(m_registers.a); break;
+        case TargetRegister::B: shiftRight(m_registers.b); break;
+        case TargetRegister::C: shiftRight(m_registers.c); break;
+        case TargetRegister::D: shiftRight(m_registers.d); break;
+        case TargetRegister::E: shiftRight(m_registers.e); break;
+        case TargetRegister::H: shiftRight(m_registers.h); break;
+        case TargetRegister::L: shiftRight(m_registers.l); break;
+        case TargetRegister::A: shiftRight(m_registers.a); break;
     }
 }
 
@@ -1147,4 +1339,29 @@ void CPU::SRL_HL() {
     uint8_t dummy = m_bus.readByte(m_registers.getHL());
     shiftRight(dummy);
     m_bus.writeByte(m_registers.getHL(), dummy);
+}
+
+// Check if the bit at position `bit` in `byte` is zero. Set the zero flag accordingly.
+void CPU::testBit(TargetBit bit, uint8_t byte) {
+    uint8_t nthBit = ((byte >> static_cast<uint8_t>(bit)) & 1u);
+
+    m_registers.f.zero = nthBit == 0;
+    m_registers.f.half_carry = true;
+    m_registers.f.subtract = false;
+}
+
+void CPU::BIT_b_r(TargetBit bit, TargetRegister reg) {
+    switch (reg) {
+        case TargetRegister::B: testBit(bit, m_registers.b); break;
+        case TargetRegister::C: testBit(bit, m_registers.c); break;
+        case TargetRegister::D: testBit(bit, m_registers.d); break;
+        case TargetRegister::E: testBit(bit, m_registers.e); break;
+        case TargetRegister::H: testBit(bit, m_registers.h); break;
+        case TargetRegister::L: testBit(bit, m_registers.l); break;
+        case TargetRegister::A: testBit(bit, m_registers.a); break;
+    }
+}
+
+void CPU::BIT_b_HL(TargetBit bit) {
+    testBit(bit, m_bus.readByte(m_registers.getHL()));
 }

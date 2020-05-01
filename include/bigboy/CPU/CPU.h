@@ -456,19 +456,111 @@ enum class PrefixOpCode {
     // The byte at the memory address specified in the register pair HL is shifted right
     // by 1 bit position, after bit 0 is copied into the carry flag.
     // Bit-by-bit (after 0xCB): 0 0 1 1 1 1 1 0
-    SRL_HL = 0b00111110
+    SRL_HL = 0b00111110,
+
+    // BIT b, r
+    // The zero flag is set if the bit at position b in the register r is 0, otherwise,
+    // the flag is reset. Register r may be any of B, C, D, E, H, L or A.
+    // Bit-by-bit (after 0xCB): 0 1 <b b b> <r r r>
+    BIT_0_B = 0b01000000,
+    BIT_1_B = 0b01001000,
+    BIT_2_B = 0b01010000,
+    BIT_3_B = 0b01011000,
+    BIT_4_B = 0b01100000,
+    BIT_5_B = 0b01101000,
+    BIT_6_B = 0b01110000,
+    BIT_7_B = 0b01111000,
+
+    BIT_0_C = 0b01000001,
+    BIT_1_C = 0b01001001,
+    BIT_2_C = 0b01010001,
+    BIT_3_C = 0b01011001,
+    BIT_4_C = 0b01100001,
+    BIT_5_C = 0b01101001,
+    BIT_6_C = 0b01110001,
+    BIT_7_C = 0b01111001,
+
+    BIT_0_D = 0b01000010,
+    BIT_1_D = 0b01001010,
+    BIT_2_D = 0b01010010,
+    BIT_3_D = 0b01011010,
+    BIT_4_D = 0b01100010,
+    BIT_5_D = 0b01101010,
+    BIT_6_D = 0b01110010,
+    BIT_7_D = 0b01111010,
+
+    BIT_0_E = 0b01000011,
+    BIT_1_E = 0b01001011,
+    BIT_2_E = 0b01010011,
+    BIT_3_E = 0b01011011,
+    BIT_4_E = 0b01100011,
+    BIT_5_E = 0b01101011,
+    BIT_6_E = 0b01110011,
+    BIT_7_E = 0b01111011,
+
+    BIT_0_H = 0b01000100,
+    BIT_1_H = 0b01001100,
+    BIT_2_H = 0b01010100,
+    BIT_3_H = 0b01011100,
+    BIT_4_H = 0b01100100,
+    BIT_5_H = 0b01101100,
+    BIT_6_H = 0b01110100,
+    BIT_7_H = 0b01111100,
+
+    BIT_0_L = 0b01000101,
+    BIT_1_L = 0b01001101,
+    BIT_2_L = 0b01010101,
+    BIT_3_L = 0b01011101,
+    BIT_4_L = 0b01100101,
+    BIT_5_L = 0b01101101,
+    BIT_6_L = 0b01110101,
+    BIT_7_L = 0b01111101,
+
+    BIT_0_A = 0b01000111,
+    BIT_1_A = 0b01001111,
+    BIT_2_A = 0b01010111,
+    BIT_3_A = 0b01011111,
+    BIT_4_A = 0b01100111,
+    BIT_5_A = 0b01101111,
+    BIT_6_A = 0b01110111,
+    BIT_7_A = 0b01111111,
+
+    // BIT b, HL
+    // The zero flag is set if the bit at position b in the byte at the address stored
+    // in the register pair HL is 0, otherwise, the flag is reset. Register r may be
+    // any of B, C, D, E, H, L or A.
+    // Bit-by-bit (after 0xCB): 0 1 <b b b> 1 1 0
+    BIT_0_HL = 0b01000110,
+    BIT_1_HL = 0b01001110,
+    BIT_2_HL = 0b01010110,
+    BIT_3_HL = 0b01011110,
+    BIT_4_HL = 0b01100110,
+    BIT_5_HL = 0b01101110,
+    BIT_6_HL = 0b01110110,
+    BIT_7_HL = 0b01111110,
 };
 
 class CPU {
 public:
-    enum class ArithmeticTarget : uint8_t {
-        B,
-        C,
-        D,
-        E,
-        H,
-        L,
-        A
+    enum class TargetRegister : uint8_t {
+        B, // 000
+        C, // 001
+        D, // 010
+        E, // 011
+        H, // 100
+        L, // 101
+        A  // 111
+    };
+
+    enum class TargetBit : uint8_t {
+        BIT0 = 0, // 000
+        BIT1 = 1, // 001
+        BIT2 = 2, // 010
+        BIT3 = 3, // 011
+        BIT4 = 4, // 100
+        BIT5 = 5, // 101
+        BIT6 = 6, // 110
+        BIT7 = 7  // 111
     };
 
     struct Clock {
@@ -545,60 +637,60 @@ private:
 
     void add(uint8_t value);
 
-    void ADDA_r(ArithmeticTarget target);
+    void ADDA_r(TargetRegister target);
     void ADDA_n();
     void ADDA_HL();
 
     void addWithCarry(uint8_t value);
 
-    void ADCA_r(ArithmeticTarget target);
+    void ADCA_r(TargetRegister target);
     void ADCA_n();
     void ADCA_HL();
 
     void subtract(uint8_t value);
 
-    void SUB_r(ArithmeticTarget target);
+    void SUB_r(TargetRegister target);
     void SUB_n();
     void SUB_HL();
 
     void subtractWithCarry(uint8_t value);
 
-    void SBCA_r(ArithmeticTarget target);
+    void SBCA_r(TargetRegister target);
     void SBCA_n();
     void SBCA_HL();
 
     void bitwiseAnd(uint8_t value);
 
-    void AND_r(ArithmeticTarget target);
+    void AND_r(TargetRegister target);
     void AND_n();
     void AND_HL();
 
     void bitwiseOr(uint8_t value);
 
-    void OR_r(ArithmeticTarget target);
+    void OR_r(TargetRegister target);
     void OR_n();
     void OR_HL();
 
     void bitwiseXor(uint8_t value);
 
-    void XOR_r(ArithmeticTarget target);
+    void XOR_r(TargetRegister target);
     void XOR_n();
     void XOR_HL();
 
     void compare(uint8_t value);
 
-    void CP_r(ArithmeticTarget target);
+    void CP_r(TargetRegister target);
     void CP_n();
     void CP_HL();
 
     void increment(uint8_t &target);
 
-    void INC_r(ArithmeticTarget target);
+    void INC_r(TargetRegister target);
     void INC_HL();
 
     void decrement(uint8_t &target);
 
-    void DEC_r(ArithmeticTarget target);
+    void DEC_r(TargetRegister target);
     void DEC_HL();
 
     void DAA();
@@ -613,41 +705,46 @@ private:
     void rotateLeft(uint8_t &target);
 
     void RLCA();
-    void RLC_r(ArithmeticTarget target);
+    void RLC_r(TargetRegister target);
     void RLC_HL();
 
     void rotateLeftThroughCarry(uint8_t &target);
 
     void RLA();
-    void RL_r(ArithmeticTarget target);
+    void RL_r(TargetRegister target);
     void RL_HL();
 
     void rotateRight(uint8_t &target);
 
     void RRCA();
-    void RRC_r(ArithmeticTarget target);
+    void RRC_r(TargetRegister target);
     void RRC_HL();
 
     void rotateRightThroughCarry(uint8_t &target);
 
     void RRA();
-    void RR_r(ArithmeticTarget target);
+    void RR_r(TargetRegister target);
     void RR_HL();
 
     void shiftLeft(uint8_t &target);
 
-    void SLA_r(ArithmeticTarget target);
+    void SLA_r(TargetRegister target);
     void SLA_HL();
 
     void shiftTailRight(uint8_t &target);
 
-    void SRA_r(ArithmeticTarget target);
+    void SRA_r(TargetRegister target);
     void SRA_HL();
 
     void shiftRight(uint8_t &target);
 
-    void SRL_r(ArithmeticTarget target);
+    void SRL_r(TargetRegister target);
     void SRL_HL();
+
+    void testBit(TargetBit bit, uint8_t byte);
+
+    void BIT_b_r(TargetBit bit, TargetRegister reg);
+    void BIT_b_HL(TargetBit bit);
 
 public:
     void load(const std::array<uint8_t, 0xFFFF> &memory);
