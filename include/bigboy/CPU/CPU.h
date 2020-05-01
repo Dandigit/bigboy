@@ -618,6 +618,86 @@ enum class PrefixOpCode {
     SET_5_HL = 0b11101110,
     SET_6_HL = 0b11110110,
     SET_7_HL = 0b11111110,
+
+    // RES b, r
+    // The bit at position b of the register r is reset. Register r may be any of B, C,
+    // D, E, H, L or A.
+    // Bit-by-bit (after 0xCB): 1 1 <b b b> <r r r>
+    RES_0_B = 0b10000000,
+    RES_1_B = 0b10001000,
+    RES_2_B = 0b10010000,
+    RES_3_B = 0b10011000,
+    RES_4_B = 0b10100000,
+    RES_5_B = 0b10101000,
+    RES_6_B = 0b10110000,
+    RES_7_B = 0b10111000,
+
+    RES_0_C = 0b10000001,
+    RES_1_C = 0b10001001,
+    RES_2_C = 0b10010001,
+    RES_3_C = 0b10011001,
+    RES_4_C = 0b10100001,
+    RES_5_C = 0b10101001,
+    RES_6_C = 0b10110001,
+    RES_7_C = 0b10111001,
+
+    RES_0_D = 0b10000010,
+    RES_1_D = 0b10001010,
+    RES_2_D = 0b10010010,
+    RES_3_D = 0b10011010,
+    RES_4_D = 0b10100010,
+    RES_5_D = 0b10101010,
+    RES_6_D = 0b10110010,
+    RES_7_D = 0b10111010,
+
+    RES_0_E = 0b10000011,
+    RES_1_E = 0b10001011,
+    RES_2_E = 0b10010011,
+    RES_3_E = 0b10011011,
+    RES_4_E = 0b10100011,
+    RES_5_E = 0b10101011,
+    RES_6_E = 0b10110011,
+    RES_7_E = 0b10111011,
+
+    RES_0_H = 0b10000100,
+    RES_1_H = 0b10001100,
+    RES_2_H = 0b10010100,
+    RES_3_H = 0b10011100,
+    RES_4_H = 0b10100100,
+    RES_5_H = 0b10101100,
+    RES_6_H = 0b10110100,
+    RES_7_H = 0b10111100,
+
+    RES_0_L = 0b10000101,
+    RES_1_L = 0b10001101,
+    RES_2_L = 0b10010101,
+    RES_3_L = 0b10011101,
+    RES_4_L = 0b10100101,
+    RES_5_L = 0b10101101,
+    RES_6_L = 0b10110101,
+    RES_7_L = 0b10111101,
+
+    RES_0_A = 0b10000111,
+    RES_1_A = 0b10001111,
+    RES_2_A = 0b10010111,
+    RES_3_A = 0b10011111,
+    RES_4_A = 0b10100111,
+    RES_5_A = 0b10101111,
+    RES_6_A = 0b10110111,
+    RES_7_A = 0b10111111,
+
+    // RES b, HL
+    // The bit at position b of the byte at the memory address stored in the register
+    // pair HL is reset.
+    // Bit-by-bit (after 0xCB): 1 1 <b b b> 1 1 0
+    RES_0_HL = 0b10000110,
+    RES_1_HL = 0b10001110,
+    RES_2_HL = 0b10010110,
+    RES_3_HL = 0b10011110,
+    RES_4_HL = 0b10100110,
+    RES_5_HL = 0b10101110,
+    RES_6_HL = 0b10110110,
+    RES_7_HL = 0b10111110,
 };
 
 class CPU {
@@ -676,19 +756,15 @@ public:
         // Some instructions allow two 8 bit registers to be read as one 16 bit register
         // Referred to as AF (A & F), BC (B & C), DE (D & E) and HL (H & L)
         uint16_t getAF() const;
-
         void setAF(uint16_t value);
 
         uint16_t getBC() const;
-
         void setBC(uint16_t value);
 
         uint16_t getDE() const;
-
         void setDE(uint16_t value);
 
         uint16_t getHL() const;
-
         void setHL(uint16_t value);
     };
 
@@ -830,6 +906,11 @@ private:
 
     void SET_b_r(TargetBit bit, TargetRegister reg);
     void SET_b_HL(TargetBit bit);
+
+    void resetBit(TargetBit bit, uint8_t& target);
+
+    void RES_b_r(TargetBit bit, TargetRegister reg);
+    void RES_b_HL(TargetBit bit);
 
 public:
     void load(const std::array<uint8_t, 0xFFFF> &memory);

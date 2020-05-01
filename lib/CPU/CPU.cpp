@@ -941,6 +941,198 @@ void CPU::stepPrefix() {
         case PrefixOpCode::SET_7_HL:
             SET_b_HL(TargetBit::BIT7);
             break;
+        case PrefixOpCode::RES_0_B:
+            RES_b_r(TargetBit::BIT0, TargetRegister::B);
+            break;
+        case PrefixOpCode::RES_1_B:
+            RES_b_r(TargetBit::BIT1, TargetRegister::B);
+            break;
+        case PrefixOpCode::RES_2_B:
+            RES_b_r(TargetBit::BIT2, TargetRegister::B);
+            break;
+        case PrefixOpCode::RES_3_B:
+            RES_b_r(TargetBit::BIT3, TargetRegister::B);
+            break;
+        case PrefixOpCode::RES_4_B:
+            RES_b_r(TargetBit::BIT4, TargetRegister::B);
+            break;
+        case PrefixOpCode::RES_5_B:
+            RES_b_r(TargetBit::BIT5, TargetRegister::B);
+            break;
+        case PrefixOpCode::RES_6_B:
+            RES_b_r(TargetBit::BIT6, TargetRegister::B);
+            break;
+        case PrefixOpCode::RES_7_B:
+            RES_b_r(TargetBit::BIT7, TargetRegister::B);
+            break;
+        case PrefixOpCode::RES_0_C:
+            RES_b_r(TargetBit::BIT0, TargetRegister::C);
+            break;
+        case PrefixOpCode::RES_1_C:
+            RES_b_r(TargetBit::BIT1, TargetRegister::C);
+            break;
+        case PrefixOpCode::RES_2_C:
+            RES_b_r(TargetBit::BIT2, TargetRegister::C);
+            break;
+        case PrefixOpCode::RES_3_C:
+            RES_b_r(TargetBit::BIT3, TargetRegister::C);
+            break;
+        case PrefixOpCode::RES_4_C:
+            RES_b_r(TargetBit::BIT4, TargetRegister::C);
+            break;
+        case PrefixOpCode::RES_5_C:
+            RES_b_r(TargetBit::BIT5, TargetRegister::C);
+            break;
+        case PrefixOpCode::RES_6_C:
+            RES_b_r(TargetBit::BIT6, TargetRegister::C);
+            break;
+        case PrefixOpCode::RES_7_C:
+            RES_b_r(TargetBit::BIT7, TargetRegister::C);
+            break;
+        case PrefixOpCode::RES_0_D:
+            RES_b_r(TargetBit::BIT0, TargetRegister::D);
+            break;
+        case PrefixOpCode::RES_1_D:
+            RES_b_r(TargetBit::BIT1, TargetRegister::D);
+            break;
+        case PrefixOpCode::RES_2_D:
+            RES_b_r(TargetBit::BIT2, TargetRegister::D);
+            break;
+        case PrefixOpCode::RES_3_D:
+            RES_b_r(TargetBit::BIT3, TargetRegister::D);
+            break;
+        case PrefixOpCode::RES_4_D:
+            RES_b_r(TargetBit::BIT4, TargetRegister::D);
+            break;
+        case PrefixOpCode::RES_5_D:
+            RES_b_r(TargetBit::BIT5, TargetRegister::D);
+            break;
+        case PrefixOpCode::RES_6_D:
+            RES_b_r(TargetBit::BIT6, TargetRegister::D);
+            break;
+        case PrefixOpCode::RES_7_D:
+            RES_b_r(TargetBit::BIT7, TargetRegister::D);
+            break;
+        case PrefixOpCode::RES_0_E:
+            RES_b_r(TargetBit::BIT0, TargetRegister::E);
+            break;
+        case PrefixOpCode::RES_1_E:
+            RES_b_r(TargetBit::BIT1, TargetRegister::E);
+            break;
+        case PrefixOpCode::RES_2_E:
+            RES_b_r(TargetBit::BIT2, TargetRegister::E);
+            break;
+        case PrefixOpCode::RES_3_E:
+            RES_b_r(TargetBit::BIT3, TargetRegister::E);
+            break;
+        case PrefixOpCode::RES_4_E:
+            RES_b_r(TargetBit::BIT4, TargetRegister::E);
+            break;
+        case PrefixOpCode::RES_5_E:
+            RES_b_r(TargetBit::BIT5, TargetRegister::E);
+            break;
+        case PrefixOpCode::RES_6_E:
+            RES_b_r(TargetBit::BIT6, TargetRegister::E);
+            break;
+        case PrefixOpCode::RES_7_E:
+            RES_b_r(TargetBit::BIT7, TargetRegister::E);
+            break;
+        case PrefixOpCode::RES_0_H:
+            RES_b_r(TargetBit::BIT0, TargetRegister::H);
+            break;
+        case PrefixOpCode::RES_1_H:
+            RES_b_r(TargetBit::BIT1, TargetRegister::H);
+            break;
+        case PrefixOpCode::RES_2_H:
+            RES_b_r(TargetBit::BIT2, TargetRegister::H);
+            break;
+        case PrefixOpCode::RES_3_H:
+            RES_b_r(TargetBit::BIT3, TargetRegister::H);
+            break;
+        case PrefixOpCode::RES_4_H:
+            RES_b_r(TargetBit::BIT4, TargetRegister::H);
+            break;
+        case PrefixOpCode::RES_5_H:
+            RES_b_r(TargetBit::BIT5, TargetRegister::H);
+            break;
+        case PrefixOpCode::RES_6_H:
+            RES_b_r(TargetBit::BIT6, TargetRegister::H);
+            break;
+        case PrefixOpCode::RES_7_H:
+            RES_b_r(TargetBit::BIT7, TargetRegister::H);
+            break;
+        case PrefixOpCode::RES_0_L:
+            RES_b_r(TargetBit::BIT0, TargetRegister::L);
+            break;
+        case PrefixOpCode::RES_1_L:
+            RES_b_r(TargetBit::BIT1, TargetRegister::L);
+            break;
+        case PrefixOpCode::RES_2_L:
+            RES_b_r(TargetBit::BIT2, TargetRegister::L);
+            break;
+        case PrefixOpCode::RES_3_L:
+            RES_b_r(TargetBit::BIT3, TargetRegister::L);
+            break;
+        case PrefixOpCode::RES_4_L:
+            RES_b_r(TargetBit::BIT4, TargetRegister::L);
+            break;
+        case PrefixOpCode::RES_5_L:
+            RES_b_r(TargetBit::BIT5, TargetRegister::L);
+            break;
+        case PrefixOpCode::RES_6_L:
+            RES_b_r(TargetBit::BIT6, TargetRegister::L);
+            break;
+        case PrefixOpCode::RES_7_L:
+            RES_b_r(TargetBit::BIT7, TargetRegister::L);
+            break;
+        case PrefixOpCode::RES_0_A:
+            RES_b_r(TargetBit::BIT0, TargetRegister::A);
+            break;
+        case PrefixOpCode::RES_1_A:
+            RES_b_r(TargetBit::BIT1, TargetRegister::A);
+            break;
+        case PrefixOpCode::RES_2_A:
+            RES_b_r(TargetBit::BIT2, TargetRegister::A);
+            break;
+        case PrefixOpCode::RES_3_A:
+            RES_b_r(TargetBit::BIT3, TargetRegister::A);
+            break;
+        case PrefixOpCode::RES_4_A:
+            RES_b_r(TargetBit::BIT4, TargetRegister::A);
+            break;
+        case PrefixOpCode::RES_5_A:
+            RES_b_r(TargetBit::BIT5, TargetRegister::A);
+            break;
+        case PrefixOpCode::RES_6_A:
+            RES_b_r(TargetBit::BIT6, TargetRegister::A);
+            break;
+        case PrefixOpCode::RES_7_A:
+            RES_b_r(TargetBit::BIT7, TargetRegister::A);
+            break;
+        case PrefixOpCode::RES_0_HL:
+            RES_b_HL(TargetBit::BIT0);
+            break;
+        case PrefixOpCode::RES_1_HL:
+            RES_b_HL(TargetBit::BIT1);
+            break;
+        case PrefixOpCode::RES_2_HL:
+            RES_b_HL(TargetBit::BIT2);
+            break;
+        case PrefixOpCode::RES_3_HL:
+            RES_b_HL(TargetBit::BIT3);
+            break;
+        case PrefixOpCode::RES_4_HL:
+            RES_b_HL(TargetBit::BIT4);
+            break;
+        case PrefixOpCode::RES_5_HL:
+            RES_b_HL(TargetBit::BIT5);
+            break;
+        case PrefixOpCode::RES_6_HL:
+            RES_b_HL(TargetBit::BIT6);
+            break;
+        case PrefixOpCode::RES_7_HL:
+            RES_b_HL(TargetBit::BIT7);
+            break;
         default:
             std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
             exit(1);
@@ -1578,5 +1770,28 @@ void CPU::SET_b_r(TargetBit bit, TargetRegister reg) {
 void CPU::SET_b_HL(TargetBit bit) {
     uint8_t dummy = m_bus.readByte(m_registers.getHL());
     setBit(bit, dummy);
+    m_bus.writeByte(m_registers.getHL(), dummy);
+}
+
+// Reset the bit at position `bit` in `target`. No flags are affected.
+void CPU::resetBit(TargetBit bit, uint8_t &target) {
+    target &= ~(1u << static_cast<uint8_t>(bit));
+}
+
+void CPU::RES_b_r(TargetBit bit, TargetRegister reg) {
+    switch (reg) {
+        case TargetRegister::B: resetBit(bit, m_registers.b); break;
+        case TargetRegister::C: resetBit(bit, m_registers.c); break;
+        case TargetRegister::D: resetBit(bit, m_registers.d); break;
+        case TargetRegister::E: resetBit(bit, m_registers.e); break;
+        case TargetRegister::H: resetBit(bit, m_registers.h); break;
+        case TargetRegister::L: resetBit(bit, m_registers.l); break;
+        case TargetRegister::A: resetBit(bit, m_registers.a); break;
+    }
+}
+
+void CPU::RES_b_HL(TargetBit bit) {
+    uint8_t dummy = m_bus.readByte(m_registers.getHL());
+    resetBit(bit, dummy);
     m_bus.writeByte(m_registers.getHL(), dummy);
 }
