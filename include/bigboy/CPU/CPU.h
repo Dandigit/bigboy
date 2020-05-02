@@ -81,7 +81,7 @@ enum class OpCode : uint8_t {
     LD_L_n = 0b00101110,
     LD_A_n = 0b00111110,
 
-    // LD r, HL
+    // LD r, (HL)
     // The byte at the memory address stored in the register pair HL is
     // loaded into register r. Register r may be any of B, C, D, E, H, L
     // or A.
@@ -94,7 +94,7 @@ enum class OpCode : uint8_t {
     LD_L_HL = 0b01101110,
     LD_A_HL = 0b01111110,
 
-    // LD HL, r
+    // LD (HL), r
     // The contents of register r are loaded into the byte at the memory
     // address specified in the register pair HL. Register r may be any
     // of B, C, D, E, H, L or A.
@@ -107,11 +107,23 @@ enum class OpCode : uint8_t {
     LD_HL_L = 0b01110101,
     LD_HL_A = 0b01110111,
 
-    // LD HL, n
+    // LD (HL), n
     // Byte n is read as an integer and loaded into the memory address
     // specified in the register pair HL.
     // Bit-by-bit: 0 0 1 1 0 1 1 0 <n n n n n n n n>
     LD_HL_n = 0b00110110,
+
+    // LD A, (BC)
+    // The byte at the memory address specified in the register pair BC
+    // is loaded in to the register A.
+    // Bit-by-bit: 0 0 0 0 1 0 1 0
+    LD_A_BC = 0b00001010,
+
+    // LD A, (DE)
+    // The byte at the memory address specified in the register pair DE
+    // is loaded into the register A.
+    // Bit-by-bit: 0 0 0 1 1 0 1 0
+    LD_A_DE = 0b00011010,
 
     // ADD A, r:
     // The contents of register r are added to the contents of register A
@@ -132,7 +144,7 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 1 1 0 0 0 1 1 0 <n n n n n n n n>
     ADDA_n = 0b11000110,
 
-    // ADD A, HL:
+    // ADD A, (HL):
     // The byte at the memory address specified in the virtual 16-bit
     // register HL is added to the contents of register A and the result
     // is stored in register A.
@@ -159,13 +171,13 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 1 1 0 0 1 1 1 0 <n n n n n n n n>
     ADCA_n = 0b11001110,
 
-    // ADC A, HL
+    // ADC A, (HL)
     // The byte at the memory address specified in the virtual 16-bit
     // register HL along with the value of the carry flag are added to the
     // register A and the result is stored in register A.
     ADCA_HL = 0b10001110,
 
-    // SUB, r
+    // SUB r
     // The contents of the register r are subtracted from the contents of
     // register A, and the result is stored in register A. Register r may be
     // any of B, C, D, E, H, L, or A.
@@ -178,13 +190,13 @@ enum class OpCode : uint8_t {
     SUB_L = 0b10010101,
     SUB_A = 0b10010111,
 
-    // SUB, n
+    // SUB n
     // Byte n is read as an integer and subtracted from the contents of
     // register A, and the result is stored in register A.
     // Bit-by-bit: 1 1 0 1 0 1 1 0 <n n n n n n n n>
     SUB_n = 0b11010110,
 
-    // SUB, HL
+    // SUB (HL)
     // The byte at the memory address specified in the virtual 16-bit
     // register HL is subtracted from the register A and the result is
     // stored in register A.
@@ -211,14 +223,14 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 1 1 0 1 1 1 1 0 <n n n n n n n n>
     SBCA_n = 0b11011110,
 
-    // SBC A, HL
+    // SBC A, (HL)
     // The byte at the memory address specified in the virtual 16-bit
     // register HL and the value of the carry flag are both subtracted from
     // the register A, and the result is stored in register A.
     // Bit-by-bit: 1 0 0 1 1 1 1 0
     SBCA_HL = 0b10011110,
 
-    // AND, r
+    // AND r
     // A bitwise AND operation is performed between the contents of the
     // register r and the contents of the register A, and the result is
     // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
@@ -231,20 +243,20 @@ enum class OpCode : uint8_t {
     AND_L = 0b10100101,
     AND_A = 0b10100111,
 
-    // AND, n
+    // AND n
     // A bitwise AND operation is performed between the byte n and the
     // contents of register A, and the result is stored in register A.
     // Bit-by-bit: 1 1 1 0 0 1 1 0 <n n n n n n n n>
     AND_n = 0b11100110,
 
-    // AND, HL
+    // AND (HL)
     // A bitwise AND operation is performed between the byte at the memory
     // address specified in the virtual 16-bit register HL and the contents
     // of register A, and the result is stored in register A.
     // Bit-by-bit: 1 0 1 0 0 1 1 0
     AND_HL = 0b10100110,
 
-    // OR, r
+    // OR r
     // A bitwise OR operation is performed between the contents of the
     // register r and the contents of the register A, and the result is
     // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
@@ -257,20 +269,20 @@ enum class OpCode : uint8_t {
     OR_L = 0b10110101,
     OR_A = 0b10110111,
 
-    // OR, n
+    // OR n
     // A bitwise OR operation is performed between the byte n and the
     // contents of register A, and the result is stored in register A.
     // Bit-by-bit: 1 1 1 1 0 1 1 0 <n n n n n n n n>
     OR_n = 0b11110110,
 
-    // OR, HL
+    // OR (HL)
     // A bitwise OR operation is performed between the byte at the memory
     // address specified in the virtual 16-bit register HL and the contents
     // of register A, and the result is stored in register A.
     // Bit-by-bit: 1 0 1 1 0 1 1 0
     OR_HL = 0b10110110,
 
-    // XOR, r
+    // XOR r
     // A bitwise XOR operation is performed between the contents of the
     // register r and the contents of the register A, and the result is
     // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
@@ -283,20 +295,20 @@ enum class OpCode : uint8_t {
     XOR_L = 0b10101101,
     XOR_A = 0b10101111,
 
-    // XOR, n
+    // XOR n
     // A bitwise XOR operation is performed between the byte n and the
     // contents of register A, and the result is stored in register A.
     // Bit-by-bit: 1 1 1 0 1 1 1 0 <n n n n n n n n>
     XOR_n = 0b11101110,
 
-    // XOR, HL
+    // XOR (HL)
     // A bitwise XOR operation is performed between the byte at the memory
     // address specified in the virtual 16-bit register HL and the contents
     // of register A, and the result is stored in register A.
     // Bit-by-bit: 1 0 1 0 1 1 1 0
     XOR_HL = 0b10101110,
 
-    // CP, r
+    // CP r
     // The contents of register R are compared with (subtracted from) the
     // register A, setting the appropriate flags but not storing the result.
     // Register r may be any of B, C, D, E, H, L or A.
@@ -309,20 +321,20 @@ enum class OpCode : uint8_t {
     CP_L = 0b10111101,
     CP_A = 0b10111111,
 
-    // CP, n
+    // CP n
     // The byte n is compared with (subtracted from) the register A, setting
     // the appropriate flags but not storing the result.
     // Bit-by-bit: 1 1 1 1 1 1 1 0 <b b b b b b b b>
     CP_n = 0b11111110,
 
-    // CP, HL
+    // CP (HL)
     // The byte at the memory address specified in the register HL is compared
     // with (subtracted from) the register A, setting the appropriate flags but
     // not storing the result.
     // Bit-by-bit: 1 0 1 1 1 1 1 0
     CP_HL = 0b10111110,
 
-    // INC, r
+    // INC r
     // The register r is incremented by 1. Register r may be any of B, C, D, E,
     // H, L or A.
     // Bit-by-bit: 0 0 <r r r> 1 0 0
@@ -334,13 +346,13 @@ enum class OpCode : uint8_t {
     INC_L = 0b00101100,
     INC_A = 0b00111100,
 
-    // INC, HL
+    // INC (HL)
     // The byte at the memory address specified in the register HL is incremented
     // by 1.
     // Bit-by-bit: 0 0 1 1 0 1 0 0
     INC_HL = 0b00110100,
 
-    // DEC, r
+    // DEC r
     // The register r is decremented by 1. Register r may be any of B, C, D, E,
     // H, L or A.
     // Bit-by-bit: 0 0 <r r r> 1 0 1
@@ -352,7 +364,7 @@ enum class OpCode : uint8_t {
     DEC_L = 0b00101101,
     DEC_A = 0b00111101,
 
-    // DEC, HL
+    // DEC (HL)
     // The byte at the memory address specified in the register HL is decremented
     // by 1.
     // Bit-by-bit: 0 0 1 1 0 1 0 1
@@ -446,7 +458,7 @@ enum class PrefixOpCode {
     RLC_L = 0b00000101,
     RLC_A = 0b00000111,
 
-    // RLC HL
+    // RLC (HL)
     // The byte at the memory address specified in the register pair HL is rotated
     // left by 1 bit position, after the sign bit (7) is copied into the carry flag.
     // Bit-by-bit (after 0xCB): 0 0 0 0 0 1 1 0
@@ -464,7 +476,7 @@ enum class PrefixOpCode {
     RL_L = 0b00010101,
     RL_A = 0b00010111,
 
-    // RL HL
+    // RL (HL)
     // The byte at the memory address specified in the register pair HL is rotated
     // left by 1 bit position through the carry flag.
     // Bit-by-bit (after 0xCB): 0 0 0 1 0 1 1 0
@@ -482,7 +494,7 @@ enum class PrefixOpCode {
     RRC_L = 0b00001101,
     RRC_A = 0b00001111,
 
-    // RRC HL
+    // RRC (HL)
     // The byte at the memory address specified in the register pair HL is rotated
     // right by 1 bit position, after bit 0 is copied into the carry flag.
     // Bit-by-bit (after 0xCB): 0 0 0 0 1 1 1 0
@@ -500,7 +512,7 @@ enum class PrefixOpCode {
     RR_L = 0b00011101,
     RR_A = 0b00011111,
 
-    // RR HL
+    // RR (HL)
     // The byte at the memory address specified in the register pair HL is rotated
     // right by 1 bit position through the carry flag.
     // Bit-by-bit (after 0xCB): 0 0 0 1 1 1 1 0
@@ -518,7 +530,7 @@ enum class PrefixOpCode {
     SLA_L = 0b00100101,
     SLA_A = 0b00100111,
 
-    // SLA HL
+    // SLA (HL)
     // The byte at the memory address specified in the register pair HL is shifted
     // left by 1 bit position, after bit 7 is copied to the carry flag.
     // Bit-by-bit (after 0xCB): 0 0 1 0 0 1 1 0
@@ -537,7 +549,7 @@ enum class PrefixOpCode {
     SRA_L = 0b00101101,
     SRA_A = 0b00101111,
 
-    // SRA HL
+    // SRA (HL)
     // The lower 7 bits (0-6) of the byte at the memory address specified in the
     // register pair HL are shifted right by 1 bi position, after bit 0 is copied
     // into the carry flag.
@@ -556,7 +568,7 @@ enum class PrefixOpCode {
     SRL_L = 0b00111101,
     SRL_A = 0b00111111,
 
-    // SRL HL
+    // SRL (HL)
     // The byte at the memory address specified in the register pair HL is shifted right
     // by 1 bit position, after bit 0 is copied into the carry flag.
     // Bit-by-bit (after 0xCB): 0 0 1 1 1 1 1 0
@@ -629,7 +641,7 @@ enum class PrefixOpCode {
     BIT_6_A = 0b01110111,
     BIT_7_A = 0b01111111,
 
-    // BIT b, HL
+    // BIT b, (HL)
     // The zero flag is set if the bit at position b in the byte at the address stored
     // in the register pair HL is 0, otherwise, the flag is reset. Register r may be
     // any of B, C, D, E, H, L or A.
@@ -710,7 +722,7 @@ enum class PrefixOpCode {
     SET_6_A = 0b11110111,
     SET_7_A = 0b11111111,
 
-    // SET b, HL
+    // SET b, (HL)
     // The bit at position b of the byte at the memory address stored in the register
     // pair HL is set.
     // Bit-by-bit (after 0xCB): 1 1 <b b b> 1 1 0
@@ -790,7 +802,7 @@ enum class PrefixOpCode {
     RES_6_A = 0b10110111,
     RES_7_A = 0b10111111,
 
-    // RES b, HL
+    // RES b, (HL)
     // The bit at position b of the byte at the memory address stored in the register
     // pair HL is reset.
     // Bit-by-bit (after 0xCB): 1 1 <b b b> 1 1 0
@@ -905,6 +917,9 @@ private:
 
     void LD_HL_r(TargetRegister value);
     void LD_HL_n();
+
+    void LD_A_BC();
+    void LD_A_DE();
 
     void add(uint8_t value);
 
