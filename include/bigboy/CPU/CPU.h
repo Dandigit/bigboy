@@ -128,8 +128,26 @@ enum class OpCode : uint8_t {
     // LD A, (nn)
     // The 16-bit short nn is read as an integer, specifying the memory
     // address of a byte which is loaded into the register A.
-    // Bit-by-bit: 0 0 1 1 1 0 1 0 <n n n n n n n n n n n n n n n n>
+    // Bit-by-bit: 0 0 1 1 1 0 1 0 <n n n n n n n n> <n n n n n n n n>
     LD_A_nn = 0b00111010,
+
+    // LD (BC), A
+    // The contents of the register A are loaded into the byte at the
+    // memory address specified in the register pair BC.
+    // Bit-by-bit: 0 0 0 0 0 0 1 0
+    LD_BC_A = 0b00000010,
+
+    // LD (DE), A
+    // The contents of the register A are loaded into the byte at the
+    // memory address specified in the register pair BC.
+    // Bit-by-bit: 0 0 0 1 0 0 1 0
+    LD_DE_A = 0b00010010,
+
+    // LD (nn), A
+    // The 16 bit short nn is read as an integer, specifying the memory
+    // address of a byte into which the register A is loaded.
+    // Bit-by-bit: 0 0 1 1 0 0 1 0 <n n n n n n n n> <n n n n n n n n>
+    LD_nn_A = 0b00110010,
 
     // ADD A, r:
     // The contents of register r are added to the contents of register A
@@ -824,7 +842,7 @@ enum class PrefixOpCode {
 
 class CPU {
 public:
-    enum class TargetRegister : uint8_t {
+    enum class RegisterOperand : uint8_t {
         B, // 000
         C, // 001
         D, // 010
@@ -834,7 +852,14 @@ public:
         A  // 111
     };
 
-    enum class TargetBit : uint8_t {
+    enum class RegisterPairOperand : uint8_t {
+        BC, // 00
+        DE, // 01
+        HL, // 10
+        SP  // 11
+    };
+
+    enum class BitOperand : uint8_t {
         BIT0 = 0, // 000
         BIT1 = 1, // 001
         BIT2 = 2, // 010
@@ -875,7 +900,7 @@ public:
         // General purpose
         uint8_t b, c, d, e, h, l = 0;
 
-        uint8_t& get(TargetRegister target);
+        uint8_t& get(RegisterOperand target);
 
         // Some instructions allow two 8 bit registers to be read as one 16 bit register
         // Referred to as AF (A & F), BC (B & C), DE (D & E) and HL (H & L)
@@ -900,8 +925,9 @@ public:
 
         explicit MemoryBus(std::array<uint8_t, 0xFFFF> memory);
 
-        uint8_t readByte(uint16_t address);
+        uint8_t& byteAt(uint16_t address);
 
+        uint8_t readByte(uint16_t address);
         void writeByte(uint16_t address, uint8_t value);
     };
 
@@ -917,73 +943,77 @@ private:
 
     void load(uint8_t& target, uint8_t value);
 
-    void LD_r_r(TargetRegister target, TargetRegister value);
-    void LD_r_n(TargetRegister target);
-    void LD_r_HL(TargetRegister target);
+    void LD_r_r(RegisterOperand target, RegisterOperand value);
+    void LD_r_n(RegisterOperand target);
+    void LD_r_HL(RegisterOperand target);
 
-    void LD_HL_r(TargetRegister value);
+    void LD_HL_r(RegisterOperand value);
     void LD_HL_n();
 
     void LD_A_BC();
     void LD_A_DE();
     void LD_A_nn();
 
+    void LD_BC_A();
+    void LD_DE_A();
+    void LD_nn_A();
+
     void add(uint8_t value);
 
-    void ADDA_r(TargetRegister target);
+    void ADDA_r(RegisterOperand target);
     void ADDA_n();
     void ADDA_HL();
 
     void addWithCarry(uint8_t value);
 
-    void ADCA_r(TargetRegister target);
+    void ADCA_r(RegisterOperand target);
     void ADCA_n();
     void ADCA_HL();
 
     void subtract(uint8_t value);
 
-    void SUB_r(TargetRegister target);
+    void SUB_r(RegisterOperand target);
     void SUB_n();
     void SUB_HL();
 
     void subtractWithCarry(uint8_t value);
 
-    void SBCA_r(TargetRegister target);
+    void SBCA_r(RegisterOperand target);
     void SBCA_n();
     void SBCA_HL();
 
     void bitwiseAnd(uint8_t value);
 
-    void AND_r(TargetRegister target);
+    void AND_r(RegisterOperand target);
     void AND_n();
     void AND_HL();
 
     void bitwiseOr(uint8_t value);
 
-    void OR_r(TargetRegister target);
+    void OR_r(RegisterOperand target);
     void OR_n();
     void OR_HL();
 
     void bitwiseXor(uint8_t value);
 
-    void XOR_r(TargetRegister target);
+    void XOR_r(RegisterOperand target);
     void XOR_n();
     void XOR_HL();
 
     void compare(uint8_t value);
 
-    void CP_r(TargetRegister target);
+    void CP_r(RegisterOperand target);
     void CP_n();
     void CP_HL();
 
     void increment(uint8_t &target);
 
-    void INC_r(TargetRegister target);
+    void INC_r(RegisterOperand target);
     void INC_HL();
 
     void decrement(uint8_t &target);
 
-    void DEC_r(TargetRegister target);
+    void DEC_r(RegisterOperand target);
     void DEC_HL();
 
     void DAA();
@@ -998,56 +1028,56 @@ private:
     void rotateLeft(uint8_t &target);
 
     void RLCA();
-    void RLC_r(TargetRegister target);
+    void RLC_r(RegisterOperand target);
     void RLC_HL();
 
     void rotateLeftThroughCarry(uint8_t &target);
 
     void RLA();
-    void RL_r(TargetRegister target);
+    void RL_r(RegisterOperand target);
     void RL_HL();
 
     void rotateRight(uint8_t &target);
 
     void RRCA();
-    void RRC_r(TargetRegister target);
+    void RRC_r(RegisterOperand target);
     void RRC_HL();
 
     void rotateRightThroughCarry(uint8_t &target);
 
     void RRA();
-    void RR_r(TargetRegister target);
+    void RR_r(RegisterOperand target);
     void RR_HL();
 
     void shiftLeft(uint8_t &target);
 
-    void SLA_r(TargetRegister target);
+    void SLA_r(RegisterOperand target);
     void SLA_HL();
 
     void shiftTailRight(uint8_t &target);
 
-    void SRA_r(TargetRegister target);
+    void SRA_r(RegisterOperand target);
     void SRA_HL();
 
     void shiftRight(uint8_t &target);
 
-    void SRL_r(TargetRegister target);
+    void SRL_r(RegisterOperand target);
     void SRL_HL();
 
-    void testBit(TargetBit bit, uint8_t byte);
+    void testBit(BitOperand bit, uint8_t byte);
 
-    void BIT_b_r(TargetBit bit, TargetRegister reg);
-    void BIT_b_HL(TargetBit bit);
+    void BIT_b_r(BitOperand bit, RegisterOperand reg);
+    void BIT_b_HL(BitOperand bit);
 
-    void setBit(TargetBit bit, uint8_t& target);
+    void setBit(BitOperand bit, uint8_t& target);
 
-    void SET_b_r(TargetBit bit, TargetRegister reg);
-    void SET_b_HL(TargetBit bit);
+    void SET_b_r(BitOperand bit, RegisterOperand reg);
+    void SET_b_HL(BitOperand bit);
 
-    void resetBit(TargetBit bit, uint8_t& target);
+    void resetBit(BitOperand bit, uint8_t& target);
 
-    void RES_b_r(TargetBit bit, TargetRegister reg);
-    void RES_b_HL(TargetBit bit);
+    void RES_b_r(BitOperand bit, RegisterOperand reg);
+    void RES_b_HL(BitOperand bit);
 
 public:
     void load(const std::array<uint8_t, 0xFFFF> &memory);
