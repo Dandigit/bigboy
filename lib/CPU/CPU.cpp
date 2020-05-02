@@ -308,6 +308,9 @@ void CPU::step() {
         case OpCode::LD_HL_A:
             LD_HL_r(TargetRegister::A);
             break;
+        case OpCode::LD_HL_n:
+            LD_HL_n();
+            break;
         case OpCode::ADDA_B:
             ADDA_r(TargetRegister::B);
             break;
@@ -1380,6 +1383,12 @@ void CPU::LD_r_HL(TargetRegister target) {
 void CPU::LD_HL_r(TargetRegister value) {
     uint8_t dummy = m_bus.readByte(m_registers.getHL());
     load(dummy, m_registers.get(value));
+    m_bus.writeByte(m_registers.getHL(), dummy);
+}
+
+void CPU::LD_HL_n() {
+    uint8_t dummy = m_bus.readByte(m_registers.getHL());
+    load(dummy, m_bus.readByte(m_pc++));
     m_bus.writeByte(m_registers.getHL(), dummy);
 }
 
