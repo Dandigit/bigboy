@@ -149,6 +149,15 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 0 0 1 1 0 0 1 0 <n n n n n n n n> <n n n n n n n n>
     LD_nn_A = 0b00110010,
 
+    // LD dd, nn
+    // The 16-bit short nn is read as an integer and loaded into the
+    // register pair dd. Register pair dd may be any of BC, DE, HL or SP.
+    // Bit-by-bit: 0 0 <d d> 0 0 0 1 <n n n n n n n n> <n n n n n n n n>
+    LD_BC_nn = 0b00000001,
+    LD_DE_nn = 0b00010001,
+    LD_HL_nn = 0b00100001,
+    LD_SP_nn = 0b00110001,
+
     // ADD A, r:
     // The contents of register r are added to the contents of register A
     // (the Accumulator) and the result is stored in register A. Register
@@ -900,7 +909,12 @@ public:
         // General purpose
         uint8_t b, c, d, e, h, l = 0;
 
+        // Stack pointer
+        uint16_t sp;
+
+        // TODO: Use these instead of switching over a RegisterOperand
         uint8_t& get(RegisterOperand target);
+        uint16_t& get(RegisterPairOperand target);
 
         // Some instructions allow two 8 bit registers to be read as one 16 bit register
         // Referred to as AF (A & F), BC (B & C), DE (D & E) and HL (H & L)
@@ -957,6 +971,10 @@ private:
     void LD_BC_A();
     void LD_DE_A();
     void LD_nn_A();
+
+    void loadPair(RegisterPairOperand target, uint16_t value);
+
+    void LD_dd_nn(RegisterPairOperand target);
 
     void add(uint8_t value);
 

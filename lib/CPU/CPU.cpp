@@ -333,6 +333,18 @@ void CPU::step() {
         case OpCode::LD_nn_A:
             LD_nn_A();
             break;
+        case OpCode::LD_BC_nn:
+            LD_dd_nn(RegisterPairOperand::BC);
+            break;
+        case OpCode::LD_DE_nn:
+            LD_dd_nn(RegisterPairOperand::DE);
+            break;
+        case OpCode::LD_HL_nn:
+            LD_dd_nn(RegisterPairOperand::HL);
+            break;
+        case OpCode::LD_SP_nn:
+            LD_dd_nn(RegisterPairOperand::SP);
+            break;
         case OpCode::ADDA_B:
             ADDA_r(RegisterOperand::B);
             break;
@@ -1444,6 +1456,32 @@ void CPU::LD_nn_A() {
     uint16_t nn = (higher << 8u) | lower;
 
     load(m_bus.byteAt(nn), m_registers.a);
+}
+
+void CPU::loadPair(RegisterPairOperand target, uint16_t value) {
+    switch (target) {
+        case RegisterPairOperand::BC:
+            m_registers.setBC(value);
+            break;
+        case RegisterPairOperand::DE:
+            m_registers.setDE(value);
+            break;
+        case RegisterPairOperand::HL:
+            m_registers.setHL(value);
+            break;
+        case RegisterPairOperand::SP:
+            // Not really a register pair, just a 16-bit register
+            m_registers.sp = value;
+            break;
+    }
+}
+
+void CPU::LD_dd_nn(RegisterPairOperand target) {
+    uint8_t lower = m_bus.readByte(m_pc++);
+    uint8_t higher = m_bus.readByte(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    loadPair(target, nn);
 }
 
 // Add `value` to the register A, and set/reset the necessary flags
