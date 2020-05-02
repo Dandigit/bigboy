@@ -317,6 +317,9 @@ void CPU::step() {
         case OpCode::LD_A_DE:
             LD_A_DE();
             break;
+        case OpCode::LD_A_nn:
+            LD_A_nn();
+            break;
         case OpCode::ADDA_B:
             ADDA_r(TargetRegister::B);
             break;
@@ -1404,6 +1407,14 @@ void CPU::LD_A_BC() {
 
 void CPU::LD_A_DE() {
     load(m_registers.a, m_bus.readByte(m_registers.getDE()));
+}
+
+void CPU::LD_A_nn() {
+    uint8_t lower = m_bus.readByte(m_pc++);
+    uint8_t higher = m_bus.readByte(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    load(m_registers.a, m_bus.readByte(nn));
 }
 
 // Add `value` to the register A, and set/reset the necessary flags

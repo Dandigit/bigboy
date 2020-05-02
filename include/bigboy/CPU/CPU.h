@@ -125,6 +125,12 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 0 0 0 1 1 0 1 0
     LD_A_DE = 0b00011010,
 
+    // LD A, (nn)
+    // The 16-bit short nn is read as an integer, specifying the memory
+    // address of a byte which is loaded into the register A.
+    // Bit-by-bit: 0 0 1 1 1 0 1 0 <n n n n n n n n n n n n n n n n>
+    LD_A_nn = 0b00111010,
+
     // ADD A, r:
     // The contents of register r are added to the contents of register A
     // (the Accumulator) and the result is stored in register A. Register
@@ -920,6 +926,7 @@ private:
 
     void LD_A_BC();
     void LD_A_DE();
+    void LD_A_nn();
 
     void add(uint8_t value);
 
