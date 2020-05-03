@@ -22,8 +22,596 @@ void CPU::exec() {
     }
 }
 
+void CPU::load(uint8_t& target, uint8_t value) {
+    target = value;
+}
+
+void CPU::LD_r_r(RegisterOperand target, RegisterOperand value) {
+    load(m_registers.get(target), m_registers.get(value));
+}
+
+void CPU::LD_r_n(RegisterOperand target) {
+    load(m_registers.get(target), m_mmu.byteAt(m_pc++));
+}
+
+void CPU::LD_r_HL(RegisterOperand target) {
+    load(m_registers.get(target), m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::LD_HL_r(RegisterOperand value) {
+    load(m_mmu.byteAt(m_registers.HL()), m_registers.get(value));
+}
+
+void CPU::LD_HL_n() {
+    load(m_mmu.byteAt(m_registers.HL()), m_mmu.byteAt(m_pc++));
+}
+
+void CPU::LD_A_BC() {
+    load(m_registers.a, m_mmu.byteAt(m_registers.BC()));
+}
+
+void CPU::LD_A_DE() {
+    load(m_registers.a, m_mmu.byteAt(m_registers.DE()));
+}
+
+void CPU::LD_A_nn() {
+    uint8_t lower = m_mmu.byteAt(m_pc++);
+    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    load(m_registers.a, m_mmu.byteAt(nn));
+}
+
+void CPU::LD_BC_A() {
+    load(m_mmu.byteAt(m_registers.BC()), m_registers.a);
+}
+
+void CPU::LD_DE_A() {
+    load(m_mmu.byteAt(m_registers.DE()), m_registers.a);
+}
+
+void CPU::LD_nn_A() {
+    uint8_t lower = m_mmu.byteAt(m_pc++);
+    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    load(m_mmu.byteAt(nn), m_registers.a);
+}
+
+void CPU::load(uint16_t& target, uint16_t value) {
+    target = value;
+}
+
+void CPU::LD_dd_nn(RegisterPairOperand target) {
+    uint8_t lower = m_mmu.byteAt(m_pc++);
+    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    load(m_registers.get(target), nn);
+}
+
+void CPU::LD_HL_nn() {
+    uint8_t lower = m_mmu.byteAt(m_pc++);
+    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    load(m_registers.l, m_mmu.byteAt(nn));
+    load(m_registers.h, m_mmu.byteAt(nn + 1));
+}
+
+void CPU::LD_nn_HL() {
+    uint8_t lower = m_mmu.byteAt(m_pc++);
+    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    load(m_mmu.byteAt(nn), m_registers.l);
+    load(m_mmu.byteAt(nn + 1), m_registers.h);
+}
+
+void CPU::LD_SP_HL() {
+    load(m_registers.sp, m_registers.HL());
+}
+
+void CPU::push(uint16_t value) {
+    uint8_t high = (value >> 8u);
+    m_mmu.byteAt(--m_registers.sp) = high;
+
+    uint8_t low = (value & 0xFFu);
+    m_mmu.byteAt(--m_registers.sp) = low;
+}
+
+void CPU::PUSH_qq(RegisterPairStackOperand value) {
+    push(m_registers.get(value));
+}
+
+void CPU::pop(uint16_t& target) {
+    uint8_t low = m_mmu.byteAt(m_registers.sp--);
+    uint8_t high = m_mmu.byteAt(m_registers.sp--);
+
+    target = (high << 8u) | low;
+}
+
+void CPU::POP_qq(RegisterPairStackOperand target) {
+    pop(m_registers.get(target));
+}
+
+// Add `value` to the register A, and set/reset the necessary flags
+void CPU::add(uint8_t value) {
+    uint8_t result = m_registers.a + value;
+
+    m_flags.zero = result == 0;
+    m_flags.subtract = false;
+    m_flags.carry = result < value;
+    m_flags.halfCarry = (m_registers.a & 0xF) + (value & 0xF) > 0xF;
+
+    m_registers.a = result;
+}
+
+void CPU::ADDA_r(RegisterOperand target) {
+    add(m_registers.get(target));
+}
+
+void CPU::ADDA_n() {
+    add(m_mmu.byteAt(m_pc++));
+}
+
+void CPU::ADDA_HL() {
+    add(m_mmu.byteAt(m_registers.HL()));
+}
+
+// Add `value` plus the carry flag to the register A, and set/reset the necessary flags
+void CPU::addWithCarry(uint8_t value) {
+    add(value + (m_flags.carry ? 1 : 0));
+}
+
+void CPU::ADCA_r(RegisterOperand target) {
+    addWithCarry(m_registers.get(target));
+}
+
+void CPU::ADCA_n() {
+    addWithCarry(m_mmu.byteAt(m_pc++));
+}
+
+void CPU::ADCA_HL() {
+    addWithCarry(m_mmu.byteAt(m_registers.HL()));
+}
+
+// Subtract `value` from the register A, set the correct flags,
+// and store the result in register A
+void CPU::subtract(uint8_t value) {
+    uint8_t result = m_registers.a - value;
+
+    m_flags.zero = result == 0;
+    m_flags.subtract = true;
+    m_flags.carry = result > value;
+    m_flags.halfCarry = (m_registers.a & 0x0F) < (value & 0x0F);
+
+    m_registers.a = result;
+}
+
+void CPU::SUB_r(RegisterOperand target) {
+    subtract(m_registers.get(target));
+}
+
+void CPU::SUB_n() {
+    subtract(m_mmu.byteAt(m_pc++));
+}
+
+void CPU::SUB_HL() {
+    subtract(m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::subtractWithCarry(uint8_t value) {
+    subtract(value + (m_flags.carry ? 1 : 0));
+}
+
+void CPU::SBCA_r(RegisterOperand target) {
+    subtractWithCarry(m_registers.get(target));
+}
+
+void CPU::SBCA_n() {
+    subtractWithCarry(m_mmu.byteAt(m_pc++));
+}
+
+void CPU::SBCA_HL() {
+    subtractWithCarry(m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::bitwiseAnd(uint8_t value) {
+    m_registers.a &= value;
+
+    m_flags.zero = m_registers.a == 0;
+    m_flags.subtract = false;
+    m_flags.carry = false;
+    m_flags.halfCarry = true;
+}
+
+void CPU::AND_r(RegisterOperand target) {
+    bitwiseAnd(m_registers.get(target));
+}
+
+void CPU::AND_n() {
+    bitwiseAnd(m_mmu.byteAt(m_pc++));
+}
+
+void CPU::AND_HL() {
+    bitwiseAnd(m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::bitwiseOr(uint8_t value) {
+    m_registers.a |= value;
+
+    m_flags.zero = m_registers.a == 0;
+    m_flags.subtract = false;
+    m_flags.carry = false;
+    m_flags.halfCarry = false;
+}
+
+void CPU::OR_r(RegisterOperand target) {
+    bitwiseOr(m_registers.get(target));
+}
+
+void CPU::OR_n() {
+    bitwiseOr(m_mmu.byteAt(m_pc++));
+}
+
+void CPU::OR_HL() {
+    bitwiseOr(m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::bitwiseXor(uint8_t value) {
+    m_registers.a ^= value;
+
+    m_flags.zero = m_registers.a == 0;
+    m_flags.subtract = false;
+    m_flags.carry = false;
+    m_flags.halfCarry = false;
+}
+
+void CPU::XOR_r(RegisterOperand target) {
+    bitwiseXor(m_registers.get(target));
+}
+
+void CPU::XOR_n() {
+    bitwiseXor(m_mmu.byteAt(m_pc++));
+}
+
+void CPU::XOR_HL() {
+    bitwiseXor(m_mmu.byteAt(m_registers.HL()));
+}
+
+// Compares `value` with (subtracts it from) the register A, setting the appropriate
+// flags but not storing the result.
+void CPU::compare(uint8_t value) {
+    uint8_t result = m_registers.a - value;
+
+    m_flags.zero = result == 0;
+    m_flags.subtract = true;
+    m_flags.carry = result > value;
+    m_flags.halfCarry = (m_registers.a & 0x0F) < (value & 0x0F);
+}
+
+void CPU::CP_r(RegisterOperand target) {
+    compare(m_registers.get(target));
+}
+
+void CPU::CP_n() {
+    compare(m_mmu.byteAt(m_pc++));
+}
+
+void CPU::CP_HL() {
+    compare(m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::increment(uint8_t &target) {
+    uint8_t result = target + 1;
+
+    m_flags.zero = result == 0;
+    m_flags.subtract = false;
+    m_flags.halfCarry = (target & (1 << 2)) != 0 && (result & (1 << 2)) == 0;
+
+    target = result;
+}
+
+void CPU::INC_r(RegisterOperand target) {
+    increment(m_registers.get(target));
+}
+
+void CPU::INC_HL() {
+    increment(m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::decrement(uint8_t& target) {
+    uint8_t result = target - 1;
+
+    m_flags.zero = result == 0;
+    m_flags.subtract = true;
+    m_flags.halfCarry = ((result ^ 0x01 ^ target) & 0x10) == 0x10;
+
+    target = result;
+}
+
+void CPU::DEC_r(RegisterOperand target) {
+    decrement(m_registers.get(target));
+}
+
+void CPU::DEC_HL() {
+    decrement(m_mmu.byteAt(m_registers.HL()));
+}
+
+// Retroactively transform the previous addition or subtraction into a BCD operation
+void CPU::DAA() {
+    if (m_flags.subtract) {
+        // After a subtraction, only adjust if a carry and/or half carry occurred
+        if (m_flags.carry) {
+            m_registers.a -= 0x60;
+        }
+
+        if (m_flags.halfCarry) {
+            m_registers.a -= 0x6;
+        }
+    } else {
+        // After an addition, only adjust if a carry and/or half carry occurred
+        // or if the result is out of bounds
+        if (m_flags.carry || m_registers.a > 0x99) {
+            m_registers.a += 0x60;
+            m_flags.carry = true;
+        }
+
+        if (m_flags.halfCarry || (m_registers.a & 0x0f) > 0x09) {
+            m_registers.a += 0x6;
+        }
+    }
+
+    // Always update these flags
+    m_flags.zero = m_registers.a == 0;
+    m_flags.halfCarry = false;
+}
+
+// Invert the contents of register A
+void CPU::CPL() {
+    m_registers.a ^= 0xFF;
+
+    m_flags.subtract = true;
+    m_flags.halfCarry = true;
+}
+
+// Invert the carry flag
+void CPU::CCF() {
+    m_flags.carry = !m_flags.carry;
+
+    m_flags.subtract = false;
+    m_flags.halfCarry = false;
+}
+
+// Set the carry flag
+void CPU::SCF() {
+    m_flags.carry = true;
+
+    m_flags.subtract = false;
+    m_flags.halfCarry = false;
+}
+
+void CPU::NOP() {
+    // Nothing!
+}
+
+// Rotate `target` left 1 bit position, copying the sign bit to the carry flag and bit 0
+void CPU::rotateLeft(uint8_t &target) {
+    uint8_t signBit = target >> 7u;
+
+    target <<= 1u;
+    target ^= signBit;
+
+    m_flags.carry = signBit != 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
+}
+
+void CPU::RLCA() {
+    rotateLeft(m_registers.a);
+}
+
+void CPU::RLC_r(RegisterOperand target) {
+    rotateLeft(m_registers.get(target));
+}
+
+void CPU::RLC_HL() {
+    rotateLeft(m_mmu.byteAt(m_registers.HL()));
+}
+
+// Rotate `target` left 1 bit position through the carry flag,
+// copying the previous contents of the carry flag to bit 0
+void CPU::rotateLeftThroughCarry(uint8_t &target) {
+    uint8_t prevCarryFlag = (m_flags.carry ? 1 : 0);
+
+    std::bitset<9> value{target};
+    value[8] = prevCarryFlag;
+
+    value <<= 1u;
+    value[0] = prevCarryFlag;
+
+    target = static_cast<uint8_t>(value.to_ulong());
+
+    m_flags.carry = value[8];
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
+}
+
+void CPU::RLA() {
+    rotateLeftThroughCarry(m_registers.a);
+}
+
+void CPU::RL_r(RegisterOperand target) {
+    rotateLeftThroughCarry(m_registers.get(target));
+}
+
+void CPU::RL_HL() {
+    rotateLeftThroughCarry(m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::rotateRight(uint8_t &target) {
+    uint8_t zerothBit = target & 1u;
+
+    target >>= 1u;
+    target ^= (zerothBit << 7u);
+
+    m_flags.carry = zerothBit != 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
+}
+
+void CPU::RRCA() {
+    rotateRight(m_registers.a);
+}
+
+void CPU::RRC_r(RegisterOperand target) {
+    rotateRight(m_registers.get(target));
+}
+
+void CPU::RRC_HL() {
+    rotateRight(m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::rotateRightThroughCarry(uint8_t &target) {
+    uint8_t prevCarryFlag = (m_flags.carry ? 1 : 0);
+
+    std::bitset<9> value{target};
+    value <<= 1u;
+    value[0] = prevCarryFlag;
+
+    value >>= 1u;
+    value[8] = prevCarryFlag;
+
+    target = static_cast<uint8_t>((value >> 1).to_ulong());
+
+    m_flags.carry = value[0];
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
+}
+
+void CPU::RRA() {
+    rotateRightThroughCarry(m_registers.a);
+}
+
+void CPU::RR_r(RegisterOperand target) {
+    rotateRightThroughCarry(m_registers.get(target));
+}
+
+void CPU::RR_HL() {
+    rotateRightThroughCarry(m_mmu.byteAt(m_registers.HL()));
+}
+
+// Shift `target` to the left by 1 bit position, after copying bit 7 into the carry flag
+void CPU::shiftLeft(uint8_t& target) {
+    m_flags.carry = (target >> 7u) != 0;
+
+    target <<= 1u;
+
+    m_flags.zero = target == 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
+}
+
+void CPU::SLA_r(RegisterOperand target) {
+    shiftLeft(m_registers.get(target));
+}
+
+void CPU::SLA_HL() {
+    shiftLeft(m_mmu.byteAt(m_registers.HL()));
+}
+
+// Shift the lower 7 bits (0-6) of `target` 1 bit position to the right,
+// after copying bit 0 into the carry flag.
+void CPU::shiftTailRight(uint8_t& target) {
+    m_flags.carry = (target & 1u) != 0;
+
+    // Save the 7th bit
+    uint8_t bit7 = (target >> 7u);
+
+    // Shift the entire number right
+    target >>= 1u;
+
+    // Restore the 7th bit
+    target |= (bit7 << 7u);
+
+    m_flags.zero = target == 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
+}
+
+void CPU::SRA_r(RegisterOperand target) {
+    shiftTailRight(m_registers.get(target));
+}
+
+void CPU::SRA_HL() {
+    shiftTailRight(m_mmu.byteAt(m_registers.HL()));
+}
+
+// Shift `target` to the right by 1 bit position, after copying bit 0 into the carry flag
+void CPU::shiftRight(uint8_t& target) {
+    m_flags.carry = (target & 1u) != 0;
+
+    target >>= 1u;
+
+    m_flags.zero = target == 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
+}
+
+void CPU::SRL_r(RegisterOperand target) {
+    shiftRight(m_registers.get(target));
+}
+
+void CPU::SRL_HL() {
+    shiftRight(m_mmu.byteAt(m_registers.HL()));
+}
+
+// Check if the bit at position `bit` in `byte` is zero. Set the zero flag accordingly.
+void CPU::testBit(BitOperand bit, uint8_t byte) {
+    uint8_t nthBit = ((byte >> static_cast<uint8_t>(bit)) & 1u);
+
+    m_flags.zero = nthBit == 0;
+    m_flags.halfCarry = true;
+    m_flags.subtract = false;
+}
+
+void CPU::BIT_b_r(BitOperand bit, RegisterOperand reg) {
+    testBit(bit, m_registers.get(reg));
+}
+
+void CPU::BIT_b_HL(BitOperand bit) {
+    testBit(bit, m_mmu.byteAt(m_registers.HL()));
+}
+
+// Set the bit at position `bit` in `target`. No flags are affected.
+void CPU::setBit(BitOperand bit, uint8_t &target) {
+    target |= (1u << static_cast<uint8_t>(bit));
+}
+
+void CPU::SET_b_r(BitOperand bit, RegisterOperand reg) {
+    setBit(bit, m_registers.get(reg));
+}
+
+void CPU::SET_b_HL(BitOperand bit) {
+    setBit(bit, m_mmu.byteAt(m_registers.HL()));
+}
+
+// Reset the bit at position `bit` in `target`. No flags are affected.
+void CPU::resetBit(BitOperand bit, uint8_t &target) {
+    target &= ~(1u << static_cast<uint8_t>(bit));
+}
+
+void CPU::RES_b_r(BitOperand bit, RegisterOperand reg) {
+    resetBit(bit, m_registers.get(reg));
+}
+
+void CPU::RES_b_HL(BitOperand bit) {
+    resetBit(bit, m_mmu.byteAt(m_registers.HL()));
+}
+
 void CPU::step() {
-    auto current = static_cast<OpCode>(m_mmu.readByte(m_pc++));
+    auto current = static_cast<OpCode>(m_mmu.byteAt(m_pc++));
     switch (current) {
         case OpCode::LD_B_B:
             LD_r_r(RegisterOperand::B, RegisterOperand::B);
@@ -1352,778 +1940,4 @@ void CPU::stepPrefix() {
             std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
             exit(1);
     }
-}
-
-void CPU::load(uint8_t& target, uint8_t value) {
-    target = value;
-}
-
-void CPU::LD_r_r(RegisterOperand target, RegisterOperand value) {
-    load(m_registers.get(target), m_registers.get(value));
-}
-
-void CPU::LD_r_n(RegisterOperand target) {
-    load(m_registers.get(target), m_mmu.readByte(m_pc++));
-}
-
-void CPU::LD_r_HL(RegisterOperand target) {
-    load(m_registers.get(target), m_mmu.readByte(m_registers.getHL()));
-}
-
-void CPU::LD_HL_r(RegisterOperand value) {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    load(dummy, m_registers.get(value));
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-void CPU::LD_HL_n() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    load(dummy, m_mmu.readByte(m_pc++));
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-void CPU::LD_A_BC() {
-    load(m_registers.a, m_mmu.readByte(m_registers.getBC()));
-}
-
-void CPU::LD_A_DE() {
-    load(m_registers.a, m_mmu.readByte(m_registers.getDE()));
-}
-
-void CPU::LD_A_nn() {
-    uint8_t lower = m_mmu.readByte(m_pc++);
-    uint8_t higher = m_mmu.readByte(m_pc++);
-    uint16_t nn = (higher << 8u) | lower;
-
-    load(m_registers.a, m_mmu.readByte(nn));
-}
-
-void CPU::LD_BC_A() {
-    load(m_mmu.byteAt(m_registers.getBC()), m_registers.a);
-}
-
-void CPU::LD_DE_A() {
-    load(m_mmu.byteAt(m_registers.getDE()), m_registers.a);
-}
-
-void CPU::LD_nn_A() {
-    uint8_t lower = m_mmu.readByte(m_pc++);
-    uint8_t higher = m_mmu.readByte(m_pc++);
-    uint16_t nn = (higher << 8u) | lower;
-
-    load(m_mmu.byteAt(nn), m_registers.a);
-}
-
-void CPU::load(uint16_t& target, uint16_t value) {
-    target = value;
-}
-
-void CPU::LD_dd_nn(RegisterPairOperand target) {
-    uint8_t lower = m_mmu.readByte(m_pc++);
-    uint8_t higher = m_mmu.readByte(m_pc++);
-    uint16_t nn = (higher << 8u) | lower;
-
-    load(m_registers.get(target), nn);
-}
-
-void CPU::LD_HL_nn() {
-    uint8_t lower = m_mmu.readByte(m_pc++);
-    uint8_t higher = m_mmu.readByte(m_pc++);
-    uint16_t nn = (higher << 8u) | lower;
-
-    load(m_registers.l, m_mmu.byteAt(nn));
-    load(m_registers.h, m_mmu.byteAt(nn + 1));
-}
-
-void CPU::LD_nn_HL() {
-    uint8_t lower = m_mmu.readByte(m_pc++);
-    uint8_t higher = m_mmu.readByte(m_pc++);
-    uint16_t nn = (higher << 8u) | lower;
-
-    load(m_mmu.byteAt(nn), m_registers.l);
-    load(m_mmu.byteAt(nn + 1), m_registers.h);
-}
-
-void CPU::LD_SP_HL() {
-    load(m_registers.sp, m_registers.HL());
-}
-
-void CPU::push(uint16_t value) {
-    uint8_t high = (value >> 8u);
-    m_mmu.byteAt(--m_registers.sp) = high;
-
-    uint8_t low = (value & 0xFFu);
-    m_mmu.byteAt(--m_registers.sp) = low;
-}
-
-void CPU::PUSH_qq(RegisterPairStackOperand value) {
-    push(m_registers.get(value));
-}
-
-void CPU::pop(uint16_t& target) {
-    uint8_t low = m_mmu.byteAt(m_registers.sp--);
-    uint8_t high = m_mmu.byteAt(m_registers.sp--);
-
-    target = (high << 8u) | low;
-}
-
-void CPU::POP_qq(RegisterPairStackOperand target) {
-    pop(m_registers.get(target));
-}
-
-// Add `value` to the register A, and set/reset the necessary flags
-void CPU::add(uint8_t value) {
-    uint8_t result = m_registers.a + value;
-
-    m_flags.zero = result == 0;
-    m_flags.subtract = false;
-    m_flags.carry = result < value;
-    m_flags.halfCarry = (m_registers.a & 0xF) + (value & 0xF) > 0xF;
-
-    m_registers.a = result;
-}
-
-void CPU::ADDA_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: add(m_registers.b); break;
-        case RegisterOperand::C: add(m_registers.c); break;
-        case RegisterOperand::D: add(m_registers.d); break;
-        case RegisterOperand::E: add(m_registers.e); break;
-        case RegisterOperand::H: add(m_registers.h); break;
-        case RegisterOperand::L: add(m_registers.l); break;
-        case RegisterOperand::A: add(m_registers.a); break;
-    }
-}
-
-void CPU::ADDA_n() {
-    add(m_mmu.readByte(m_pc++));
-}
-
-void CPU::ADDA_HL() {
-    add(m_mmu.readByte(m_registers.getHL()));
-}
-
-// Add `value` plus the carry flag to the register A, and set/reset the necessary flags
-void CPU::addWithCarry(uint8_t value) {
-    add(value + (m_flags.carry ? 1 : 0));
-}
-
-void CPU::ADCA_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: addWithCarry(m_registers.b); break;
-        case RegisterOperand::C: addWithCarry(m_registers.c); break;
-        case RegisterOperand::D: addWithCarry(m_registers.d); break;
-        case RegisterOperand::E: addWithCarry(m_registers.e); break;
-        case RegisterOperand::H: addWithCarry(m_registers.h); break;
-        case RegisterOperand::L: addWithCarry(m_registers.l); break;
-        case RegisterOperand::A: addWithCarry(m_registers.a); break;
-    }
-}
-
-void CPU::ADCA_n() {
-    addWithCarry(m_mmu.readByte(m_pc++));
-}
-
-void CPU::ADCA_HL() {
-    addWithCarry(m_mmu.readByte(m_registers.getHL()));
-}
-
-// Subtract `value` from the register A, set the correct flags,
-// and store the result in register A
-void CPU::subtract(uint8_t value) {
-    uint8_t result = m_registers.a - value;
-
-    m_flags.zero = result == 0;
-    m_flags.subtract = true;
-    m_flags.carry = result > value;
-    m_flags.halfCarry = (m_registers.a & 0x0F) < (value & 0x0F);
-
-    m_registers.a = result;
-}
-
-void CPU::SUB_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: subtract(m_registers.b); break;
-        case RegisterOperand::C: subtract(m_registers.c); break;
-        case RegisterOperand::D: subtract(m_registers.d); break;
-        case RegisterOperand::E: subtract(m_registers.e); break;
-        case RegisterOperand::H: subtract(m_registers.h); break;
-        case RegisterOperand::L: subtract(m_registers.l); break;
-        case RegisterOperand::A: subtract(m_registers.a); break;
-    }
-}
-
-void CPU::SUB_n() {
-    subtract(m_mmu.readByte(m_pc++));
-}
-
-void CPU::SUB_HL() {
-    subtract(m_mmu.readByte(m_registers.getHL()));
-}
-
-void CPU::subtractWithCarry(uint8_t value) {
-    subtract(value + (m_flags.carry ? 1 : 0));
-}
-
-void CPU::SBCA_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: subtractWithCarry(m_registers.b); break;
-        case RegisterOperand::C: subtractWithCarry(m_registers.c); break;
-        case RegisterOperand::D: subtractWithCarry(m_registers.d); break;
-        case RegisterOperand::E: subtractWithCarry(m_registers.e); break;
-        case RegisterOperand::H: subtractWithCarry(m_registers.h); break;
-        case RegisterOperand::L: subtractWithCarry(m_registers.l); break;
-        case RegisterOperand::A: subtractWithCarry(m_registers.a); break;
-    }
-}
-
-void CPU::SBCA_n() {
-    subtractWithCarry(m_mmu.readByte(m_pc++));
-}
-
-void CPU::SBCA_HL() {
-    subtractWithCarry(m_mmu.readByte(m_registers.getHL()));
-}
-
-void CPU::bitwiseAnd(uint8_t value) {
-    m_registers.a &= value;
-
-    m_flags.zero = m_registers.a == 0;
-    m_flags.subtract = false;
-    m_flags.carry = false;
-    m_flags.halfCarry = true;
-}
-
-void CPU::AND_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: bitwiseAnd(m_registers.b); break;
-        case RegisterOperand::C: bitwiseAnd(m_registers.c); break;
-        case RegisterOperand::D: bitwiseAnd(m_registers.d); break;
-        case RegisterOperand::E: bitwiseAnd(m_registers.e); break;
-        case RegisterOperand::H: bitwiseAnd(m_registers.h); break;
-        case RegisterOperand::L: bitwiseAnd(m_registers.l); break;
-        case RegisterOperand::A: bitwiseAnd(m_registers.a); break;
-    }
-}
-
-void CPU::AND_n() {
-    bitwiseAnd(m_mmu.readByte(m_pc++));
-}
-
-void CPU::AND_HL() {
-    bitwiseAnd(m_mmu.readByte(m_registers.getHL()));
-}
-
-void CPU::bitwiseOr(uint8_t value) {
-    m_registers.a |= value;
-
-    m_flags.zero = m_registers.a == 0;
-    m_flags.subtract = false;
-    m_flags.carry = false;
-    m_flags.halfCarry = false;
-}
-
-void CPU::OR_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: bitwiseOr(m_registers.b); break;
-        case RegisterOperand::C: bitwiseOr(m_registers.c); break;
-        case RegisterOperand::D: bitwiseOr(m_registers.d); break;
-        case RegisterOperand::E: bitwiseOr(m_registers.e); break;
-        case RegisterOperand::H: bitwiseOr(m_registers.h); break;
-        case RegisterOperand::L: bitwiseOr(m_registers.l); break;
-        case RegisterOperand::A: bitwiseOr(m_registers.a); break;
-    }
-}
-
-void CPU::OR_n() {
-    bitwiseOr(m_mmu.readByte(m_pc++));
-}
-
-void CPU::OR_HL() {
-    bitwiseOr(m_mmu.readByte(m_registers.getHL()));
-}
-
-void CPU::bitwiseXor(uint8_t value) {
-    m_registers.a ^= value;
-
-    m_flags.zero = m_registers.a == 0;
-    m_flags.subtract = false;
-    m_flags.carry = false;
-    m_flags.halfCarry = false;
-}
-
-void CPU::XOR_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: bitwiseXor(m_registers.b); break;
-        case RegisterOperand::C: bitwiseXor(m_registers.c); break;
-        case RegisterOperand::D: bitwiseXor(m_registers.d); break;
-        case RegisterOperand::E: bitwiseXor(m_registers.e); break;
-        case RegisterOperand::H: bitwiseXor(m_registers.h); break;
-        case RegisterOperand::L: bitwiseXor(m_registers.l); break;
-        case RegisterOperand::A: bitwiseXor(m_registers.a); break;
-    }
-}
-
-void CPU::XOR_n() {
-    bitwiseXor(m_mmu.readByte(m_pc++));
-}
-
-void CPU::XOR_HL() {
-    bitwiseXor(m_mmu.readByte(m_registers.getHL()));
-}
-
-// Compares `value` with (subtracts it from) the register A, setting the appropriate
-// flags but not storing the result.
-void CPU::compare(uint8_t value) {
-    uint8_t result = m_registers.a - value;
-
-    m_flags.zero = result == 0;
-    m_flags.subtract = true;
-    m_flags.carry = result > value;
-    m_flags.halfCarry = (m_registers.a & 0x0F) < (value & 0x0F);
-}
-
-void CPU::CP_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: compare(m_registers.b); break;
-        case RegisterOperand::C: compare(m_registers.c); break;
-        case RegisterOperand::D: compare(m_registers.d); break;
-        case RegisterOperand::E: compare(m_registers.e); break;
-        case RegisterOperand::H: compare(m_registers.h); break;
-        case RegisterOperand::L: compare(m_registers.l); break;
-        case RegisterOperand::A: compare(m_registers.a); break;
-    }
-}
-
-void CPU::CP_n() {
-    compare(m_mmu.readByte(m_pc++));
-}
-
-void CPU::CP_HL() {
-    compare(m_mmu.readByte(m_registers.getHL()));
-}
-
-void CPU::increment(uint8_t &target) {
-    uint8_t result = target + 1;
-
-    m_flags.zero = result == 0;
-    m_flags.subtract = false;
-    m_flags.halfCarry = (target & (1 << 2)) != 0 && (result & (1 << 2)) == 0;
-
-    target = result;
-}
-
-void CPU::INC_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: increment(m_registers.b); break;
-        case RegisterOperand::C: increment(m_registers.c); break;
-        case RegisterOperand::D: increment(m_registers.d); break;
-        case RegisterOperand::E: increment(m_registers.e); break;
-        case RegisterOperand::H: increment(m_registers.h); break;
-        case RegisterOperand::L: increment(m_registers.l); break;
-        case RegisterOperand::A: increment(m_registers.a); break;
-    }
-}
-
-void CPU::INC_HL() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    increment(dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-void CPU::decrement(uint8_t& target) {
-    uint8_t result = target - 1;
-
-    m_flags.zero = result == 0;
-    m_flags.subtract = true;
-    m_flags.halfCarry = ((result ^ 0x01 ^ target) & 0x10) == 0x10;
-
-    target = result;
-}
-
-void CPU::DEC_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: decrement(m_registers.b); break;
-        case RegisterOperand::C: decrement(m_registers.c); break;
-        case RegisterOperand::D: decrement(m_registers.d); break;
-        case RegisterOperand::E: decrement(m_registers.e); break;
-        case RegisterOperand::H: decrement(m_registers.h); break;
-        case RegisterOperand::L: decrement(m_registers.l); break;
-        case RegisterOperand::A: decrement(m_registers.a); break;
-    }
-}
-
-void CPU::DEC_HL() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    decrement(dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-// Retroactively transform the previous addition or subtraction into a BCD operation
-void CPU::DAA() {
-    if (m_flags.subtract) {
-        // After a subtraction, only adjust if a carry and/or half carry occurred
-        if (m_flags.carry) {
-            m_registers.a -= 0x60;
-        }
-
-        if (m_flags.halfCarry) {
-            m_registers.a -= 0x6;
-        }
-    } else {
-        // After an addition, only adjust if a carry and/or half carry occurred
-        // or if the result is out of bounds
-        if (m_flags.carry || m_registers.a > 0x99) {
-            m_registers.a += 0x60;
-            m_flags.carry = true;
-        }
-
-        if (m_flags.halfCarry || (m_registers.a & 0x0f) > 0x09) {
-            m_registers.a += 0x6;
-        }
-    }
-
-    // Always update these flags
-    m_flags.zero = m_registers.a == 0;
-    m_flags.halfCarry = false;
-}
-
-// Invert the contents of register A
-void CPU::CPL() {
-    m_registers.a ^= 0xFF;
-
-    m_flags.subtract = true;
-    m_flags.halfCarry = true;
-}
-
-// Invert the carry flag
-void CPU::CCF() {
-    m_flags.carry = !m_flags.carry;
-
-    m_flags.subtract = false;
-    m_flags.halfCarry = false;
-}
-
-// Set the carry flag
-void CPU::SCF() {
-    m_flags.carry = true;
-
-    m_flags.subtract = false;
-    m_flags.halfCarry = false;
-}
-
-void CPU::NOP() {
-    // Nothing!
-}
-
-// Rotate `target` left 1 bit position, copying the sign bit to the carry flag and bit 0
-void CPU::rotateLeft(uint8_t &target) {
-    uint8_t signBit = target >> 7u;
-
-    target <<= 1u;
-    target ^= signBit;
-
-    m_flags.carry = signBit != 0;
-    m_flags.halfCarry = false;
-    m_flags.subtract = false;
-}
-
-void CPU::RLCA() {
-    rotateLeft(m_registers.a);
-}
-
-void CPU::RLC_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: rotateLeft(m_registers.b); break;
-        case RegisterOperand::C: rotateLeft(m_registers.c); break;
-        case RegisterOperand::D: rotateLeft(m_registers.d); break;
-        case RegisterOperand::E: rotateLeft(m_registers.e); break;
-        case RegisterOperand::H: rotateLeft(m_registers.h); break;
-        case RegisterOperand::L: rotateLeft(m_registers.l); break;
-        case RegisterOperand::A: rotateLeft(m_registers.a); break;
-    }
-}
-
-void CPU::RLC_HL() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    rotateLeft(dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-// Rotate `target` left 1 bit position through the carry flag,
-// copying the previous contents of the carry flag to bit 0
-void CPU::rotateLeftThroughCarry(uint8_t &target) {
-    uint8_t prevCarryFlag = (m_flags.carry ? 1 : 0);
-
-    std::bitset<9> value{target};
-    value[8] = prevCarryFlag;
-
-    value <<= 1u;
-    value[0] = prevCarryFlag;
-
-    target = static_cast<uint8_t>(value.to_ulong());
-
-    m_flags.carry = value[8];
-    m_flags.halfCarry = false;
-    m_flags.subtract = false;
-}
-
-void CPU::RLA() {
-    rotateLeftThroughCarry(m_registers.a);
-}
-
-void CPU::RL_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: rotateLeftThroughCarry(m_registers.b); break;
-        case RegisterOperand::C: rotateLeftThroughCarry(m_registers.c); break;
-        case RegisterOperand::D: rotateLeftThroughCarry(m_registers.d); break;
-        case RegisterOperand::E: rotateLeftThroughCarry(m_registers.e); break;
-        case RegisterOperand::H: rotateLeftThroughCarry(m_registers.h); break;
-        case RegisterOperand::L: rotateLeftThroughCarry(m_registers.l); break;
-        case RegisterOperand::A: rotateLeftThroughCarry(m_registers.a); break;
-    }
-}
-
-void CPU::RL_HL() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    rotateLeftThroughCarry(dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-void CPU::rotateRight(uint8_t &target) {
-    uint8_t zerothBit = target & 1u;
-
-    target >>= 1u;
-    target ^= (zerothBit << 7u);
-
-    m_flags.carry = zerothBit != 0;
-    m_flags.halfCarry = false;
-    m_flags.subtract = false;
-}
-
-void CPU::RRCA() {
-    rotateRight(m_registers.a);
-}
-
-void CPU::RRC_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: rotateRight(m_registers.b); break;
-        case RegisterOperand::C: rotateRight(m_registers.c); break;
-        case RegisterOperand::D: rotateRight(m_registers.d); break;
-        case RegisterOperand::E: rotateRight(m_registers.e); break;
-        case RegisterOperand::H: rotateRight(m_registers.h); break;
-        case RegisterOperand::L: rotateRight(m_registers.l); break;
-        case RegisterOperand::A: rotateRight(m_registers.a); break;
-    }
-}
-
-void CPU::RRC_HL() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    rotateRight(dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-void CPU::rotateRightThroughCarry(uint8_t &target) {
-    uint8_t prevCarryFlag = (m_flags.carry ? 1 : 0);
-
-    std::bitset<9> value{target};
-    value <<= 1u;
-    value[0] = prevCarryFlag;
-
-    value >>= 1u;
-    value[8] = prevCarryFlag;
-
-    target = static_cast<uint8_t>((value >> 1).to_ulong());
-
-    m_flags.carry = value[0];
-    m_flags.halfCarry = false;
-    m_flags.subtract = false;
-}
-
-void CPU::RRA() {
-    rotateRightThroughCarry(m_registers.a);
-}
-
-void CPU::RR_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: rotateRightThroughCarry(m_registers.b); break;
-        case RegisterOperand::C: rotateRightThroughCarry(m_registers.c); break;
-        case RegisterOperand::D: rotateRightThroughCarry(m_registers.d); break;
-        case RegisterOperand::E: rotateRightThroughCarry(m_registers.e); break;
-        case RegisterOperand::H: rotateRightThroughCarry(m_registers.h); break;
-        case RegisterOperand::L: rotateRightThroughCarry(m_registers.l); break;
-        case RegisterOperand::A: rotateRightThroughCarry(m_registers.a); break;
-    }
-}
-
-void CPU::RR_HL() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    rotateRightThroughCarry(dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-// Shift `target` to the left by 1 bit position, after copying bit 7 into the carry flag
-void CPU::shiftLeft(uint8_t& target) {
-    m_flags.carry = (target >> 7u) != 0;
-
-    target <<= 1u;
-
-    m_flags.zero = target == 0;
-    m_flags.halfCarry = false;
-    m_flags.subtract = false;
-}
-
-void CPU::SLA_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: shiftLeft(m_registers.b); break;
-        case RegisterOperand::C: shiftLeft(m_registers.c); break;
-        case RegisterOperand::D: shiftLeft(m_registers.d); break;
-        case RegisterOperand::E: shiftLeft(m_registers.e); break;
-        case RegisterOperand::H: shiftLeft(m_registers.h); break;
-        case RegisterOperand::L: shiftLeft(m_registers.l); break;
-        case RegisterOperand::A: shiftLeft(m_registers.a); break;
-    }
-}
-
-void CPU::SLA_HL() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    shiftLeft(dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-// Shift the lower 7 bits (0-6) of `target` 1 bit position to the right,
-// after copying bit 0 into the carry flag.
-void CPU::shiftTailRight(uint8_t& target) {
-    m_flags.carry = (target & 1u) != 0;
-
-    // Save the 7th bit
-    uint8_t bit7 = (target >> 7u);
-
-    // Shift the entire number right
-    target >>= 1u;
-
-    // Restore the 7th bit
-    target |= (bit7 << 7u);
-
-    m_flags.zero = target == 0;
-    m_flags.halfCarry = false;
-    m_flags.subtract = false;
-}
-
-void CPU::SRA_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: shiftTailRight(m_registers.b); break;
-        case RegisterOperand::C: shiftTailRight(m_registers.c); break;
-        case RegisterOperand::D: shiftTailRight(m_registers.d); break;
-        case RegisterOperand::E: shiftTailRight(m_registers.e); break;
-        case RegisterOperand::H: shiftTailRight(m_registers.h); break;
-        case RegisterOperand::L: shiftTailRight(m_registers.l); break;
-        case RegisterOperand::A: shiftTailRight(m_registers.a); break;
-    }
-}
-
-void CPU::SRA_HL() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    shiftTailRight(dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-// Shift `target` to the right by 1 bit position, after copying bit 0 into the carry flag
-void CPU::shiftRight(uint8_t& target) {
-    m_flags.carry = (target & 1u) != 0;
-
-    target >>= 1u;
-
-    m_flags.zero = target == 0;
-    m_flags.halfCarry = false;
-    m_flags.subtract = false;
-}
-
-void CPU::SRL_r(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: shiftRight(m_registers.b); break;
-        case RegisterOperand::C: shiftRight(m_registers.c); break;
-        case RegisterOperand::D: shiftRight(m_registers.d); break;
-        case RegisterOperand::E: shiftRight(m_registers.e); break;
-        case RegisterOperand::H: shiftRight(m_registers.h); break;
-        case RegisterOperand::L: shiftRight(m_registers.l); break;
-        case RegisterOperand::A: shiftRight(m_registers.a); break;
-    }
-}
-
-void CPU::SRL_HL() {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    shiftRight(dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-// Check if the bit at position `bit` in `byte` is zero. Set the zero flag accordingly.
-void CPU::testBit(BitOperand bit, uint8_t byte) {
-    uint8_t nthBit = ((byte >> static_cast<uint8_t>(bit)) & 1u);
-
-    m_flags.zero = nthBit == 0;
-    m_flags.halfCarry = true;
-    m_flags.subtract = false;
-}
-
-void CPU::BIT_b_r(BitOperand bit, RegisterOperand reg) {
-    switch (reg) {
-        case RegisterOperand::B: testBit(bit, m_registers.b); break;
-        case RegisterOperand::C: testBit(bit, m_registers.c); break;
-        case RegisterOperand::D: testBit(bit, m_registers.d); break;
-        case RegisterOperand::E: testBit(bit, m_registers.e); break;
-        case RegisterOperand::H: testBit(bit, m_registers.h); break;
-        case RegisterOperand::L: testBit(bit, m_registers.l); break;
-        case RegisterOperand::A: testBit(bit, m_registers.a); break;
-    }
-}
-
-void CPU::BIT_b_HL(BitOperand bit) {
-    testBit(bit, m_mmu.readByte(m_registers.getHL()));
-}
-
-// Set the bit at position `bit` in `target`. No flags are affected.
-void CPU::setBit(BitOperand bit, uint8_t &target) {
-    target |= (1u << static_cast<uint8_t>(bit));
-}
-
-void CPU::SET_b_r(BitOperand bit, RegisterOperand reg) {
-    switch (reg) {
-        case RegisterOperand::B: setBit(bit, m_registers.b); break;
-        case RegisterOperand::C: setBit(bit, m_registers.c); break;
-        case RegisterOperand::D: setBit(bit, m_registers.d); break;
-        case RegisterOperand::E: setBit(bit, m_registers.e); break;
-        case RegisterOperand::H: setBit(bit, m_registers.h); break;
-        case RegisterOperand::L: setBit(bit, m_registers.l); break;
-        case RegisterOperand::A: setBit(bit, m_registers.a); break;
-    }
-}
-
-void CPU::SET_b_HL(BitOperand bit) {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    setBit(bit, dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
-}
-
-// Reset the bit at position `bit` in `target`. No flags are affected.
-void CPU::resetBit(BitOperand bit, uint8_t &target) {
-    target &= ~(1u << static_cast<uint8_t>(bit));
-}
-
-void CPU::RES_b_r(BitOperand bit, RegisterOperand reg) {
-    switch (reg) {
-        case RegisterOperand::B: resetBit(bit, m_registers.b); break;
-        case RegisterOperand::C: resetBit(bit, m_registers.c); break;
-        case RegisterOperand::D: resetBit(bit, m_registers.d); break;
-        case RegisterOperand::E: resetBit(bit, m_registers.e); break;
-        case RegisterOperand::H: resetBit(bit, m_registers.h); break;
-        case RegisterOperand::L: resetBit(bit, m_registers.l); break;
-        case RegisterOperand::A: resetBit(bit, m_registers.a); break;
-    }
-}
-
-void CPU::RES_b_HL(BitOperand bit) {
-    uint8_t dummy = m_mmu.readByte(m_registers.getHL());
-    resetBit(bit, dummy);
-    m_mmu.writeByte(m_registers.getHL(), dummy);
 }

@@ -55,8 +55,7 @@ struct Registers {
 
     // Stack pointer
     uint16_t sp = 0xFF - 1;
-
-    // TODO: Use this instead of switching over a RegisterOperand
+    
     uint8_t& get(RegisterOperand target);
     uint16_t& get(RegisterPairOperand target);
     uint16_t& get(RegisterPairStackOperand target);
@@ -74,16 +73,6 @@ struct Registers {
 
     uint16_t& AF();
     uint16_t AF() const;
-
-    // TODO: Use the new interface above instead
-    uint16_t getBC() const;
-    void setBC(uint16_t value);
-
-    uint16_t getDE() const;
-    void setDE(uint16_t value);
-
-    uint16_t getHL() const;
-    void setHL(uint16_t value);
 };
 
 #endif //BIGBOY_REGISTERS_H
