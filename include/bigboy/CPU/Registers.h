@@ -39,10 +39,6 @@ enum class BitOperand : uint8_t {
 };
 
 struct Registers {
-    // Accumulator and flags
-    uint8_t a = 0;
-    Flags f = 0;
-
     // General purpose
     uint8_t c = 0;
     uint8_t b = 0;
@@ -53,12 +49,17 @@ struct Registers {
     uint8_t l = 0;
     uint8_t h = 0;
 
+    // Accumulator and flags
+    uint8_t f = 0;
+    uint8_t a = 0;
+
     // Stack pointer
     uint16_t sp = 0xFF - 1;
 
     // TODO: Use this instead of switching over a RegisterOperand
     uint8_t& get(RegisterOperand target);
     uint16_t& get(RegisterPairOperand target);
+    uint16_t& get(RegisterPairStackOperand target);
 
     // Some instructions allow two 8 bit registers to be read as one 16 bit register
     // Referred to as BC (B & C), DE (D & E), HL (H & L) and AF (A & F)
@@ -71,7 +72,8 @@ struct Registers {
     uint16_t& HL();
     uint16_t HL() const;
 
-    uint16_t AF() const; // AF is read-only
+    uint16_t& AF();
+    uint16_t AF() const;
 
     // TODO: Use the new interface above instead
     uint16_t getBC() const;

@@ -21,6 +21,19 @@ uint16_t& Registers::get(RegisterPairOperand target) {
     }
 }
 
+uint16_t& Registers::get(RegisterPairStackOperand target) {
+    switch (target) {
+        case RegisterPairStackOperand::BC: return BC();
+        case RegisterPairStackOperand::DE: return DE();
+        case RegisterPairStackOperand::HL: return HL();
+        case RegisterPairStackOperand::AF: return AF();
+    }
+}
+
+uint16_t& Registers::AF() {
+    return *static_cast<uint16_t*>(static_cast<void*>(&f));
+}
+
 uint16_t Registers::AF() const {
     return static_cast<uint16_t>(a) << 8u
            | static_cast<uint16_t>(f);

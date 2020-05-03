@@ -3,21 +3,35 @@
 
 #include <cstdint>
 
-struct Flags {
+class Flag {
+    uint8_t& m_register;
+    uint8_t m_position;
+
+public:
+    // We can treat a Flags object like a normal uint8_t
+    Flag(uint8_t& register_, uint8_t position);
+
+    Flag& operator=(bool set);
+
+    operator bool();
+};
+
+class Flags {
+private:
     static constexpr uint8_t ZERO_FLAG_BYTE_POSITION = 7;
     static constexpr uint8_t SUBTRACT_FLAG_BYTE_POSITION = 6;
     static constexpr uint8_t HALF_CARRY_FLAG_BYTE_POSITION = 5;
     static constexpr uint8_t CARRY_FLAG_BYTE_POSITION = 4;
 
-    bool zero = false;
-    bool subtract = false;
-    bool half_carry = false;
-    bool carry = false;
+    uint8_t& m_register;
 
-    // We can treat a Flags object like a normal uint8_t
-    Flags(uint8_t byte);
+public:
+    Flag zero;
+    Flag subtract;
+    Flag halfCarry;
+    Flag carry;
 
-    operator uint8_t() const;
+    explicit Flags(uint8_t& register_);
 };
 
 #endif //BIGBOY_FLAGS_H

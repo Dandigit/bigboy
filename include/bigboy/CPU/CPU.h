@@ -14,14 +14,15 @@ public:
     };
 
 private:
-    Clock m_clock;
-    Registers m_registers;
+    Clock m_clock{};
+    Registers m_registers{};
+    Flags m_flags{m_registers.f};
 
     MMU m_mmu{};
-    uint16_t m_pc{0};
 
-    uint8_t m_halt;
-    uint8_t m_stop;
+    uint16_t m_pc = 0;
+    uint8_t m_halt = 0;
+    uint8_t m_stop = 0;
 
     void load(uint8_t& target, uint8_t value);
 
@@ -48,6 +49,9 @@ private:
     void LD_nn_HL();
 
     void LD_SP_HL();
+
+    void push(uint16_t value);
+    void PUSH_qq(RegisterPairStackOperand value);
 
     void add(uint8_t value);
 

@@ -1424,14 +1424,26 @@ void CPU::LD_SP_HL() {
     load(m_registers.sp, m_registers.HL());
 }
 
+void CPU::push(uint16_t value) {
+    uint8_t high = (value >> 8u);
+    m_mmu.byteAt(--m_registers.sp) = high;
+
+    uint8_t low = (value & 0xFFu);
+    m_mmu.byteAt(--m_registers.sp) = low;
+}
+
+void CPU::PUSH_qq(RegisterPairStackOperand value) {
+    push(m_registers.get(value));
+}
+
 // Add `value` to the register A, and set/reset the necessary flags
 void CPU::add(uint8_t value) {
     uint8_t result = m_registers.a + value;
 
-    m_registers.f.zero = result == 0;
-    m_registers.f.subtract = false;
-    m_registers.f.carry = result < value;
-    m_registers.f.half_carry = (m_registers.a & 0xF) + (value & 0xF) > 0xF;
+    m_flags.zero = result == 0;
+    m_flags.subtract = false;
+    m_flags.carry = result < value;
+    m_flags.halfCarry = (m_registers.a & 0xF) + (value & 0xF) > 0xF;
 
     m_registers.a = result;
 }
@@ -1458,7 +1470,7 @@ void CPU::ADDA_HL() {
 
 // Add `value` plus the carry flag to the register A, and set/reset the necessary flags
 void CPU::addWithCarry(uint8_t value) {
-    add(value + (m_registers.f.carry ? 1 : 0));
+    add(value + (m_flags.carry ? 1 : 0));
 }
 
 void CPU::ADCA_r(RegisterOperand target) {
@@ -1486,10 +1498,10 @@ void CPU::ADCA_HL() {
 void CPU::subtract(uint8_t value) {
     uint8_t result = m_registers.a - value;
 
-    m_registers.f.zero = result == 0;
-    m_registers.f.subtract = true;
-    m_registers.f.carry = result > value;
-    m_registers.f.half_carry = (m_registers.a & 0x0F) < (value & 0x0F);
+    m_flags.zero = result == 0;
+    m_flags.subtract = true;
+    m_flags.carry = result > value;
+    m_flags.halfCarry = (m_registers.a & 0x0F) < (value & 0x0F);
 
     m_registers.a = result;
 }
@@ -1515,7 +1527,7 @@ void CPU::SUB_HL() {
 }
 
 void CPU::subtractWithCarry(uint8_t value) {
-    subtract(value + (m_registers.f.carry ? 1 : 0));
+    subtract(value + (m_flags.carry ? 1 : 0));
 }
 
 void CPU::SBCA_r(RegisterOperand target) {
@@ -1541,10 +1553,10 @@ void CPU::SBCA_HL() {
 void CPU::bitwiseAnd(uint8_t value) {
     m_registers.a &= value;
 
-    m_registers.f.zero = m_registers.a == 0;
-    m_registers.f.subtract = false;
-    m_registers.f.carry = false;
-    m_registers.f.half_carry = true;
+    m_flags.zero = m_registers.a == 0;
+    m_flags.subtract = false;
+    m_flags.carry = false;
+    m_flags.halfCarry = true;
 }
 
 void CPU::AND_r(RegisterOperand target) {
@@ -1570,10 +1582,10 @@ void CPU::AND_HL() {
 void CPU::bitwiseOr(uint8_t value) {
     m_registers.a |= value;
 
-    m_registers.f.zero = m_registers.a == 0;
-    m_registers.f.subtract = false;
-    m_registers.f.carry = false;
-    m_registers.f.half_carry = false;
+    m_flags.zero = m_registers.a == 0;
+    m_flags.subtract = false;
+    m_flags.carry = false;
+    m_flags.halfCarry = false;
 }
 
 void CPU::OR_r(RegisterOperand target) {
@@ -1599,10 +1611,10 @@ void CPU::OR_HL() {
 void CPU::bitwiseXor(uint8_t value) {
     m_registers.a ^= value;
 
-    m_registers.f.zero = m_registers.a == 0;
-    m_registers.f.subtract = false;
-    m_registers.f.carry = false;
-    m_registers.f.half_carry = false;
+    m_flags.zero = m_registers.a == 0;
+    m_flags.subtract = false;
+    m_flags.carry = false;
+    m_flags.halfCarry = false;
 }
 
 void CPU::XOR_r(RegisterOperand target) {
@@ -1630,10 +1642,10 @@ void CPU::XOR_HL() {
 void CPU::compare(uint8_t value) {
     uint8_t result = m_registers.a - value;
 
-    m_registers.f.zero = result == 0;
-    m_registers.f.subtract = true;
-    m_registers.f.carry = result > value;
-    m_registers.f.half_carry = (m_registers.a & 0x0F) < (value & 0x0F);
+    m_flags.zero = result == 0;
+    m_flags.subtract = true;
+    m_flags.carry = result > value;
+    m_flags.halfCarry = (m_registers.a & 0x0F) < (value & 0x0F);
 }
 
 void CPU::CP_r(RegisterOperand target) {
@@ -1659,9 +1671,9 @@ void CPU::CP_HL() {
 void CPU::increment(uint8_t &target) {
     uint8_t result = target + 1;
 
-    m_registers.f.zero = result == 0;
-    m_registers.f.subtract = false;
-    m_registers.f.half_carry = (target & (1 << 2)) != 0 && (result & (1 << 2)) == 0;
+    m_flags.zero = result == 0;
+    m_flags.subtract = false;
+    m_flags.halfCarry = (target & (1 << 2)) != 0 && (result & (1 << 2)) == 0;
 
     target = result;
 }
@@ -1687,9 +1699,9 @@ void CPU::INC_HL() {
 void CPU::decrement(uint8_t& target) {
     uint8_t result = target - 1;
 
-    m_registers.f.zero = result == 0;
-    m_registers.f.subtract = true;
-    m_registers.f.half_carry = ((result ^ 0x01 ^ target) & 0x10) == 0x10;
+    m_flags.zero = result == 0;
+    m_flags.subtract = true;
+    m_flags.halfCarry = ((result ^ 0x01 ^ target) & 0x10) == 0x10;
 
     target = result;
 }
@@ -1714,55 +1726,55 @@ void CPU::DEC_HL() {
 
 // Retroactively transform the previous addition or subtraction into a BCD operation
 void CPU::DAA() {
-    if (m_registers.f.subtract) {
+    if (m_flags.subtract) {
         // After a subtraction, only adjust if a carry and/or half carry occurred
-        if (m_registers.f.carry) {
+        if (m_flags.carry) {
             m_registers.a -= 0x60;
         }
 
-        if (m_registers.f.half_carry) {
+        if (m_flags.halfCarry) {
             m_registers.a -= 0x6;
         }
     } else {
         // After an addition, only adjust if a carry and/or half carry occurred
         // or if the result is out of bounds
-        if (m_registers.f.carry || m_registers.a > 0x99) {
+        if (m_flags.carry || m_registers.a > 0x99) {
             m_registers.a += 0x60;
-            m_registers.f.carry = true;
+            m_flags.carry = true;
         }
 
-        if (m_registers.f.half_carry || (m_registers.a & 0x0f) > 0x09) {
+        if (m_flags.halfCarry || (m_registers.a & 0x0f) > 0x09) {
             m_registers.a += 0x6;
         }
     }
 
     // Always update these flags
-    m_registers.f.zero = m_registers.a == 0;
-    m_registers.f.half_carry = false;
+    m_flags.zero = m_registers.a == 0;
+    m_flags.halfCarry = false;
 }
 
 // Invert the contents of register A
 void CPU::CPL() {
     m_registers.a ^= 0xFF;
 
-    m_registers.f.subtract = true;
-    m_registers.f.half_carry = true;
+    m_flags.subtract = true;
+    m_flags.halfCarry = true;
 }
 
 // Invert the carry flag
 void CPU::CCF() {
-    m_registers.f.carry = !m_registers.f.carry;
+    m_flags.carry = !m_flags.carry;
 
-    m_registers.f.subtract = false;
-    m_registers.f.half_carry = false;
+    m_flags.subtract = false;
+    m_flags.halfCarry = false;
 }
 
 // Set the carry flag
 void CPU::SCF() {
-    m_registers.f.carry = true;
+    m_flags.carry = true;
 
-    m_registers.f.subtract = false;
-    m_registers.f.half_carry = false;
+    m_flags.subtract = false;
+    m_flags.halfCarry = false;
 }
 
 void CPU::NOP() {
@@ -1776,9 +1788,9 @@ void CPU::rotateLeft(uint8_t &target) {
     target <<= 1u;
     target ^= signBit;
 
-    m_registers.f.carry = signBit != 0;
-    m_registers.f.half_carry = false;
-    m_registers.f.subtract = false;
+    m_flags.carry = signBit != 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
 }
 
 void CPU::RLCA() {
@@ -1806,7 +1818,7 @@ void CPU::RLC_HL() {
 // Rotate `target` left 1 bit position through the carry flag,
 // copying the previous contents of the carry flag to bit 0
 void CPU::rotateLeftThroughCarry(uint8_t &target) {
-    uint8_t prevCarryFlag = (m_registers.f.carry ? 1 : 0);
+    uint8_t prevCarryFlag = (m_flags.carry ? 1 : 0);
 
     std::bitset<9> value{target};
     value[8] = prevCarryFlag;
@@ -1816,9 +1828,9 @@ void CPU::rotateLeftThroughCarry(uint8_t &target) {
 
     target = static_cast<uint8_t>(value.to_ulong());
 
-    m_registers.f.carry = value[8];
-    m_registers.f.half_carry = false;
-    m_registers.f.subtract = false;
+    m_flags.carry = value[8];
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
 }
 
 void CPU::RLA() {
@@ -1849,9 +1861,9 @@ void CPU::rotateRight(uint8_t &target) {
     target >>= 1u;
     target ^= (zerothBit << 7u);
 
-    m_registers.f.carry = zerothBit != 0;
-    m_registers.f.half_carry = false;
-    m_registers.f.subtract = false;
+    m_flags.carry = zerothBit != 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
 }
 
 void CPU::RRCA() {
@@ -1877,7 +1889,7 @@ void CPU::RRC_HL() {
 }
 
 void CPU::rotateRightThroughCarry(uint8_t &target) {
-    uint8_t prevCarryFlag = (m_registers.f.carry ? 1 : 0);
+    uint8_t prevCarryFlag = (m_flags.carry ? 1 : 0);
 
     std::bitset<9> value{target};
     value <<= 1u;
@@ -1888,9 +1900,9 @@ void CPU::rotateRightThroughCarry(uint8_t &target) {
 
     target = static_cast<uint8_t>((value >> 1).to_ulong());
 
-    m_registers.f.carry = value[0];
-    m_registers.f.half_carry = false;
-    m_registers.f.subtract = false;
+    m_flags.carry = value[0];
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
 }
 
 void CPU::RRA() {
@@ -1917,13 +1929,13 @@ void CPU::RR_HL() {
 
 // Shift `target` to the left by 1 bit position, after copying bit 7 into the carry flag
 void CPU::shiftLeft(uint8_t& target) {
-    m_registers.f.carry = (target >> 7u) != 0;
+    m_flags.carry = (target >> 7u) != 0;
 
     target <<= 1u;
 
-    m_registers.f.zero = target == 0;
-    m_registers.f.half_carry = false;
-    m_registers.f.subtract = false;
+    m_flags.zero = target == 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
 }
 
 void CPU::SLA_r(RegisterOperand target) {
@@ -1947,7 +1959,7 @@ void CPU::SLA_HL() {
 // Shift the lower 7 bits (0-6) of `target` 1 bit position to the right,
 // after copying bit 0 into the carry flag.
 void CPU::shiftTailRight(uint8_t& target) {
-    m_registers.f.carry = (target & 1u) != 0;
+    m_flags.carry = (target & 1u) != 0;
 
     // Save the 7th bit
     uint8_t bit7 = (target >> 7u);
@@ -1958,9 +1970,9 @@ void CPU::shiftTailRight(uint8_t& target) {
     // Restore the 7th bit
     target |= (bit7 << 7u);
 
-    m_registers.f.zero = target == 0;
-    m_registers.f.half_carry = false;
-    m_registers.f.subtract = false;
+    m_flags.zero = target == 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
 }
 
 void CPU::SRA_r(RegisterOperand target) {
@@ -1983,13 +1995,13 @@ void CPU::SRA_HL() {
 
 // Shift `target` to the right by 1 bit position, after copying bit 0 into the carry flag
 void CPU::shiftRight(uint8_t& target) {
-    m_registers.f.carry = (target & 1u) != 0;
+    m_flags.carry = (target & 1u) != 0;
 
     target >>= 1u;
 
-    m_registers.f.zero = target == 0;
-    m_registers.f.half_carry = false;
-    m_registers.f.subtract = false;
+    m_flags.zero = target == 0;
+    m_flags.halfCarry = false;
+    m_flags.subtract = false;
 }
 
 void CPU::SRL_r(RegisterOperand target) {
@@ -2014,9 +2026,9 @@ void CPU::SRL_HL() {
 void CPU::testBit(BitOperand bit, uint8_t byte) {
     uint8_t nthBit = ((byte >> static_cast<uint8_t>(bit)) & 1u);
 
-    m_registers.f.zero = nthBit == 0;
-    m_registers.f.half_carry = true;
-    m_registers.f.subtract = false;
+    m_flags.zero = nthBit == 0;
+    m_flags.halfCarry = true;
+    m_flags.subtract = false;
 }
 
 void CPU::BIT_b_r(BitOperand bit, RegisterOperand reg) {

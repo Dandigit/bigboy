@@ -172,6 +172,17 @@ enum class OpCode : uint8_t {
     LD_SP_HL = 0b11111001,
 
     // PUSH qq
+    // The contents of the register pair qq are pushed to the stack. First,
+    // the stack pointer (SP) is decremented, and the high-order byte of qq
+    // is loaded to the byte at the memory address specified by SP. Then,
+    // SP is decremented again and the low-order byte of qq is loaded into
+    // the byte at the memory address specified by SP. The register pair qq
+    // may be any of BC, DE, HL or AF.
+    // Bit-by-bit: 1 1 <q q> 0 1 0 1
+    PUSH_BC = 0b11000101,
+    PUSH_DE = 0b11010101,
+    PUSH_HL = 0b11100101,
+    PUSH_AF = 0b11110101,
 
     // POP qq
 
