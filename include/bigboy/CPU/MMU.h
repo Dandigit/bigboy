@@ -1,16 +1,16 @@
-#ifndef BIGBOY_MEMORYBUS_H
-#define BIGBOY_MEMORYBUS_H
+#ifndef BIGBOY_MMU_H
+#define BIGBOY_MMU_H
 
 #include <array>
 #include <cstdint>
 
-class MemoryBus {
+class MMU {
     std::array<uint8_t, 0xFFFF> m_memory{0};
 
 public:
-    MemoryBus() = default;
+    MMU() = default;
 
-    explicit MemoryBus(std::array<uint8_t, 0xFFFF> memory);
+    explicit MMU(std::array<uint8_t, 0xFFFF> memory);
 
     uint8_t& byteAt(uint16_t address);
 
@@ -19,4 +19,4 @@ public:
     void writeByte(uint16_t address, uint8_t value);
 };
 
-#endif //BIGBOY_MEMORYBUS_H
+#endif //BIGBOY_MMU_H

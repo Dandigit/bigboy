@@ -1,15 +1,13 @@
 #ifndef BIGBOY_CPU_H
 #define BIGBOY_CPU_H
 
-#include <bigboy/CPU/MemoryBus.h>
+#include <bigboy/CPU/MMU.h>
 #include <bigboy/CPU/OpCode.h>
 #include <bigboy/CPU/PrefixOpCode.h>
 #include <bigboy/CPU/Registers.h>
 
 class CPU {
 public:
-
-
     struct Clock {
         int m;
         int t;
@@ -19,7 +17,7 @@ private:
     Clock m_clock;
     Registers m_registers;
 
-    MemoryBus m_bus{};
+    MMU m_mmu{};
     uint16_t m_pc{0};
 
     uint8_t m_halt;
