@@ -158,6 +158,20 @@ enum class OpCode : uint8_t {
     LD_HL_nn = 0b00100001,
     LD_SP_nn = 0b00110001,
 
+    // LD HL, (nn) [opcode renamed to LD_HL_mm]
+    // The byte at the memory address (nn) is loaded into the low order byte
+    // (l) of the register pair HL and the byte at the next highest memory
+    // address (nn+1) is loaded into the high order portion (h).
+    // Bit-by-bit: 0 0 1 0 1 0 1 0 <n n n n n n n n> <n n n n n n n n>
+    LD_HL_mm = 0b00101010,
+
+    // LD (nn), HL
+    // The low order byte of the register pair HL (l) is loaded to the byte
+    // at the memory address (nn), and the high order byte (h) is loaded to
+    // the byte at the next highest memory address (nn+1).
+    // Bit-by-bit: 0 0 1 0 0 0 1 0
+    LD_nn_HL = 0b00100010,
+
     // ADD A, r:
     // The contents of register r are added to the contents of register A
     // (the Accumulator) and the result is stored in register A. Register
@@ -907,20 +921,34 @@ public:
         Flags f = 0;
 
         // General purpose
-        uint8_t b, c, d, e, h, l = 0;
+        uint8_t c = 0;
+        uint8_t b = 0;
+
+        uint8_t e = 0;
+        uint8_t d = 0;
+
+        uint8_t l = 0;
+        uint8_t h = 0;
 
         // Stack pointer
-        uint16_t sp;
+        uint16_t sp = 0;
 
-        // TODO: Use these instead of switching over a RegisterOperand
+        // TODO: Use this instead of switching over a RegisterOperand
         uint8_t& get(RegisterOperand target);
         uint16_t& get(RegisterPairOperand target);
 
         // Some instructions allow two 8 bit registers to be read as one 16 bit register
-        // Referred to as AF (A & F), BC (B & C), DE (D & E) and HL (H & L)
-        uint16_t getAF() const;
-        void setAF(uint16_t value);
+        // Referred to as BC (B & C), DE (D & E) and HL (H & L)
+        uint16_t& BC();
+        uint16_t BC() const;
 
+        uint16_t& DE();
+        uint16_t DE() const;
+
+        uint16_t& HL();
+        uint16_t HL() const;
+
+        // TODO: Use the new interface above instead
         uint16_t getBC() const;
         void setBC(uint16_t value);
 
@@ -972,9 +1000,13 @@ private:
     void LD_DE_A();
     void LD_nn_A();
 
-    void loadPair(RegisterPairOperand target, uint16_t value);
+    void load(uint16_t& target, uint16_t value);
 
     void LD_dd_nn(RegisterPairOperand target);
+
+    void LD_HL_nn();
+
+    void LD_nn_HL();
 
     void add(uint8_t value);
 
@@ -1107,7 +1139,8 @@ public:
 
     void reset();
 
-    Registers &registers();
+    Registers& registers();
+    const Registers& registers() const;
 };
 
 #endif //BIGBOY_CPU_H

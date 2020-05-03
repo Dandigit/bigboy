@@ -7,6 +7,27 @@ protected:
     CPU cpu{};
 };
 
+TEST_F(CPUTest, registerPairs) {
+    constexpr std::array<uint16_t, 5> values{0, 21, 532, 9000, 2};
+
+    #define TEST_REGISTER_PAIR(pair, low, high) \
+        do { \
+            for (const uint16_t value : values) { \
+                cpu.registers().pair = value; \
+                EXPECT_EQ(cpu.registers().pair, value); \
+                EXPECT_EQ(static_cast<const CPU&>(cpu).registers().pair, value); \
+                EXPECT_EQ(cpu.registers().low, (value & 0xFFu)); \
+                EXPECT_EQ(cpu.registers().high, (value >> 8u)); \
+            } \
+        } while (false)
+
+    TEST_REGISTER_PAIR(BC(), c, b);
+    TEST_REGISTER_PAIR(DE(), e, d);
+    TEST_REGISTER_PAIR(HL(), l, h);
+
+    #undef TEST_REGISTER_PAIR
+}
+
 TEST_F(CPUTest, ADDA_r) {
     constexpr std::array<uint8_t, 5> aValues{21, 0, 67, 99, 255};
     constexpr std::array<uint8_t, 5> rValues{10, 2, 255, 0, 33};
@@ -21,7 +42,7 @@ TEST_F(CPUTest, ADDA_r) {
                 cpu.load({static_cast<uint8_t>(OpCode::instruction)}); \
                 cpu.exec(); \
                 \
-                ASSERT_EQ(cpu.registers().a, static_cast<uint8_t>(aValues[i] + rValues[i])) \
+                EXPECT_EQ(cpu.registers().a, static_cast<uint8_t>(aValues[i] + rValues[i])) \
                     << "    in test of instruction " << #instruction << " on register " << #r; \
             } \
         } while (false)
@@ -40,7 +61,7 @@ TEST_F(CPUTest, ADDA_r) {
         cpu.load({static_cast<uint8_t>(OpCode::ADDA_A)});
         cpu.exec();
 
-        ASSERT_EQ(cpu.registers().a, static_cast<uint8_t>(aValue + aValue));
+        EXPECT_EQ(cpu.registers().a, static_cast<uint8_t>(aValue + aValue));
     }
 
     #undef TEST_FOR_REGISTER

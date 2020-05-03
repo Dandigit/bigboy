@@ -29,14 +29,40 @@ uint8_t& CPU::Registers::get(RegisterOperand target) {
     }
 }
 
-uint16_t CPU::Registers::getAF() const {
-    return static_cast<uint16_t>(a) << 8
-            | static_cast<uint16_t>(f);
+uint16_t& CPU::Registers::get(RegisterPairOperand target) {
+    switch (target) {
+        case RegisterPairOperand::BC: return BC();
+        case RegisterPairOperand::DE: return DE();
+        case RegisterPairOperand::HL: return HL();
+        case RegisterPairOperand::SP: return sp;
+    }
 }
 
-void CPU::Registers::setAF(uint16_t value) {
-    a = static_cast<uint8_t>((value & 0xFF00) >> 8);
-    f = static_cast<uint8_t>(value & 0xFF00);
+uint16_t& CPU::Registers::BC() {
+    return *static_cast<uint16_t*>(static_cast<void*>(&c));
+}
+
+uint16_t CPU::Registers::BC() const {
+    return static_cast<uint16_t>(b) << 8u
+           | static_cast<uint16_t>(c);
+}
+
+uint16_t& CPU::Registers::DE() {
+    return *static_cast<uint16_t*>(static_cast<void*>(&e));
+}
+
+uint16_t CPU::Registers::DE() const {
+    return static_cast<uint16_t>(d) << 8u
+           | static_cast<uint16_t>(e);
+}
+
+uint16_t& CPU::Registers::HL() {
+    return *static_cast<uint16_t*>(static_cast<void*>(&l));
+}
+
+uint16_t CPU::Registers::HL() const {
+    return static_cast<uint16_t>(h) << 8u
+           | static_cast<uint16_t>(l);
 }
 
 uint16_t CPU::Registers::getBC() const {
@@ -85,6 +111,10 @@ void CPU::MemoryBus::writeByte(uint16_t address, uint8_t value) {
 }
 
 CPU::Registers& CPU::registers() {
+    return m_registers;
+}
+
+const CPU::Registers& CPU::registers() const {
     return m_registers;
 }
 
@@ -344,6 +374,12 @@ void CPU::step() {
             break;
         case OpCode::LD_SP_nn:
             LD_dd_nn(RegisterPairOperand::SP);
+            break;
+        case OpCode::LD_HL_mm:
+            LD_HL_nn();
+            break;
+        case OpCode::LD_nn_HL:
+            LD_nn_HL();
             break;
         case OpCode::ADDA_B:
             ADDA_r(RegisterOperand::B);
@@ -1458,22 +1494,8 @@ void CPU::LD_nn_A() {
     load(m_bus.byteAt(nn), m_registers.a);
 }
 
-void CPU::loadPair(RegisterPairOperand target, uint16_t value) {
-    switch (target) {
-        case RegisterPairOperand::BC:
-            m_registers.setBC(value);
-            break;
-        case RegisterPairOperand::DE:
-            m_registers.setDE(value);
-            break;
-        case RegisterPairOperand::HL:
-            m_registers.setHL(value);
-            break;
-        case RegisterPairOperand::SP:
-            // Not really a register pair, just a 16-bit register
-            m_registers.sp = value;
-            break;
-    }
+void CPU::load(uint16_t& target, uint16_t value) {
+    target = value;
 }
 
 void CPU::LD_dd_nn(RegisterPairOperand target) {
@@ -1481,7 +1503,25 @@ void CPU::LD_dd_nn(RegisterPairOperand target) {
     uint8_t higher = m_bus.readByte(m_pc++);
     uint16_t nn = (higher << 8u) | lower;
 
-    loadPair(target, nn);
+    load(m_registers.get(target), nn);
+}
+
+void CPU::LD_HL_nn() {
+    uint8_t lower = m_bus.readByte(m_pc++);
+    uint8_t higher = m_bus.readByte(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    load(m_registers.l, m_bus.byteAt(nn));
+    load(m_registers.h, m_bus.byteAt(nn + 1));
+}
+
+void CPU::LD_nn_HL() {
+    uint8_t lower = m_bus.readByte(m_pc++);
+    uint8_t higher = m_bus.readByte(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    load(m_bus.byteAt(nn), m_registers.l);
+    load(m_bus.byteAt(nn + 1), m_registers.h);
 }
 
 // Add `value` to the register A, and set/reset the necessary flags
