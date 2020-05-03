@@ -277,6 +277,18 @@ void CPU::step() {
         case OpCode::LD_SP_HL:
             LD_SP_HL();
             break;
+        case OpCode::PUSH_BC:
+            PUSH_qq(RegisterPairStackOperand::BC);
+            break;
+        case OpCode::PUSH_DE:
+            PUSH_qq(RegisterPairStackOperand::DE);
+            break;
+        case OpCode::PUSH_HL:
+            PUSH_qq(RegisterPairStackOperand::HL);
+            break;
+        case OpCode::PUSH_AF:
+            PUSH_qq(RegisterPairStackOperand::AF);
+            break;
         case OpCode::ADDA_B:
             ADDA_r(RegisterOperand::B);
             break;
