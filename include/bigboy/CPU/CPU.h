@@ -172,6 +172,12 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 0 0 1 0 0 0 1 0
     LD_nn_HL = 0b00100010,
 
+    // LD SP, HL
+    // The contents of the register pair HL are loaded to the stack pointer
+    // (SP).
+    // Bit-by-bit: 1 1 1 1 1 0 0 1
+    LD_SP_HL = 0b11111001,
+
     // ADD A, r:
     // The contents of register r are added to the contents of register A
     // (the Accumulator) and the result is stored in register A. Register
@@ -1005,8 +1011,9 @@ private:
     void LD_dd_nn(RegisterPairOperand target);
 
     void LD_HL_nn();
-
     void LD_nn_HL();
+
+    void LD_SP_HL();
 
     void add(uint8_t value);
 

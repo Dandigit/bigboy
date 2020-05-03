@@ -381,6 +381,9 @@ void CPU::step() {
         case OpCode::LD_nn_HL:
             LD_nn_HL();
             break;
+        case OpCode::LD_SP_HL:
+            LD_SP_HL();
+            break;
         case OpCode::ADDA_B:
             ADDA_r(RegisterOperand::B);
             break;
@@ -1522,6 +1525,10 @@ void CPU::LD_nn_HL() {
 
     load(m_bus.byteAt(nn), m_registers.l);
     load(m_bus.byteAt(nn + 1), m_registers.h);
+}
+
+void CPU::LD_SP_HL() {
+    load(m_registers.sp, m_registers.HL());
 }
 
 // Add `value` to the register A, and set/reset the necessary flags
