@@ -289,6 +289,18 @@ void CPU::step() {
         case OpCode::PUSH_AF:
             PUSH_qq(RegisterPairStackOperand::AF);
             break;
+        case OpCode::POP_BC:
+            POP_qq(RegisterPairStackOperand::BC);
+            break;
+        case OpCode::POP_DE:
+            POP_qq(RegisterPairStackOperand::DE);
+            break;
+        case OpCode::POP_HL:
+            POP_qq(RegisterPairStackOperand::HL);
+            break;
+        case OpCode::POP_AF:
+            POP_qq(RegisterPairStackOperand::AF);
+            break;
         case OpCode::ADDA_B:
             ADDA_r(RegisterOperand::B);
             break;
@@ -1446,6 +1458,17 @@ void CPU::push(uint16_t value) {
 
 void CPU::PUSH_qq(RegisterPairStackOperand value) {
     push(m_registers.get(value));
+}
+
+void CPU::pop(uint16_t& target) {
+    uint8_t low = m_mmu.byteAt(m_registers.sp--);
+    uint8_t high = m_mmu.byteAt(m_registers.sp--);
+
+    target = (high << 8u) | low;
+}
+
+void CPU::POP_qq(RegisterPairStackOperand target) {
+    pop(m_registers.get(target));
 }
 
 // Add `value` to the register A, and set/reset the necessary flags

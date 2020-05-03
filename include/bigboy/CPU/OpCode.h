@@ -185,6 +185,17 @@ enum class OpCode : uint8_t {
     PUSH_AF = 0b11110101,
 
     // POP qq
+    // The top two bytes of the stack are popped into the register pair qq.
+    // First, the byte at the memory address specified by SP is loaded into
+    // the low-order byte of qq. SP is then incremented, and the byte at the
+    // memory address which it now specifies is loaded into the high-order
+    // byte of qq, and SP is incremented again. The register pair qq may be
+    // any of BC, DE, HL or AF.
+    // Bit-by-bit: 1 1 <q q> 0 0 0 1
+    POP_BC = 0b11000001,
+    POP_DE = 0b11010001,
+    POP_HL = 0b11100001,
+    POP_AF = 0b11110001,
 
     // ADD A, r:
     // The contents of register r are added to the contents of register A

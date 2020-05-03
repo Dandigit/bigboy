@@ -44,14 +44,17 @@ private:
     void load(uint16_t& target, uint16_t value);
 
     void LD_dd_nn(RegisterPairOperand target);
-
     void LD_HL_nn();
     void LD_nn_HL();
-
     void LD_SP_HL();
 
     void push(uint16_t value);
+
     void PUSH_qq(RegisterPairStackOperand value);
+
+    void pop(uint16_t& target);
+
+    void POP_qq(RegisterPairStackOperand target);
 
     void add(uint8_t value);
 
