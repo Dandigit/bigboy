@@ -3,118 +3,11 @@
 
 #include <bigboy/CPU/CPU.h>
 
-CPU::Registers::Flags::Flags(uint8_t byte) {
-    zero = ((byte >> ZERO_FLAG_BYTE_POSITION) & 0b1) != 0;
-    subtract = ((byte >> SUBTRACT_FLAG_BYTE_POSITION) & 0b1) != 0;
-    half_carry = ((byte >> HALF_CARRY_FLAG_BYTE_POSITION) & 0b1) != 0;
-    carry = ((byte >> CARRY_FLAG_BYTE_POSITION) & 0b1) != 0;
-}
-
-CPU::Registers::Flags::operator uint8_t() const {
-    return (zero ? 1 : 0) << ZERO_FLAG_BYTE_POSITION |
-            (subtract ? 1 : 0) << SUBTRACT_FLAG_BYTE_POSITION |
-            (half_carry ? 1 : 0) << HALF_CARRY_FLAG_BYTE_POSITION |
-            (carry ? 1 : 0) << CARRY_FLAG_BYTE_POSITION;
-}
-
-uint8_t& CPU::Registers::get(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: return b;
-        case RegisterOperand::C: return c;
-        case RegisterOperand::D: return d;
-        case RegisterOperand::E: return e;
-        case RegisterOperand::H: return h;
-        case RegisterOperand::L: return l;
-        case RegisterOperand::A: return a;
-    }
-}
-
-uint16_t& CPU::Registers::get(RegisterPairOperand target) {
-    switch (target) {
-        case RegisterPairOperand::BC: return BC();
-        case RegisterPairOperand::DE: return DE();
-        case RegisterPairOperand::HL: return HL();
-        case RegisterPairOperand::SP: return sp;
-    }
-}
-
-uint16_t& CPU::Registers::BC() {
-    return *static_cast<uint16_t*>(static_cast<void*>(&c));
-}
-
-uint16_t CPU::Registers::BC() const {
-    return static_cast<uint16_t>(b) << 8u
-           | static_cast<uint16_t>(c);
-}
-
-uint16_t& CPU::Registers::DE() {
-    return *static_cast<uint16_t*>(static_cast<void*>(&e));
-}
-
-uint16_t CPU::Registers::DE() const {
-    return static_cast<uint16_t>(d) << 8u
-           | static_cast<uint16_t>(e);
-}
-
-uint16_t& CPU::Registers::HL() {
-    return *static_cast<uint16_t*>(static_cast<void*>(&l));
-}
-
-uint16_t CPU::Registers::HL() const {
-    return static_cast<uint16_t>(h) << 8u
-           | static_cast<uint16_t>(l);
-}
-
-uint16_t CPU::Registers::getBC() const {
-    return static_cast<uint16_t>(b) << 8
-           | static_cast<uint16_t>(c);
-}
-
-void CPU::Registers::setBC(uint16_t value) {
-    b = static_cast<uint8_t>((value & 0xFF00) >> 8);
-    c = static_cast<uint8_t>(value & 0xFF00);
-}
-
-uint16_t CPU::Registers::getDE() const {
-    return static_cast<uint16_t>(d) << 8
-           | static_cast<uint16_t>(e);
-}
-
-void CPU::Registers::setDE(uint16_t value) {
-    d = static_cast<uint8_t>((value & 0xFF00) >> 8);
-    e = static_cast<uint8_t>(value & 0xFF00);
-}
-
-uint16_t CPU::Registers::getHL() const {
-    return static_cast<uint16_t>(h) << 8
-           | static_cast<uint16_t>(l);
-}
-
-void CPU::Registers::setHL(uint16_t value) {
-    h = static_cast<uint8_t>((value & 0xFF00) >> 8);
-    l = static_cast<uint8_t>(value & 0xFF00);
-}
-
-CPU::MemoryBus::MemoryBus(std::array<uint8_t, 0xFFFF> memory) :
-        m_memory{memory} {}
-
-uint8_t& CPU::MemoryBus::byteAt(uint16_t address) {
-    return m_memory[address];
-}
-
-uint8_t CPU::MemoryBus::readByte(uint16_t address) {
-    return m_memory[address];
-}
-
-void CPU::MemoryBus::writeByte(uint16_t address, uint8_t value) {
-    m_memory[address] = value;
-}
-
-CPU::Registers& CPU::registers() {
+Registers& CPU::registers() {
     return m_registers;
 }
 
-const CPU::Registers& CPU::registers() const {
+const Registers& CPU::registers() const {
     return m_registers;
 }
 
@@ -1543,7 +1436,7 @@ void CPU::add(uint8_t value) {
     m_registers.a = result;
 }
 
-void CPU::ADDA_r(CPU::RegisterOperand target) {
+void CPU::ADDA_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: add(m_registers.b); break;
         case RegisterOperand::C: add(m_registers.c); break;
@@ -1568,7 +1461,7 @@ void CPU::addWithCarry(uint8_t value) {
     add(value + (m_registers.f.carry ? 1 : 0));
 }
 
-void CPU::ADCA_r(CPU::RegisterOperand target) {
+void CPU::ADCA_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: addWithCarry(m_registers.b); break;
         case RegisterOperand::C: addWithCarry(m_registers.c); break;
@@ -1601,7 +1494,7 @@ void CPU::subtract(uint8_t value) {
     m_registers.a = result;
 }
 
-void CPU::SUB_r(CPU::RegisterOperand target) {
+void CPU::SUB_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: subtract(m_registers.b); break;
         case RegisterOperand::C: subtract(m_registers.c); break;
@@ -1625,7 +1518,7 @@ void CPU::subtractWithCarry(uint8_t value) {
     subtract(value + (m_registers.f.carry ? 1 : 0));
 }
 
-void CPU::SBCA_r(CPU::RegisterOperand target) {
+void CPU::SBCA_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: subtractWithCarry(m_registers.b); break;
         case RegisterOperand::C: subtractWithCarry(m_registers.c); break;
@@ -1654,7 +1547,7 @@ void CPU::bitwiseAnd(uint8_t value) {
     m_registers.f.half_carry = true;
 }
 
-void CPU::AND_r(CPU::RegisterOperand target) {
+void CPU::AND_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: bitwiseAnd(m_registers.b); break;
         case RegisterOperand::C: bitwiseAnd(m_registers.c); break;
@@ -1683,7 +1576,7 @@ void CPU::bitwiseOr(uint8_t value) {
     m_registers.f.half_carry = false;
 }
 
-void CPU::OR_r(CPU::RegisterOperand target) {
+void CPU::OR_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: bitwiseOr(m_registers.b); break;
         case RegisterOperand::C: bitwiseOr(m_registers.c); break;
@@ -1712,7 +1605,7 @@ void CPU::bitwiseXor(uint8_t value) {
     m_registers.f.half_carry = false;
 }
 
-void CPU::XOR_r(CPU::RegisterOperand target) {
+void CPU::XOR_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: bitwiseXor(m_registers.b); break;
         case RegisterOperand::C: bitwiseXor(m_registers.c); break;
@@ -1743,7 +1636,7 @@ void CPU::compare(uint8_t value) {
     m_registers.f.half_carry = (m_registers.a & 0x0F) < (value & 0x0F);
 }
 
-void CPU::CP_r(CPU::RegisterOperand target) {
+void CPU::CP_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: compare(m_registers.b); break;
         case RegisterOperand::C: compare(m_registers.c); break;
@@ -1773,7 +1666,7 @@ void CPU::increment(uint8_t &target) {
     target = result;
 }
 
-void CPU::INC_r(CPU::RegisterOperand target) {
+void CPU::INC_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: increment(m_registers.b); break;
         case RegisterOperand::C: increment(m_registers.c); break;
@@ -1801,7 +1694,7 @@ void CPU::decrement(uint8_t& target) {
     target = result;
 }
 
-void CPU::DEC_r(CPU::RegisterOperand target) {
+void CPU::DEC_r(RegisterOperand target) {
     switch (target) {
         case RegisterOperand::B: decrement(m_registers.b); break;
         case RegisterOperand::C: decrement(m_registers.c); break;
