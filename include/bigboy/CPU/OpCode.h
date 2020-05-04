@@ -119,10 +119,10 @@ enum class OpCode : uint8_t {
     LD_A_DE = 0b00011010,
 
     // LD A, (nn)
-    // The 16-bit short nn is read as an integer, specifying the memory
-    // address of a byte which is loaded into the register A.
-    // Bit-by-bit: 0 0 1 1 1 0 1 0 <n n n n n n n n> <n n n n n n n n>
-    LD_A_nn = 0b00111010,
+    // The byte at the memory address specified by the 16-bit short nn
+    // is loaded into the register A.
+    // Bit-by-bit: 1 1 1 1 1 0 1 0
+    LD_A_nn = 0b11111010,
 
     // LD (BC), A
     // The contents of the register A are loaded into the byte at the
@@ -137,10 +137,36 @@ enum class OpCode : uint8_t {
     LD_DE_A = 0b00010010,
 
     // LD (nn), A
-    // The 16 bit short nn is read as an integer, specifying the memory
-    // address of a byte into which the register A is loaded.
-    // Bit-by-bit: 0 0 1 1 0 0 1 0 <n n n n n n n n> <n n n n n n n n>
-    LD_nn_A = 0b00110010,
+    // The contents of the register A are loaded into the byte at the
+    // memory address specified by the 16-bit short nn.
+    // Bit-by-bit: 1 1 1 0 1 0 1 0
+    LD_nn_A = 0b11101010,
+
+    // LDI (HL), A
+    // The contents of the register A are loaded into the byte at the
+    // memory address specified by the register pair HL. HL is then
+    // incremented by 1.
+    // Bit-by-bit: 0 0 1 0 0 0 1 0
+    LDI_HL_A = 0b00100010,
+
+    // LDI A, (HL)
+    // The byte at the memory address specified by the register pair HL
+    // is loaded into the register A. HL is then incremented by 1.
+    // Bit-by-bit: 0 0 1 0 1 0 1 0
+    LDI_A_HL = 0b00101010,
+
+    // LDD (HL), A
+    // The contents of the register A are loaded into the byte at the
+    // memory address specified by the register pair HL. HL is then
+    // decremented by 1.
+    // Bit-by-bit: 0 0 1 1 0 0 1 0
+    LDD_HL_A = 0b00110010,
+
+    // LDD A, (HL)
+    // The byte at the memory address specified by the register pair HL
+    // is loaded into the register A. HL is then decremented by 1.
+    // Bit-by-bit: 0 0 1 1 1 0 1 0
+    LDD_A_HL = 0b00111010,
 
     // LD dd, nn
     // The 16-bit short nn is read as an integer and loaded into the
@@ -150,20 +176,6 @@ enum class OpCode : uint8_t {
     LD_DE_nn = 0b00010001,
     LD_HL_nn = 0b00100001,
     LD_SP_nn = 0b00110001,
-
-    // LD HL, (nn) [opcode renamed to LD_HL_mm]
-    // The byte at the memory address (nn) is loaded into the low order byte
-    // (l) of the register pair HL and the byte at the next highest memory
-    // address (nn+1) is loaded into the high order portion (h).
-    // Bit-by-bit: 0 0 1 0 1 0 1 0 <n n n n n n n n> <n n n n n n n n>
-    LD_HL_mm = 0b00101010,
-
-    // LD (nn), HL
-    // The low order byte of the register pair HL (l) is loaded to the byte
-    // at the memory address (nn), and the high order byte (h) is loaded to
-    // the byte at the next highest memory address (nn+1).
-    // Bit-by-bit: 0 0 1 0 0 0 1 0
-    LD_nn_HL = 0b00100010,
 
     // LD SP, HL
     // The contents of the register pair HL are loaded to the stack pointer

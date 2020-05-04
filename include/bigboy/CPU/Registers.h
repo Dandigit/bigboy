@@ -55,7 +55,7 @@ struct Registers {
 
     // Stack pointer
     uint16_t sp = 0xFF - 1;
-    
+
     uint8_t& get(RegisterOperand target);
     uint16_t& get(RegisterPairOperand target);
     uint16_t& get(RegisterPairStackOperand target);

@@ -78,6 +78,26 @@ void CPU::LD_nn_A() {
     load(m_mmu.byteAt(nn), m_registers.a);
 }
 
+void CPU::LDI_HL_A() {
+    load(m_mmu.byteAt(m_registers.HL()), m_registers.a);
+    ++m_registers.HL();
+}
+
+void CPU::LDI_A_HL() {
+    load(m_registers.a, m_mmu.byteAt(m_registers.HL()));
+    ++m_registers.HL();
+}
+
+void CPU::LDD_HL_A() {
+    load(m_mmu.byteAt(m_registers.HL()), m_registers.a);
+    --m_registers.HL();
+}
+
+void CPU::LDD_A_HL() {
+    load(m_registers.a, m_mmu.byteAt(m_registers.HL()));
+    --m_registers.HL();
+}
+
 void CPU::load(uint16_t& target, uint16_t value) {
     target = value;
 }
@@ -88,24 +108,6 @@ void CPU::LD_dd_nn(RegisterPairOperand target) {
     uint16_t nn = (higher << 8u) | lower;
 
     load(m_registers.get(target), nn);
-}
-
-void CPU::LD_HL_nn() {
-    uint8_t lower = m_mmu.byteAt(m_pc++);
-    uint8_t higher = m_mmu.byteAt(m_pc++);
-    uint16_t nn = (higher << 8u) | lower;
-
-    load(m_registers.l, m_mmu.byteAt(nn));
-    load(m_registers.h, m_mmu.byteAt(nn + 1));
-}
-
-void CPU::LD_nn_HL() {
-    uint8_t lower = m_mmu.byteAt(m_pc++);
-    uint8_t higher = m_mmu.byteAt(m_pc++);
-    uint16_t nn = (higher << 8u) | lower;
-
-    load(m_mmu.byteAt(nn), m_registers.l);
-    load(m_mmu.byteAt(nn + 1), m_registers.h);
 }
 
 void CPU::LD_SP_HL() {
@@ -844,6 +846,18 @@ void CPU::step() {
         case OpCode::LD_nn_A:
             LD_nn_A();
             break;
+        case OpCode::LDI_HL_A:
+            LDI_HL_A();
+            break;
+        case OpCode::LDI_A_HL:
+            LDI_A_HL();
+            break;
+        case OpCode::LDD_HL_A:
+            LDD_HL_A();
+            break;
+        case OpCode::LDD_A_HL:
+            LDD_A_HL();
+            break;
         case OpCode::LD_BC_nn:
             LD_dd_nn(RegisterPairOperand::BC);
             break;
@@ -855,12 +869,6 @@ void CPU::step() {
             break;
         case OpCode::LD_SP_nn:
             LD_dd_nn(RegisterPairOperand::SP);
-            break;
-        case OpCode::LD_HL_mm:
-            LD_HL_nn();
-            break;
-        case OpCode::LD_nn_HL:
-            LD_nn_HL();
             break;
         case OpCode::LD_SP_HL:
             LD_SP_HL();

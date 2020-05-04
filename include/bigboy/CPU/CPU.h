@@ -41,11 +41,15 @@ private:
     void LD_DE_A();
     void LD_nn_A();
 
+    void LDI_HL_A();
+    void LDI_A_HL();
+
+    void LDD_HL_A();
+    void LDD_A_HL();
+
     void load(uint16_t& target, uint16_t value);
 
     void LD_dd_nn(RegisterPairOperand target);
-    void LD_HL_nn();
-    void LD_nn_HL();
     void LD_SP_HL();
 
     void push(uint16_t value);
