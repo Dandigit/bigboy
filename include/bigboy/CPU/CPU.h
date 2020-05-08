@@ -90,17 +90,17 @@ private:
     void AND_n();
     void AND_HL();
 
-    void bitwiseOr(uint8_t value);
-
-    void OR_r(RegisterOperand target);
-    void OR_n();
-    void OR_HL();
-
     void bitwiseXor(uint8_t value);
 
     void XOR_r(RegisterOperand target);
     void XOR_n();
     void XOR_HL();
+
+    void bitwiseOr(uint8_t value);
+
+    void OR_r(RegisterOperand target);
+    void OR_n();
+    void OR_HL();
 
     void compare(uint8_t value);
 
@@ -120,12 +120,6 @@ private:
 
     void DAA();
     void CPL();
-
-    void CCF();
-    void SCF();
-
-    void NOP();
-    void HALT();
 
     void rotateLeft(uint8_t &target);
 
@@ -180,6 +174,11 @@ private:
 
     void RES_b_r(BitOperand bit, RegisterOperand reg);
     void RES_b_HL(BitOperand bit);
+
+    void CCF();
+    void SCF();
+
+    void NOP();
 
 public:
     void load(const std::array<uint8_t, 0xFFFF> &memory);

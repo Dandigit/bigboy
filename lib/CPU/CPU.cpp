@@ -240,27 +240,6 @@ void CPU::AND_HL() {
     bitwiseAnd(m_mmu.byteAt(m_registers.HL()));
 }
 
-void CPU::bitwiseOr(uint8_t value) {
-    m_registers.a |= value;
-
-    m_flags.zero = m_registers.a == 0;
-    m_flags.subtract = false;
-    m_flags.carry = false;
-    m_flags.halfCarry = false;
-}
-
-void CPU::OR_r(RegisterOperand target) {
-    bitwiseOr(m_registers.get(target));
-}
-
-void CPU::OR_n() {
-    bitwiseOr(m_mmu.byteAt(m_pc++));
-}
-
-void CPU::OR_HL() {
-    bitwiseOr(m_mmu.byteAt(m_registers.HL()));
-}
-
 void CPU::bitwiseXor(uint8_t value) {
     m_registers.a ^= value;
 
@@ -280,6 +259,27 @@ void CPU::XOR_n() {
 
 void CPU::XOR_HL() {
     bitwiseXor(m_mmu.byteAt(m_registers.HL()));
+}
+
+void CPU::bitwiseOr(uint8_t value) {
+    m_registers.a |= value;
+
+    m_flags.zero = m_registers.a == 0;
+    m_flags.subtract = false;
+    m_flags.carry = false;
+    m_flags.halfCarry = false;
+}
+
+void CPU::OR_r(RegisterOperand target) {
+    bitwiseOr(m_registers.get(target));
+}
+
+void CPU::OR_n() {
+    bitwiseOr(m_mmu.byteAt(m_pc++));
+}
+
+void CPU::OR_HL() {
+    bitwiseOr(m_mmu.byteAt(m_registers.HL()));
 }
 
 // Compares `value` with (subtracts it from) the register A, setting the appropriate
@@ -1032,33 +1032,6 @@ void CPU::step() {
         case OpCode::AND_HL:
             AND_HL();
             break;
-        case OpCode::OR_B:
-            OR_r(RegisterOperand::B);
-            break;
-        case OpCode::OR_C:
-            OR_r(RegisterOperand::C);
-            break;
-        case OpCode::OR_D:
-            OR_r(RegisterOperand::D);
-            break;
-        case OpCode::OR_E:
-            OR_r(RegisterOperand::E);
-            break;
-        case OpCode::OR_H:
-            OR_r(RegisterOperand::H);
-            break;
-        case OpCode::OR_L:
-            OR_r(RegisterOperand::L);
-            break;
-        case OpCode::OR_A:
-            OR_r(RegisterOperand::A);
-            break;
-        case OpCode::OR_n:
-            OR_n();
-            break;
-        case OpCode::OR_HL:
-            OR_HL();
-            break;
         case OpCode::XOR_B:
             XOR_r(RegisterOperand::B);
             break;
@@ -1085,6 +1058,33 @@ void CPU::step() {
             break;
         case OpCode::XOR_HL:
             XOR_HL();
+            break;
+        case OpCode::OR_B:
+            OR_r(RegisterOperand::B);
+            break;
+        case OpCode::OR_C:
+            OR_r(RegisterOperand::C);
+            break;
+        case OpCode::OR_D:
+            OR_r(RegisterOperand::D);
+            break;
+        case OpCode::OR_E:
+            OR_r(RegisterOperand::E);
+            break;
+        case OpCode::OR_H:
+            OR_r(RegisterOperand::H);
+            break;
+        case OpCode::OR_L:
+            OR_r(RegisterOperand::L);
+            break;
+        case OpCode::OR_A:
+            OR_r(RegisterOperand::A);
+            break;
+        case OpCode::OR_n:
+            OR_n();
+            break;
+        case OpCode::OR_HL:
+            OR_HL();
             break;
         case OpCode::CP_B:
             CP_r(RegisterOperand::B);
@@ -1167,15 +1167,6 @@ void CPU::step() {
         case OpCode::CPL:
             CPL();
             break;
-        case OpCode::CCF:
-            CCF();
-            break;
-        case OpCode::SCF:
-            SCF();
-            break;
-        case OpCode::NOP:
-            NOP();
-            break;
         case OpCode::RLCA:
             RLCA();
             break;
@@ -1188,7 +1179,16 @@ void CPU::step() {
         case OpCode::RRA:
             RRA();
             break;
-        case OpCode::PREFIX:
+        case OpCode::CCF:
+            CCF();
+            break;
+        case OpCode::SCF:
+            SCF();
+            break;
+        case OpCode::NOP:
+            NOP();
+            break;
+        case OpCode::CB:
             stepPrefix();
             break;
         default:

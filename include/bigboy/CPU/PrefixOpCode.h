@@ -93,6 +93,9 @@ enum class PrefixOpCode {
     // Bit-by-bit (after 0xCB): 0 0 1 0 0 1 1 0
     SLA_HL = 0b00100110,
 
+    // TODO: SWAP r
+    // TODO: SWAP (HL)
+
     // SRA r
     // The lower 7 bits (0-6) of the register r are shifted right by 1 bit position,
     // after bit 0 is copied into the carry flag. Register r may be any of B, C, D,

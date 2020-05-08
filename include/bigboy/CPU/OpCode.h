@@ -142,6 +142,11 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 1 1 1 0 1 0 1 0
     LD_nn_A = 0b11101010,
 
+    // TODO: LD A, (FF00+n)
+    // TODO: LD (FF00+n), A
+    // TODO LD A, (FF00+C)
+    // TODO: LD (FF00+C), A
+
     // LDI (HL), A
     // The contents of the register A are loaded into the byte at the
     // memory address specified by the register pair HL. HL is then
@@ -340,32 +345,6 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 1 0 1 0 0 1 1 0
     AND_HL = 0b10100110,
 
-    // OR r
-    // A bitwise OR operation is performed between the contents of the
-    // register r and the contents of the register A, and the result is
-    // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
-    // Bit-by-bit: 1 0 1 1 0 <r r r>
-    OR_B = 0b10110000,
-    OR_C = 0b10110001,
-    OR_D = 0b10110010,
-    OR_E = 0b10110011,
-    OR_H = 0b10110100,
-    OR_L = 0b10110101,
-    OR_A = 0b10110111,
-
-    // OR n
-    // A bitwise OR operation is performed between the byte n and the
-    // contents of register A, and the result is stored in register A.
-    // Bit-by-bit: 1 1 1 1 0 1 1 0 <n n n n n n n n>
-    OR_n = 0b11110110,
-
-    // OR (HL)
-    // A bitwise OR operation is performed between the byte at the memory
-    // address specified in the virtual 16-bit register HL and the contents
-    // of register A, and the result is stored in register A.
-    // Bit-by-bit: 1 0 1 1 0 1 1 0
-    OR_HL = 0b10110110,
-
     // XOR r
     // A bitwise XOR operation is performed between the contents of the
     // register r and the contents of the register A, and the result is
@@ -391,6 +370,32 @@ enum class OpCode : uint8_t {
     // of register A, and the result is stored in register A.
     // Bit-by-bit: 1 0 1 0 1 1 1 0
     XOR_HL = 0b10101110,
+
+    // OR r
+    // A bitwise OR operation is performed between the contents of the
+    // register r and the contents of the register A, and the result is
+    // stored in register A. Register r may be any of B, C, D, E, H, L, or A.
+    // Bit-by-bit: 1 0 1 1 0 <r r r>
+    OR_B = 0b10110000,
+    OR_C = 0b10110001,
+    OR_D = 0b10110010,
+    OR_E = 0b10110011,
+    OR_H = 0b10110100,
+    OR_L = 0b10110101,
+    OR_A = 0b10110111,
+
+    // OR n
+    // A bitwise OR operation is performed between the byte n and the
+    // contents of register A, and the result is stored in register A.
+    // Bit-by-bit: 1 1 1 1 0 1 1 0 <n n n n n n n n>
+    OR_n = 0b11110110,
+
+    // OR (HL)
+    // A bitwise OR operation is performed between the byte at the memory
+    // address specified in the virtual 16-bit register HL and the contents
+    // of register A, and the result is stored in register A.
+    // Bit-by-bit: 1 0 1 1 0 1 1 0
+    OR_HL = 0b10110110,
 
     // CP r
     // The contents of register R are compared with (subtracted from) the
@@ -470,6 +475,36 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 0 0 1 0 1 1 1 1
     CPL = 0b00101111,
 
+    // TODO: ADD HL, rr
+    // TODO: INC rr
+    // TODO: DEC rr
+    // TODO: ADD SP, dd
+    // TODO: LD HL, SP+dd
+
+    // RLCA
+    // The contents of register A are rotated left by 1 bit position, after the sign
+    // bit (7) is copied into the carry flag.
+    // Bit-by-bit: 0 0 0 0 0 1 1 1
+    RLCA = 0b00000111,
+
+    // RLA
+    // The contents of register A are rotated left by 1 bit position through the
+    // carry flag.
+    // Bit-by-bit: 0 0 0 1 0 1 1 1
+    RLA = 0b00010111,
+
+    // RRCA
+    // The contents of register A are rotated right by 1 bit position, after bit 0
+    // is copied into the carry flag.
+    // Bit-by-bit: 0 0 0 0 1 1 1 1
+    RRCA = 0b00001111,
+
+    // RRA
+    // The contents of register A are rotated right by 1 bit position through the
+    // carry flag.
+    // Bit-by-bit: 0 0 0 1 1 1 1 1
+    RRA = 0b00011111,
+
     // CCF
     // The carry flag is inverted.
     // Bit-by-bit: 0 0 1 1 1 1 1 1
@@ -497,35 +532,24 @@ enum class OpCode : uint8_t {
     STOP = 0b00010000,
 
     // TODO: DI
+    // TODO: EI
 
-    // RLCA
-    // The contents of register A are rotated left by 1 bit position, after the sign
-    // bit (7) is copied into the carry flag.
-    // Bit-by-bit: 0 0 0 0 0 1 1 1
-    RLCA = 0b00000111,
+    // TODO: JP nn
+    // TODO: JP HL
+    // TODO: JP f, nn
+    // TODO: JR PC+dd
+    // TODO: JR f, PC+dd
+    // TODO: CALL nn
+    // TODO: CALL f, nn
+    // TODO: RET
+    // TODO: RET f
+    // TODO: RETI
+    // TODO: RST n
 
-    // RLA
-    // The contents of register A are rotated left by 1 bit position through the
-    // carry flag.
-    // Bit-by-bit: 0 0 0 1 0 1 1 1
-    RLA = 0b00010111,
-
-    // RRCA
-    // The contents of register A are rotated right by 1 bit position, after bit 0
-    // is copied into the carry flag.
-    // Bit-by-bit: 0 0 0 0 1 1 1 1
-    RRCA = 0b00001111,
-
-    // RRA
-    // The contents of register A are rotated right by 1 bit position through the
-    // carry flag.
-    // Bit-by-bit: 0 0 0 1 1 1 1 1
-    RRA = 0b00011111,
-
-    // PREFIX:
+    // CB:
     // Interpret the next byte as a prefix instruction (PrefixOpCode)
     // rather than a normal instruction (OpCode)
-    PREFIX = 0b11001011
+    CB = 0b11001011
 };
 
 #endif //BIGBOY_OPCODE_H
