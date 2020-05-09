@@ -142,10 +142,29 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 1 1 1 0 1 0 1 0
     LD_nn_A = 0b11101010,
 
-    // TODO: LD A, (FF00+n)
-    // TODO: LD (FF00+n), A
-    // TODO LD A, (FF00+C)
-    // TODO: LD (FF00+C), A
+    // LD A, (FF00+n)
+    // The byte at the memory address (FF00+n) - the nth I/O port - is
+    // loaded into the register A.
+    // Bit-by-bit: 1 1 1 1 0 0 0 0 <n n n n n n n n>
+    LD_A_FF00n = 0b11110000,
+
+    // LD (FF00+n), A
+    // The contents of the register A are loaded into the byte at the
+    // memory address (FF00+n) - the nth I/O port.
+    // Bit-by-bit: 1 1 1 0 0 0 0 0 <n n n n n n n n>
+    LD_FF00n_A = 0b11100000,
+
+    // LD A, (FF00+C)
+    // The byte at the memory address (FF00+C) - the Cth I/O port - is
+    // loaded into the register A.
+    // Bit-by-bit: 1 1 1 1 0 0 1 0
+    LD_A_FF00C = 0b11110010,
+
+    // LD (FF00+C), A
+    // The contents of the register A are loaded into the byte at the
+    // memory address (FF00+C) - the Cth I/O port.
+    // Bit-by-bit: 1 1 1 0 0 0 1 0
+    LD_FF00C_A = 0b11100010,
 
     // LDI (HL), A
     // The contents of the register A are loaded into the byte at the

@@ -41,6 +41,12 @@ private:
     void LD_DE_A();
     void LD_nn_A();
 
+    void LD_A_FF00n();
+    void LD_FF00n_A();
+
+    void LD_A_FF00C();
+    void LD_FF00C_A();
+
     void LDI_HL_A();
     void LDI_A_HL();
 

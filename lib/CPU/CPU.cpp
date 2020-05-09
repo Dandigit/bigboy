@@ -78,6 +78,22 @@ void CPU::LD_nn_A() {
     load(m_mmu.byteAt(nn), m_registers.a);
 }
 
+void CPU::LD_A_FF00n() {
+    load(m_registers.a, m_mmu.byteAt(0xFF00 + m_pc++));
+}
+
+void CPU::LD_FF00n_A() {
+    load(m_mmu.byteAt(0xFF00 + m_pc++), m_registers.a);
+}
+
+void CPU::LD_A_FF00C() {
+    load(m_registers.a, m_mmu.byteAt(0xFF00 + m_registers.c));
+}
+
+void CPU::LD_FF00C_A() {
+    load(m_mmu.byteAt(0xFF00 + m_registers.c), m_registers.a);
+}
+
 void CPU::LDI_HL_A() {
     load(m_mmu.byteAt(m_registers.HL()), m_registers.a);
     ++m_registers.HL();
@@ -845,6 +861,18 @@ void CPU::step() {
             break;
         case OpCode::LD_nn_A:
             LD_nn_A();
+            break;
+        case OpCode::LD_A_FF00n:
+            LD_A_FF00n();
+            break;
+        case OpCode::LD_FF00n_A:
+            LD_FF00n_A();
+            break;
+        case OpCode::LD_A_FF00C:
+            LD_A_FF00C();
+            break;
+        case OpCode::LD_FF00C_A:
+            LD_FF00C_A();
             break;
         case OpCode::LDI_HL_A:
             LDI_HL_A();
