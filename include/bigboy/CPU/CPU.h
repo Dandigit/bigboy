@@ -173,6 +173,11 @@ private:
     void SLA_r(RegisterOperand target);
     void SLA_HL();
 
+    void swap(uint8_t& target);
+
+    void SWAP_r(RegisterOperand target);
+    void SWAP_HL();
+
     void shiftTailRight(uint8_t &target);
 
     void SRA_r(RegisterOperand target);

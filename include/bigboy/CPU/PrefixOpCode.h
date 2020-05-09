@@ -93,8 +93,23 @@ enum class PrefixOpCode {
     // Bit-by-bit (after 0xCB): 0 0 1 0 0 1 1 0
     SLA_HL = 0b00100110,
 
-    // TODO: SWAP r
-    // TODO: SWAP (HL)
+    // SWAP r
+    // The upper and lower nibbles of the register r are swapped. Register r may be
+    // any of B, C, D, E, H, L or A.
+    // Bit-by-bit: 0 0 1 1 0 <r r r>
+    SWAP_B = 0b00110000,
+    SWAP_C = 0b00110001,
+    SWAP_D = 0b00110010,
+    SWAP_E = 0b00110011,
+    SWAP_H = 0b00110100,
+    SWAP_L = 0b00110101,
+    SWAP_A = 0b00110111,
+
+    // SWAP (HL)
+    // The upper and lower nibbles of the byte at the memory address specified in
+    // the register pair HL are swapped.
+    // Bit-by-bit: 0 0 1 1 0 1 1 0
+    SWAP_HL = 0b00110110,
 
     // SRA r
     // The lower 7 bits (0-6) of the register r are shifted right by 1 bit position,

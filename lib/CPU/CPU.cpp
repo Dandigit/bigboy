@@ -594,6 +594,25 @@ void CPU::SLA_HL() {
     shiftLeft(m_mmu.byteAt(m_registers.HL()));
 }
 
+// Swap the lower and upper nibbles of `target`, setting the appropriate
+// flags.
+void CPU::swap(uint8_t& target) {
+    target = ((target & 0x0Fu) << 4u | (target & 0xF0u) >> 4u);
+
+    m_flags.zero = target == 0;
+    m_flags.subtract = false;
+    m_flags.halfCarry = false;
+    m_flags.carry = false;
+}
+
+void CPU::SWAP_r(RegisterOperand target) {
+    swap(m_registers.get(target));
+}
+
+void CPU::SWAP_HL() {
+    swap(m_mmu.byteAt(m_registers.HL()));
+}
+
 // Shift the lower 7 bits (0-6) of `target` 1 bit position to the right,
 // after copying bit 0 into the carry flag.
 void CPU::shiftTailRight(uint8_t& target) {
@@ -1444,6 +1463,30 @@ void CPU::stepPrefix() {
             break;
         case PrefixOpCode::SLA_HL:
             SLA_HL();
+            break;
+        case PrefixOpCode::SWAP_B:
+            SWAP_r(RegisterOperand::B);
+            break;
+        case PrefixOpCode::SWAP_C:
+            SWAP_r(RegisterOperand::C);
+            break;
+        case PrefixOpCode::SWAP_D:
+            SWAP_r(RegisterOperand::D);
+            break;
+        case PrefixOpCode::SWAP_E:
+            SWAP_r(RegisterOperand::E);
+            break;
+        case PrefixOpCode::SWAP_H:
+            SWAP_r(RegisterOperand::H);
+            break;
+        case PrefixOpCode::SWAP_L:
+            SWAP_r(RegisterOperand::L);
+            break;
+        case PrefixOpCode::SWAP_A:
+            SWAP_r(RegisterOperand::A);
+            break;
+        case PrefixOpCode::SWAP_HL:
+            SWAP_HL();
             break;
         case PrefixOpCode::SRA_B:
             SRA_r(RegisterOperand::B);
