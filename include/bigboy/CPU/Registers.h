@@ -27,17 +27,6 @@ enum class RegisterPairStackOperand : uint8_t {
     AF  // 11
 };
 
-enum class BitOperand : uint8_t {
-    BIT0 = 0, // 000
-    BIT1 = 1, // 001
-    BIT2 = 2, // 010
-    BIT3 = 3, // 011
-    BIT4 = 4, // 100
-    BIT5 = 5, // 101
-    BIT6 = 6, // 110
-    BIT7 = 7  // 111
-};
-
 struct Registers {
     // General purpose
     uint8_t c = 0;

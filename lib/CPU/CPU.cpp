@@ -760,6 +760,52 @@ void CPU::JR_f_PCdd(ConditionOperand condition) {
     }
 }
 
+void CPU::call(uint16_t address) {
+    push(m_pc);
+    load(m_pc, address);
+}
+
+void CPU::CALL_nn() {
+    uint8_t lower = m_mmu.byteAt(m_pc++);
+    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    call(nn);
+}
+
+void CPU::CALL_f_nn(ConditionOperand condition) {
+    uint8_t lower = m_mmu.byteAt(m_pc++);
+    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    if (m_flags.get(condition)) {
+        call(nn);
+    }
+}
+
+void CPU::ret() {
+    pop(m_pc);
+}
+
+void CPU::RET() {
+    ret();
+}
+
+void CPU::RET_f(ConditionOperand condition) {
+    if (m_flags.get(condition)) {
+        ret();
+    }
+}
+
+void CPU::RETI() {
+    ret();
+    m_ime = true;
+}
+
+void CPU::RST(ResetOperand address) {
+    call(static_cast<uint16_t>(address));
+}
+
 void CPU::step() {
     if (m_stopped) return;
     if (m_halted) {
@@ -1441,6 +1487,63 @@ void CPU::step() {
             break;
         case OpCode::JR_C_PCdd:
             JR_f_PCdd(ConditionOperand::C);
+            break;
+        case OpCode::CALL_nn:
+            CALL_nn();
+            break;
+        case OpCode::CALL_NZ_nn:
+            CALL_f_nn(ConditionOperand::NZ);
+            break;
+        case OpCode::CALL_Z_nn:
+            CALL_f_nn(ConditionOperand::Z);
+            break;
+        case OpCode::CALL_NC_nn:
+            CALL_f_nn(ConditionOperand::NC);
+            break;
+        case OpCode::CALL_C_nn:
+            CALL_f_nn(ConditionOperand::C);
+            break;
+        case OpCode::RET:
+            RET();
+            break;
+        case OpCode::RET_NZ:
+            RET_f(ConditionOperand::NZ);
+            break;
+        case OpCode::RET_Z:
+            RET_f(ConditionOperand::Z);
+            break;
+        case OpCode::RET_NC:
+            RET_f(ConditionOperand::NC);
+            break;
+        case OpCode::RET_C:
+            RET_f(ConditionOperand::C);
+            break;
+        case OpCode::RETI:
+            RETI();
+            break;
+        case OpCode::RST_00:
+            RST(ResetOperand::x00);
+            break;
+        case OpCode::RST_08:
+            RST(ResetOperand::x08);
+            break;
+        case OpCode::RST_10:
+            RST(ResetOperand::x10);
+            break;
+        case OpCode::RST_18:
+            RST(ResetOperand::x18);
+            break;
+        case OpCode::RST_20:
+            RST(ResetOperand::x20);
+            break;
+        case OpCode::RST_28:
+            RST(ResetOperand::x28);
+            break;
+        case OpCode::RST_30:
+            RST(ResetOperand::x30);
+            break;
+        case OpCode::RST_38:
+            RST(ResetOperand::x38);
             break;
         case OpCode::CB:
             stepPrefix();

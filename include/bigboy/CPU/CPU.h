@@ -6,6 +6,28 @@
 #include <bigboy/CPU/PrefixOpCode.h>
 #include <bigboy/CPU/Registers.h>
 
+enum class BitOperand : uint8_t {
+    BIT0 = 0, // 000
+    BIT1 = 1, // 001
+    BIT2 = 2, // 010
+    BIT3 = 3, // 011
+    BIT4 = 4, // 100
+    BIT5 = 5, // 101
+    BIT6 = 6, // 110
+    BIT7 = 7  // 111
+};
+
+enum class ResetOperand : uint16_t {
+    x00 = 0x00,
+    x08 = 0x08,
+    x10 = 0x10,
+    x18 = 0x18,
+    x20 = 0x20,
+    x28 = 0x28,
+    x30 = 0x30,
+    x38 = 0x38
+};
+
 class CPU {
 public:
     struct Clock {
@@ -231,6 +253,19 @@ private:
 
     void JR_PCdd();
     void JR_f_PCdd(ConditionOperand condition);
+
+    void call(uint16_t address);
+
+    void CALL_nn();
+    void CALL_f_nn(ConditionOperand condition);
+
+    void ret();
+
+    void RET();
+    void RET_f(ConditionOperand condition);
+    void RETI();
+
+    void RST(ResetOperand address);
 
 public:
     void load(const std::array<uint8_t, 0xFFFF> &memory);

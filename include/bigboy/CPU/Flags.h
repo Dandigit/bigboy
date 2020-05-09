@@ -4,10 +4,10 @@
 #include <cstdint>
 
 enum class ConditionOperand : uint8_t {
-    NZ, // 000
-    Z,  // 010
-    NC, // 100
-    C   // 110
+    NZ, // 000 or 001
+    Z,  // 010 or 011
+    NC, // 100 or 101
+    C   // 110 or 111
 };
 
 class Flag {

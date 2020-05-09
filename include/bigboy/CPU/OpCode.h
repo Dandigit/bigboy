@@ -633,12 +633,62 @@ enum class OpCode : uint8_t {
     JR_NC_PCdd = 0b00110000,
     JR_C_PCdd = 0b00111000,
 
-    // TODO: CALL nn
-    // TODO: CALL f, nn
-    // TODO: RET
-    // TODO: RET f
-    // TODO: RETI
-    // TODO: RST n
+    // CALL nn
+    // The current program counter (return address) is pushed to the stack,
+    // high-order byte first. The 16-bit word nn is then loaded into the
+    // program counter, from where execution continues.
+    // Bit-by-bit: 1 1 0 0 1 1 0 1
+    CALL_nn = 0b11001101,
+
+    // CALL f, nn
+    // Only if the condition f is true is the current program counter (return
+    // address) pushed to the stack, high-order byte first, and the 16-bit word
+    // nn loaded into the program counter. Execution will them continue from
+    // the program counter. Condition f may be any of nz, z, nc or c.
+    // Bit-by-bit: 1 1 0 <f f f> 0 0
+    CALL_NZ_nn = 0b11000100,
+    CALL_Z_nn = 0b11001100,
+    CALL_NC_nn = 0b11010100,
+    CALL_C_nn = 0b11011100,
+
+    // RET
+    // The 16-bit word on top of the stack is popped off, low-order byte first,
+    // and loaded into the program counter, from where execution continues.
+    // Bit-by-bit: 1 1 0 0 1 0 0 1
+    RET = 0b11001001,
+
+    // RET f
+    // Only if the condition f is true is the 16-bit word on top of the stack
+    // popped off and loaded into the program counter. Execution will then
+    // continue from the program counter. Condition f may be any of nz, z, nc or c.
+    // Bit-by-bit: 1 1 0 <f f f> 0 0
+    RET_NZ = 0b11000000,
+    RET_Z = 0b11001000,
+    RET_NC = 0b11010000,
+    RET_C = 0b11011000,
+
+    // RETI
+    // The 16-bit word on top of the stack is popped off, low-order byte first,
+    // and loaded into the program counter. Interrupts are then enabled by setting
+    // the interrupt master flag (IME), and execution then continues from the
+    // program counter.
+    // Bit-by-bit: 1 1 0 1 1 0 0 1
+    RETI = 0b11011001,
+
+    // RST n
+    // The current program counter is pushed onto the stack, high-order byte first.
+    // The value of the operand n is then loaded into the program counter, from
+    // where execution continues. Operand n may be any of 0x00, 0x08, 0x10, 0x18,
+    // 0x20, 0x28, 0x30 or 0x38.
+    // Bit-by-bit: 1 1 <n n n> 1 1 1
+    RST_00 = 0b11000111,
+    RST_08 = 0b11001111,
+    RST_10 = 0b11010111,
+    RST_18 = 0b11011111,
+    RST_20 = 0b11100111,
+    RST_28 = 0b11101111,
+    RST_30 = 0b11110111,
+    RST_38 = 0b11111111,
 
     // CB
     // Interpret the next byte as a prefix instruction (PrefixOpCode)
