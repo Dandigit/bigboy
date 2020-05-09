@@ -20,9 +20,16 @@ private:
 
     MMU m_mmu{};
 
-    uint16_t m_pc = 0;
-    uint8_t m_halt = 0;
-    uint8_t m_stop = 0;
+    uint16_t m_pc = 0; // Program counter.
+
+    // Are we halted? HALT will set this, and interrupts will reset this.
+    bool m_halted = false;
+
+    // Are we stopped? STOP will set this.
+    bool m_stopped = false;
+
+    // Interrupt master enable flag. EI/DI will set/reset this.
+    bool m_ime = true;
 
     void load(uint8_t& target, uint8_t value);
 
@@ -207,6 +214,23 @@ private:
     void SCF();
 
     void NOP();
+
+    void HALT();
+    void STOP();
+
+    void DI();
+    void EI();
+
+    void absoluteJump(uint16_t address);
+
+    void JP_nn();
+    void JP_HL();
+    void JP_f_nn(ConditionOperand condition);
+
+    void relativeJump(int8_t offset);
+
+    void JR_PCdd();
+    void JR_f_PCdd(ConditionOperand condition);
 
 public:
     void load(const std::array<uint8_t, 0xFFFF> &memory);

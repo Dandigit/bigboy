@@ -3,6 +3,13 @@
 
 #include <cstdint>
 
+enum class ConditionOperand : uint8_t {
+    NZ, // 000
+    Z,  // 010
+    NC, // 100
+    C   // 110
+};
+
 class Flag {
     uint8_t& m_register;
     uint8_t m_position;
@@ -13,7 +20,7 @@ public:
 
     Flag& operator=(bool set);
 
-    operator bool();
+    operator bool() const;
 };
 
 class Flags {
@@ -30,6 +37,8 @@ public:
     Flag subtract;
     Flag halfCarry;
     Flag carry;
+
+    bool get(ConditionOperand condition) const;
 
     explicit Flags(uint8_t& register_);
 };

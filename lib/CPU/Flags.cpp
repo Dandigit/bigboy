@@ -9,7 +9,7 @@ Flag& Flag::operator=(bool set) {
     return *this;
 }
 
-Flag::operator bool() {
+Flag::operator bool() const {
     return ((m_register >> m_position) & 1u) == 1u;
 }
 
@@ -19,3 +19,12 @@ Flags::Flags(uint8_t& register_) :
         subtract{register_, SUBTRACT_FLAG_BYTE_POSITION},
         halfCarry{register_, HALF_CARRY_FLAG_BYTE_POSITION},
         carry{register_, CARRY_FLAG_BYTE_POSITION} {}
+
+bool Flags::get(ConditionOperand condition) const {
+    switch (condition) {
+        case ConditionOperand::NZ: return !zero;
+        case ConditionOperand::Z: return zero;
+        case ConditionOperand::NC: return !carry;
+        case ConditionOperand::C: return carry;
+    }
+}

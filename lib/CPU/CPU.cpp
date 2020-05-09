@@ -449,26 +449,6 @@ void CPU::LD_HL_SPs() {
     load(m_registers.HL(), value);
 }
 
-// Invert the carry flag
-void CPU::CCF() {
-    m_flags.carry = !m_flags.carry;
-
-    m_flags.subtract = false;
-    m_flags.halfCarry = false;
-}
-
-// Set the carry flag
-void CPU::SCF() {
-    m_flags.carry = true;
-
-    m_flags.subtract = false;
-    m_flags.halfCarry = false;
-}
-
-void CPU::NOP() {
-    // Nothing!
-}
-
 // Rotate `target` left 1 bit position, copying the sign bit to the carry flag and bit 0
 void CPU::rotateLeft(uint8_t &target) {
     uint8_t signBit = target >> 7u;
@@ -702,7 +682,92 @@ void CPU::RES_b_HL(BitOperand bit) {
     resetBit(bit, m_mmu.byteAt(m_registers.HL()));
 }
 
+// Invert the carry flag
+void CPU::CCF() {
+    m_flags.carry = !m_flags.carry;
+
+    m_flags.subtract = false;
+    m_flags.halfCarry = false;
+}
+
+// Set the carry flag
+void CPU::SCF() {
+    m_flags.carry = true;
+
+    m_flags.subtract = false;
+    m_flags.halfCarry = false;
+}
+
+void CPU::NOP() {
+    // Nothing!
+}
+
+void CPU::HALT() {
+    m_halted = true;
+}
+
+void CPU::STOP() {
+    m_stopped = true;
+}
+
+void CPU::DI() {
+    m_ime = false;
+}
+
+void CPU::EI() {
+    m_ime = true;
+}
+
+void CPU::absoluteJump(uint16_t address) {
+    m_pc = address;
+}
+
+void CPU::JP_nn() {
+    uint8_t lower = m_mmu.byteAt(m_pc++);
+    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    absoluteJump(nn);
+}
+
+void CPU::JP_HL() {
+    absoluteJump(m_registers.HL());
+}
+
+void CPU::JP_f_nn(ConditionOperand condition) {
+    uint8_t lower = m_mmu.byteAt(m_pc++);
+    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint16_t nn = (higher << 8u) | lower;
+
+    if (m_flags.get(condition)) {
+        absoluteJump(nn);
+    }
+}
+
+void CPU::relativeJump(int8_t offset) {
+    m_pc += offset;
+}
+
+void CPU::JR_PCdd() {
+    auto dd = static_cast<int8_t>(m_mmu.byteAt(m_pc++));
+    relativeJump(dd);
+}
+
+void CPU::JR_f_PCdd(ConditionOperand condition) {
+    auto dd = static_cast<int8_t>(m_mmu.byteAt(m_pc++));
+    if (m_flags.get(condition)) {
+        relativeJump(dd);
+    }
+}
+
 void CPU::step() {
+    if (m_stopped) return;
+    if (m_halted) {
+        // We need to keep the clock going.
+        NOP();
+        return;
+    }
+
     auto current = static_cast<OpCode>(m_mmu.byteAt(m_pc++));
     switch (current) {
         case OpCode::LD_B_B:
@@ -1331,6 +1396,51 @@ void CPU::step() {
             break;
         case OpCode::NOP:
             NOP();
+            break;
+        case OpCode::HALT:
+            HALT();
+            break;
+        case OpCode::STOP:
+            STOP();
+            break;
+        case OpCode::DI:
+            DI();
+            break;
+        case OpCode::EI:
+            EI();
+            break;
+        case OpCode::JP_nn:
+            JP_nn();
+            break;
+        case OpCode::JP_HL:
+            JP_HL();
+            break;
+        case OpCode::JP_NZ_nn:
+            JP_f_nn(ConditionOperand::NZ);
+            break;
+        case OpCode::JP_Z_nn:
+            JP_f_nn(ConditionOperand::Z);
+            break;
+        case OpCode::JP_NC_nn:
+            JP_f_nn(ConditionOperand::NC);
+            break;
+        case OpCode::JP_C_nn:
+            JP_f_nn(ConditionOperand::C);
+            break;
+        case OpCode::JR_PCdd:
+            JR_PCdd();
+            break;
+        case OpCode::JR_NZ_PCdd:
+            JR_f_PCdd(ConditionOperand::NZ);
+            break;
+        case OpCode::JR_Z_PCdd:
+            JR_f_PCdd(ConditionOperand::Z);
+            break;
+        case OpCode::JR_NC_PCdd:
+            JR_f_PCdd(ConditionOperand::NC);
+            break;
+        case OpCode::JR_C_PCdd:
+            JR_f_PCdd(ConditionOperand::C);
             break;
         case OpCode::CB:
             stepPrefix();

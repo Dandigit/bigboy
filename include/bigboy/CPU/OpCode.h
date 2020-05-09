@@ -572,25 +572,67 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 0 0 0 0 0 0 0 0
     NOP = 0b00000000,
 
-    // TODO: HALT
+    // HALT
     // CPU operation is suspended until an interrupt or reset is recieved. While in
     // this halted state, NOPs are executed to maintain memory refresh logic.
     // Bit-by-bit: 0 1 1 1 0 1 1 0
     HALT = 0b01110110,
 
-    // TODO: STOP
+    // STOP
     // CPU operation is stopped.
     // Bit-by-bit: 0 0 0 1 0 0 0 0
     STOP = 0b00010000,
 
-    // TODO: DI
-    // TODO: EI
+    // DI
+    // Interrupts are disabled by resetting the Interrupt Master Flag (IME).
+    // Bit-by-bit: 1 1 1 1 0 0 1 1
+    DI = 0b11110011,
 
-    // TODO: JP nn
-    // TODO: JP HL
-    // TODO: JP f, nn
-    // TODO: JR PC+dd
-    // TODO: JR f, PC+dd
+    // EI
+    // Interrupts are enabled by setting the Interrupt Master Flag (IME).
+    // Bit-by-bit: 1 1 1 1 1 0 1 1
+    EI = 0b11111011,
+
+    // JP nn
+    // The 16-bit word nn is loaded into the program counter, from where
+    // execution continues.
+    // Bit-by-bit: 1 1 0 0 0 0 1 1 <n n n n n n n n> <n n n n n n n n>
+    JP_nn = 0b11000011,
+
+    // JP HL
+    // The contents of the register pair HL are loaded into the program
+    // counter, from where execution continues.
+    // Bit-by-bit: 1 1 1 0 1 0 0 1
+    JP_HL = 0b11101001,
+
+    // JP f, nn
+    // The 16-bit word nn is loaded into the program counter only if the
+    // condition f is true. Execution will then continue from the program
+    // counter. Condition f may be any of nz, z, nc or c.
+    // Bit-by-bit: 1 1 0 <f f f> 1 0 <n n n n n n n n> <n n n n n n n n>
+    JP_NZ_nn = 0b11000010,
+    JP_Z_nn = 0b11001010,
+    JP_NC_nn = 0b11010010,
+    JP_C_nn = 0b11011010,
+
+    // JR PC+dd
+    // The 8-bit signed integer dd is added to the program counter and the
+    // result is stored in the program counter, from where execution
+    // continues.
+    // Bit-by-bit: 0 0 0 1 1 0 0 0 <dd dd dd dd dd dd dd dd>
+    JR_PCdd = 0b00011000,
+
+    // JR f, PC+dd
+    // The 8-bit signed integer dd is added to the program counter and the
+    // result is stored in the program counter only if the condition f is
+    // true. Execution will then continue from the program counter.
+    // Condition f may be any of nz, z, nc or c.
+    // Bit-by-bit: 0 0 1 <f f f> 0 0
+    JR_NZ_PCdd = 0b00100000,
+    JR_Z_PCdd = 0b00101000,
+    JR_NC_PCdd = 0b00110000,
+    JR_C_PCdd = 0b00111000,
+
     // TODO: CALL nn
     // TODO: CALL f, nn
     // TODO: RET
