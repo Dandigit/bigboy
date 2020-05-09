@@ -353,7 +353,7 @@ void CPU::DEC_r(RegisterOperand target) {
     decrement(m_registers.get(target));
 }
 
-void CPU::DEC_HL() {
+void CPU::DEC_HL_() {
     decrement(m_mmu.byteAt(m_registers.HL()));
 }
 
@@ -392,6 +392,61 @@ void CPU::CPL() {
 
     m_flags.subtract = true;
     m_flags.halfCarry = true;
+}
+
+// Add `value` to `target`, storing the result in `target` and setting the appropriate flags
+void CPU::add(uint16_t &target, uint16_t value) {
+    uint16_t result = target + value;
+
+    m_flags.subtract = false;
+    m_flags.carry = result < target;
+    m_flags.halfCarry = ((result ^ target ^ value) & 0x1000) != 0;
+
+    target = result;
+}
+
+void CPU::ADD_HL_rr(RegisterPairOperand value) {
+    add(m_registers.HL(), m_registers.get(value));
+}
+
+void CPU::increment(uint16_t& target) {
+    ++target;
+}
+
+void CPU::INC_rr(RegisterPairOperand target) {
+    increment(m_registers.get(target));
+}
+
+void CPU::decrement(uint16_t& target) {
+    --target;
+}
+
+void CPU::DEC_rr(RegisterPairOperand target) {
+    decrement(m_registers.get(target));
+}
+
+void CPU::add(uint16_t &target, int8_t value) {
+    uint16_t result = target + value;
+
+    m_flags.zero = false;
+    m_flags.subtract = false;
+    m_flags.halfCarry = (result & 0xF) < (target & 0xF);
+    m_flags.carry = (result & 0xFF) < (target & 0xFF);
+
+    target = result;
+}
+
+void CPU::ADD_SP_s() {
+    auto s = static_cast<int8_t>(m_mmu.byteAt(m_pc++));
+    add(m_registers.sp, s);
+}
+
+void CPU::LD_HL_SPs() {
+    uint16_t value = m_registers.sp;
+    auto s = static_cast<int8_t>(m_mmu.byteAt(m_pc++));
+    add(value, s);
+
+    load(m_registers.HL(), value);
 }
 
 // Invert the carry flag
@@ -1162,7 +1217,7 @@ void CPU::step() {
         case OpCode::INC_A:
             INC_r(RegisterOperand::A);
             break;
-        case OpCode::INC_HL:
+        case OpCode::INC_HL_:
             INC_HL();
             break;
         case OpCode::DEC_B:
@@ -1186,14 +1241,56 @@ void CPU::step() {
         case OpCode::DEC_A:
             DEC_r(RegisterOperand::A);
             break;
-        case OpCode::DEC_HL:
-            DEC_HL();
+        case OpCode::DEC_HL_:
+            DEC_HL_();
             break;
         case OpCode::DAA:
             DAA();
             break;
         case OpCode::CPL:
             CPL();
+            break;
+        case OpCode::ADD_HL_BC:
+            ADD_HL_rr(RegisterPairOperand::BC);
+            break;
+        case OpCode::ADD_HL_DE:
+            ADD_HL_rr(RegisterPairOperand::DE);
+            break;
+        case OpCode::ADD_HL_HL:
+            ADD_HL_rr(RegisterPairOperand::HL);
+            break;
+        case OpCode::ADD_HL_SP:
+            ADD_HL_rr(RegisterPairOperand::SP);
+            break;
+        case OpCode::INC_BC:
+            INC_rr(RegisterPairOperand::BC);
+            break;
+        case OpCode::INC_DE:
+            INC_rr(RegisterPairOperand::DE);
+            break;
+        case OpCode::INC_HL:
+            INC_rr(RegisterPairOperand::HL);
+            break;
+        case OpCode::INC_SP:
+            INC_rr(RegisterPairOperand::SP);
+            break;
+        case OpCode::DEC_BC:
+            DEC_rr(RegisterPairOperand::BC);
+            break;
+        case OpCode::DEC_DE:
+            DEC_rr(RegisterPairOperand::DE);
+            break;
+        case OpCode::DEC_HL:
+            DEC_rr(RegisterPairOperand::HL);
+            break;
+        case OpCode::DEC_SP:
+            DEC_rr(RegisterPairOperand::SP);
+            break;
+        case OpCode::ADD_SP_s:
+            ADD_SP_s();
+            break;
+        case OpCode::LD_HL_SPs:
+            LD_HL_SPs();
             break;
         case OpCode::RLCA:
             RLCA();

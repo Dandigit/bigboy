@@ -122,10 +122,27 @@ private:
     void decrement(uint8_t &target);
 
     void DEC_r(RegisterOperand target);
-    void DEC_HL();
+    void DEC_HL_();
 
     void DAA();
     void CPL();
+
+    void add(uint16_t& target, uint16_t value);
+
+    void ADD_HL_rr(RegisterPairOperand value);
+
+    void increment(uint16_t& target);
+
+    void INC_rr(RegisterPairOperand target);
+
+    void decrement(uint16_t& target);
+
+    void DEC_rr(RegisterPairOperand target);
+
+    void add(uint16_t& target, int8_t value);
+
+    void ADD_SP_s();
+    void LD_HL_SPs();
 
     void rotateLeft(uint8_t &target);
 

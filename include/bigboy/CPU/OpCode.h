@@ -458,7 +458,7 @@ enum class OpCode : uint8_t {
     // The byte at the memory address specified in the register HL is incremented
     // by 1.
     // Bit-by-bit: 0 0 1 1 0 1 0 0
-    INC_HL = 0b00110100,
+    INC_HL_ = 0b00110100,
 
     // DEC r
     // The register r is decremented by 1. Register r may be any of B, C, D, E,
@@ -476,7 +476,7 @@ enum class OpCode : uint8_t {
     // The byte at the memory address specified in the register HL is decremented
     // by 1.
     // Bit-by-bit: 0 0 1 1 0 1 0 1
-    DEC_HL = 0b00110101,
+    DEC_HL_ = 0b00110101,
 
     // DAA
     // The results of the previous operation as stored in the Accumulator and flags
@@ -494,11 +494,44 @@ enum class OpCode : uint8_t {
     // Bit-by-bit: 0 0 1 0 1 1 1 1
     CPL = 0b00101111,
 
-    // TODO: ADD HL, rr
-    // TODO: INC rr
-    // TODO: DEC rr
-    // TODO: ADD SP, dd
-    // TODO: LD HL, SP+dd
+    // ADD HL, rr
+    // The contents of the register pair rr are added to the contents of the register
+    // pair HL and the result is stored in HL. Register pair rr may be any of BC, DE,
+    // HL or SP.
+    // Bit-by-bit: 0 0 <r r> 1 0 0 1
+    ADD_HL_BC = 0b00001001,
+    ADD_HL_DE = 0b00011001,
+    ADD_HL_HL = 0b00101001,
+    ADD_HL_SP = 0b00111001,
+
+    // INC rr
+    // The register pair rr is incremented by 1. Register pair rr may be any of BC,
+    // DE, HL or SP.
+    // Bit-by-bit: 0 0 <r r> 0 0 1 1
+    INC_BC = 0b00000011,
+    INC_DE = 0b00010011,
+    INC_HL = 0b00100011,
+    INC_SP = 0b00110011,
+
+    // DEC rr
+    // The register pair rr is decremented by 1. Register pair rr may be any of BC,
+    // DE, HL or SP.
+    // Bit-by-bit: 0 0 <r r> 1 0 1 1
+    DEC_BC = 0b00001011,
+    DEC_DE = 0b00011011,
+    DEC_HL = 0b00101011,
+    DEC_SP = 0b00111011,
+
+    // ADD SP, s
+    // The byte s is read as a signed integer and added to the register pair SP.
+    // Bit-by-bit: 1 1 1 0 1 0 0 0 <s s s s s s s s>
+    ADD_SP_s = 0b11101000,
+
+    // LD HL, SP+s
+    // The byte s is read as a signed integer and added to the register pair SP. The
+    // result is then loaded into the register pair HL.
+    // Bit-by-bit: 1 1 1 1 1 0 0 0 <s s s s s s s s>
+    LD_HL_SPs = 0b11111000,
 
     // RLCA
     // The contents of register A are rotated left by 1 bit position, after the sign
@@ -565,7 +598,7 @@ enum class OpCode : uint8_t {
     // TODO: RETI
     // TODO: RST n
 
-    // CB:
+    // CB
     // Interpret the next byte as a prefix instruction (PrefixOpCode)
     // rather than a normal instruction (OpCode)
     CB = 0b11001011
