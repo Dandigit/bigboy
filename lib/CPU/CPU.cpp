@@ -719,7 +719,7 @@ void CPU::EI() {
 }
 
 void CPU::absoluteJump(uint16_t address) {
-    m_pc = address;
+    load(m_pc, address);
 }
 
 void CPU::JP_nn() {
@@ -745,7 +745,7 @@ void CPU::JP_f_nn(ConditionOperand condition) {
 }
 
 void CPU::relativeJump(int8_t offset) {
-    m_pc += offset;
+    load(m_pc, m_pc + offset);
 }
 
 void CPU::JR_PCdd() {
@@ -762,7 +762,7 @@ void CPU::JR_f_PCdd(ConditionOperand condition) {
 
 void CPU::call(uint16_t address) {
     push(m_pc);
-    load(m_pc, address);
+    absoluteJump(address);
 }
 
 void CPU::CALL_nn() {

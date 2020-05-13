@@ -29,18 +29,38 @@ enum class RegisterPairStackOperand : uint8_t {
 
 struct Registers {
     // General purpose
+    #ifdef BIGBOY_BIG_ENDIAN
+    uint8_t b = 0;
+    uint8_t c = 0;
+    #else
     uint8_t c = 0;
     uint8_t b = 0;
+    #endif
 
+    #ifdef BIGBOY_BIG_ENDIAN
+    uint8_t d = 0;
+    uint8_t e = 0;
+    #else
     uint8_t e = 0;
     uint8_t d = 0;
+    #endif
 
+    #ifdef BIGBOY_BIG_ENDIAN
+    uint8_t h = 0;
+    uint8_t l = 0;
+    #else
     uint8_t l = 0;
     uint8_t h = 0;
+    #endif
 
     // Accumulator and flags
+    #ifdef BIGBOY_BIG_ENDIAN
     uint8_t f = 0;
     uint8_t a = 0;
+    #else
+    uint8_t a = 0;
+    uint8_t f = 0;
+    #endif
 
     // Stack pointer
     uint16_t sp = 0xFF - 1;

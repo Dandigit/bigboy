@@ -31,7 +31,11 @@ uint16_t& Registers::get(RegisterPairStackOperand target) {
 }
 
 uint16_t& Registers::BC() {
+    #ifdef BIGBOY_BIG_ENDIAN
+    return *static_cast<uint16_t*>(static_cast<void*>(&b));
+    #else
     return *static_cast<uint16_t*>(static_cast<void*>(&c));
+    #endif
 }
 
 uint16_t Registers::BC() const {
@@ -40,7 +44,11 @@ uint16_t Registers::BC() const {
 }
 
 uint16_t& Registers::DE() {
+    #ifdef BIGBOY_BIG_ENDIAN
+    return *static_cast<uint16_t*>(static_cast<void*>(&d));
+    #else
     return *static_cast<uint16_t*>(static_cast<void*>(&e));
+    #endif
 }
 
 uint16_t Registers::DE() const {
@@ -49,7 +57,11 @@ uint16_t Registers::DE() const {
 }
 
 uint16_t& Registers::HL() {
+    #ifdef BIGBOY_BIG_ENDIAN
+    return *static_cast<uint16_t*>(static_cast<void*>(&h));
+    #else
     return *static_cast<uint16_t*>(static_cast<void*>(&l));
+    #endif
 }
 
 uint16_t Registers::HL() const {
@@ -58,7 +70,11 @@ uint16_t Registers::HL() const {
 }
 
 uint16_t& Registers::AF() {
+    #ifdef BIGBOY_BIG_ENDIAN
+    return *static_cast<uint16_t*>(static_cast<void*>(&a));
+    #else
     return *static_cast<uint16_t*>(static_cast<void*>(&f));
+    #endif
 }
 
 uint16_t Registers::AF() const {

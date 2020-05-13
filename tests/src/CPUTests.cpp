@@ -10,20 +10,20 @@ protected:
 TEST_F(CPUTest, registerPairs) {
     constexpr std::array<uint16_t, 5> values{0, 21, 532, 9000, 2};
 
-    #define TEST_REGISTER_PAIR(pair, low, high) \
+    #define TEST_REGISTER_PAIR(pair, high, low) \
         do { \
             for (const uint16_t value : values) { \
                 cpu.registers().pair = value; \
                 EXPECT_EQ(cpu.registers().pair, value); \
                 EXPECT_EQ(static_cast<const CPU&>(cpu).registers().pair, value); \
-                EXPECT_EQ(cpu.registers().low, (value & 0xFFu)); \
                 EXPECT_EQ(cpu.registers().high, (value >> 8u)); \
+                EXPECT_EQ(cpu.registers().low, (value & 0xFFu)); \
             } \
         } while (false)
 
-    TEST_REGISTER_PAIR(BC(), c, b);
-    TEST_REGISTER_PAIR(DE(), e, d);
-    TEST_REGISTER_PAIR(HL(), l, h);
+    TEST_REGISTER_PAIR(BC(), b, c);
+    TEST_REGISTER_PAIR(DE(), d, e);
+    TEST_REGISTER_PAIR(HL(), h, l);
 
     #undef TEST_REGISTER_PAIR
 }
