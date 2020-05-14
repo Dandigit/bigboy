@@ -6,6 +6,7 @@ enum class PrefixOpCode {
     // The contents of the register r are rotated left by 1 bit position, after the
     // sign bit (7) is copied into the carry flag. Register r may be any of B, C, D,
     // E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 0 0 0 0 0 <r r r>
     RLC_B = 0b00000000,
     RLC_C = 0b00000001,
@@ -18,12 +19,14 @@ enum class PrefixOpCode {
     // RLC (HL)
     // The byte at the memory address specified in the register pair HL is rotated
     // left by 1 bit position, after the sign bit (7) is copied into the carry flag.
+    // Clock cycles: 16
     // Bit-by-bit (after 0xCB): 0 0 0 0 0 1 1 0
     RLC_HL = 0b00000110,
 
     // RL r
     // The contents of the register r are rotated left by 1 bit position through the
     // carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 0 0 0 1 0 <r r r>
     RL_B = 0b00010000,
     RL_C = 0b00010001,
@@ -36,12 +39,14 @@ enum class PrefixOpCode {
     // RL (HL)
     // The byte at the memory address specified in the register pair HL is rotated
     // left by 1 bit position through the carry flag.
+    // Clock cycles: 16
     // Bit-by-bit (after 0xCB): 0 0 0 1 0 1 1 0
     RL_HL = 0b00010110,
 
     // RRC r
     // The contents of the register r are rotated left by 1 bit position, after bit
     // 0 is copied into the carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 0 0 0 0 1 <r r r>
     RRC_B = 0b00001000,
     RRC_C = 0b00001001,
@@ -54,12 +59,14 @@ enum class PrefixOpCode {
     // RRC (HL)
     // The byte at the memory address specified in the register pair HL is rotated
     // right by 1 bit position, after bit 0 is copied into the carry flag.
+    // Clock cycles: 16
     // Bit-by-bit (after 0xCB): 0 0 0 0 1 1 1 0
     RRC_HL = 0b00001110,
 
     // RR r
     // The contents of the register r are rotated right by 1 bit position through the
     // carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 0 0 0 1 1 <r r r>
     RR_B = 0b00011000,
     RR_C = 0b00011001,
@@ -72,12 +79,14 @@ enum class PrefixOpCode {
     // RR (HL)
     // The byte at the memory address specified in the register pair HL is rotated
     // right by 1 bit position through the carry flag.
+    // Clock cycles: 16
     // Bit-by-bit (after 0xCB): 0 0 0 1 1 1 1 0
     RR_HL = 0b00011110,
 
     // SLA r
     // The contents of the register r are shifted left by 1 bit position, after bit
     // 7 is copied to the carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 0 0 1 0 0 <r r r>
     SLA_B = 0b00100000,
     SLA_C = 0b00100001,
@@ -90,12 +99,14 @@ enum class PrefixOpCode {
     // SLA (HL)
     // The byte at the memory address specified in the register pair HL is shifted
     // left by 1 bit position, after bit 7 is copied to the carry flag.
+    // Clock cycles: 16
     // Bit-by-bit (after 0xCB): 0 0 1 0 0 1 1 0
     SLA_HL = 0b00100110,
 
     // SWAP r
     // The upper and lower nibbles of the register r are swapped. Register r may be
     // any of B, C, D, E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit: 0 0 1 1 0 <r r r>
     SWAP_B = 0b00110000,
     SWAP_C = 0b00110001,
@@ -108,6 +119,7 @@ enum class PrefixOpCode {
     // SWAP (HL)
     // The upper and lower nibbles of the byte at the memory address specified in
     // the register pair HL are swapped.
+    // Clock cycles: 16
     // Bit-by-bit: 0 0 1 1 0 1 1 0
     SWAP_HL = 0b00110110,
 
@@ -115,6 +127,7 @@ enum class PrefixOpCode {
     // The lower 7 bits (0-6) of the register r are shifted right by 1 bit position,
     // after bit 0 is copied into the carry flag. Register r may be any of B, C, D,
     // E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 0 0 1 0 1 <r r r>
     SRA_B = 0b00101000,
     SRA_C = 0b00101001,
@@ -128,12 +141,14 @@ enum class PrefixOpCode {
     // The lower 7 bits (0-6) of the byte at the memory address specified in the
     // register pair HL are shifted right by 1 bi position, after bit 0 is copied
     // into the carry flag.
+    // Clock cycles: 16
     // Bit-by-bit (after 0xCB): 0 0 1 0 1 1 1 0
     SRA_HL = 0b00101110,
 
     // SRL r
     // The contents of the register r are shifted right by 1 bit position, after bit 0
     // is copied into the carry flag. Register r may be any of B, C, D, E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 0 0 1 1 1 <r r r>
     SRL_B = 0b00111000,
     SRL_C = 0b00111001,
@@ -146,12 +161,14 @@ enum class PrefixOpCode {
     // SRL (HL)
     // The byte at the memory address specified in the register pair HL is shifted right
     // by 1 bit position, after bit 0 is copied into the carry flag.
+    // Clock cycles: 16
     // Bit-by-bit (after 0xCB): 0 0 1 1 1 1 1 0
     SRL_HL = 0b00111110,
 
     // BIT b, r
     // The zero flag is set if the bit at position b in the register r is 0, otherwise,
     // the flag is reset. Register r may be any of B, C, D, E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 0 1 <b b b> <r r r>
     BIT_0_B = 0b01000000,
     BIT_1_B = 0b01001000,
@@ -220,6 +237,7 @@ enum class PrefixOpCode {
     // The zero flag is set if the bit at position b in the byte at the address stored
     // in the register pair HL is 0, otherwise, the flag is reset. Register r may be
     // any of B, C, D, E, H, L or A.
+    // Clock cycles: 12
     // Bit-by-bit (after 0xCB): 0 1 <b b b> 1 1 0
     BIT_0_HL = 0b01000110,
     BIT_1_HL = 0b01001110,
@@ -233,6 +251,7 @@ enum class PrefixOpCode {
     // SET b, r
     // The bit at position b of the register r is set. Register r may be any of B, C, D,
     // E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 1 1 <b b b> <r r r>
     SET_0_B = 0b11000000,
     SET_1_B = 0b11001000,
@@ -300,6 +319,7 @@ enum class PrefixOpCode {
     // SET b, (HL)
     // The bit at position b of the byte at the memory address stored in the register
     // pair HL is set.
+    // Clock cycles: 16
     // Bit-by-bit (after 0xCB): 1 1 <b b b> 1 1 0
     SET_0_HL = 0b11000110,
     SET_1_HL = 0b11001110,
@@ -313,6 +333,7 @@ enum class PrefixOpCode {
     // RES b, r
     // The bit at position b of the register r is reset. Register r may be any of B, C,
     // D, E, H, L or A.
+    // Clock cycles: 8
     // Bit-by-bit (after 0xCB): 1 1 <b b b> <r r r>
     RES_0_B = 0b10000000,
     RES_1_B = 0b10001000,
@@ -380,6 +401,7 @@ enum class PrefixOpCode {
     // RES b, (HL)
     // The bit at position b of the byte at the memory address stored in the register
     // pair HL is reset.
+    // Clock cycles: 16
     // Bit-by-bit (after 0xCB): 1 1 <b b b> 1 1 0
     RES_0_HL = 0b10000110,
     RES_1_HL = 0b10001110,

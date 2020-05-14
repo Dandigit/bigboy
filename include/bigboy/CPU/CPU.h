@@ -55,225 +55,225 @@ private:
 
     void load(uint8_t& target, uint8_t value);
 
-    void LD_r_r(RegisterOperand target, RegisterOperand value);
-    void LD_r_n(RegisterOperand target);
-    void LD_r_HL(RegisterOperand target);
+    uint8_t LD_r_r(RegisterOperand target, RegisterOperand value);
+    uint8_t LD_r_n(RegisterOperand target);
+    uint8_t LD_r_HL(RegisterOperand target);
 
-    void LD_HL_r(RegisterOperand value);
-    void LD_HL_n();
+    uint8_t LD_HL_r(RegisterOperand value);
+    uint8_t LD_HL_n();
 
-    void LD_A_BC();
-    void LD_A_DE();
-    void LD_A_nn();
+    uint8_t LD_A_BC();
+    uint8_t LD_A_DE();
+    uint8_t LD_A_nn();
 
-    void LD_BC_A();
-    void LD_DE_A();
-    void LD_nn_A();
+    uint8_t LD_BC_A();
+    uint8_t LD_DE_A();
+    uint8_t LD_nn_A();
 
-    void LD_A_FF00n();
-    void LD_FF00n_A();
+    uint8_t LD_A_FF00n();
+    uint8_t LD_FF00n_A();
 
-    void LD_A_FF00C();
-    void LD_FF00C_A();
+    uint8_t LD_A_FF00C();
+    uint8_t LD_FF00C_A();
 
-    void LDI_HL_A();
-    void LDI_A_HL();
+    uint8_t LDI_HL_A();
+    uint8_t LDI_A_HL();
 
-    void LDD_HL_A();
-    void LDD_A_HL();
+    uint8_t LDD_HL_A();
+    uint8_t LDD_A_HL();
 
     void load(uint16_t& target, uint16_t value);
 
-    void LD_dd_nn(RegisterPairOperand target);
-    void LD_SP_HL();
+    uint8_t LD_dd_nn(RegisterPairOperand target);
+    uint8_t LD_SP_HL();
 
     void push(uint16_t value);
 
-    void PUSH_qq(RegisterPairStackOperand value);
+    uint8_t PUSH_qq(RegisterPairStackOperand value);
 
     void pop(uint16_t& target);
 
-    void POP_qq(RegisterPairStackOperand target);
+    uint8_t POP_qq(RegisterPairStackOperand target);
 
     void add(uint8_t value);
 
-    void ADDA_r(RegisterOperand target);
-    void ADDA_n();
-    void ADDA_HL();
+    uint8_t ADDA_r(RegisterOperand target);
+    uint8_t ADDA_n();
+    uint8_t ADDA_HL();
 
     void addWithCarry(uint8_t value);
 
-    void ADCA_r(RegisterOperand target);
-    void ADCA_n();
-    void ADCA_HL();
+    uint8_t ADCA_r(RegisterOperand target);
+    uint8_t ADCA_n();
+    uint8_t ADCA_HL();
 
     void subtract(uint8_t value);
 
-    void SUB_r(RegisterOperand target);
-    void SUB_n();
-    void SUB_HL();
+    uint8_t SUB_r(RegisterOperand target);
+    uint8_t SUB_n();
+    uint8_t SUB_HL();
 
     void subtractWithCarry(uint8_t value);
 
-    void SBCA_r(RegisterOperand target);
-    void SBCA_n();
-    void SBCA_HL();
+    uint8_t SBCA_r(RegisterOperand target);
+    uint8_t SBCA_n();
+    uint8_t SBCA_HL();
 
     void bitwiseAnd(uint8_t value);
 
-    void AND_r(RegisterOperand target);
-    void AND_n();
-    void AND_HL();
+    uint8_t AND_r(RegisterOperand target);
+    uint8_t AND_n();
+    uint8_t AND_HL();
 
     void bitwiseXor(uint8_t value);
 
-    void XOR_r(RegisterOperand target);
-    void XOR_n();
-    void XOR_HL();
+    uint8_t XOR_r(RegisterOperand target);
+    uint8_t XOR_n();
+    uint8_t XOR_HL();
 
     void bitwiseOr(uint8_t value);
 
-    void OR_r(RegisterOperand target);
-    void OR_n();
-    void OR_HL();
+    uint8_t OR_r(RegisterOperand target);
+    uint8_t OR_n();
+    uint8_t OR_HL();
 
     void compare(uint8_t value);
 
-    void CP_r(RegisterOperand target);
-    void CP_n();
-    void CP_HL();
+    uint8_t CP_r(RegisterOperand target);
+    uint8_t CP_n();
+    uint8_t CP_HL();
 
     void increment(uint8_t &target);
 
-    void INC_r(RegisterOperand target);
-    void INC_HL();
+    uint8_t INC_r(RegisterOperand target);
+    uint8_t INC_HL();
 
     void decrement(uint8_t &target);
 
-    void DEC_r(RegisterOperand target);
-    void DEC_HL_();
+    uint8_t DEC_r(RegisterOperand target);
+    uint8_t DEC_HL_();
 
-    void DAA();
-    void CPL();
+    uint8_t DAA();
+    uint8_t CPL();
 
     void add(uint16_t& target, uint16_t value);
 
-    void ADD_HL_rr(RegisterPairOperand value);
+    uint8_t ADD_HL_rr(RegisterPairOperand value);
 
     void increment(uint16_t& target);
 
-    void INC_rr(RegisterPairOperand target);
+    uint8_t INC_rr(RegisterPairOperand target);
 
     void decrement(uint16_t& target);
 
-    void DEC_rr(RegisterPairOperand target);
+    uint8_t DEC_rr(RegisterPairOperand target);
 
     void add(uint16_t& target, int8_t value);
 
-    void ADD_SP_s();
-    void LD_HL_SPs();
+    uint8_t ADD_SP_s();
+    uint8_t LD_HL_SPs();
 
     void rotateLeft(uint8_t &target);
 
-    void RLCA();
-    void RLC_r(RegisterOperand target);
-    void RLC_HL();
+    uint8_t RLCA();
+    uint8_t RLC_r(RegisterOperand target);
+    uint8_t RLC_HL();
 
     void rotateLeftThroughCarry(uint8_t &target);
 
-    void RLA();
-    void RL_r(RegisterOperand target);
-    void RL_HL();
+    uint8_t RLA();
+    uint8_t RL_r(RegisterOperand target);
+    uint8_t RL_HL();
 
     void rotateRight(uint8_t &target);
 
-    void RRCA();
-    void RRC_r(RegisterOperand target);
-    void RRC_HL();
+    uint8_t RRCA();
+    uint8_t RRC_r(RegisterOperand target);
+    uint8_t RRC_HL();
 
     void rotateRightThroughCarry(uint8_t &target);
 
-    void RRA();
-    void RR_r(RegisterOperand target);
-    void RR_HL();
+    uint8_t RRA();
+    uint8_t RR_r(RegisterOperand target);
+    uint8_t RR_HL();
 
     void shiftLeft(uint8_t &target);
 
-    void SLA_r(RegisterOperand target);
-    void SLA_HL();
+    uint8_t SLA_r(RegisterOperand target);
+    uint8_t SLA_HL();
 
     void swap(uint8_t& target);
 
-    void SWAP_r(RegisterOperand target);
-    void SWAP_HL();
+    uint8_t SWAP_r(RegisterOperand target);
+    uint8_t SWAP_HL();
 
     void shiftTailRight(uint8_t &target);
 
-    void SRA_r(RegisterOperand target);
-    void SRA_HL();
+    uint8_t SRA_r(RegisterOperand target);
+    uint8_t SRA_HL();
 
     void shiftRight(uint8_t &target);
 
-    void SRL_r(RegisterOperand target);
-    void SRL_HL();
+    uint8_t SRL_r(RegisterOperand target);
+    uint8_t SRL_HL();
 
     void testBit(BitOperand bit, uint8_t byte);
 
-    void BIT_b_r(BitOperand bit, RegisterOperand reg);
-    void BIT_b_HL(BitOperand bit);
+    uint8_t BIT_b_r(BitOperand bit, RegisterOperand reg);
+    uint8_t BIT_b_HL(BitOperand bit);
 
     void setBit(BitOperand bit, uint8_t& target);
 
-    void SET_b_r(BitOperand bit, RegisterOperand reg);
-    void SET_b_HL(BitOperand bit);
+    uint8_t SET_b_r(BitOperand bit, RegisterOperand reg);
+    uint8_t SET_b_HL(BitOperand bit);
 
     void resetBit(BitOperand bit, uint8_t& target);
 
-    void RES_b_r(BitOperand bit, RegisterOperand reg);
-    void RES_b_HL(BitOperand bit);
+    uint8_t RES_b_r(BitOperand bit, RegisterOperand reg);
+    uint8_t RES_b_HL(BitOperand bit);
 
-    void CCF();
-    void SCF();
+    uint8_t CCF();
+    uint8_t SCF();
 
-    void NOP();
+    uint8_t NOP();
 
-    void HALT();
-    void STOP();
+    uint8_t HALT();
+    uint8_t STOP();
 
-    void DI();
-    void EI();
+    uint8_t DI();
+    uint8_t EI();
 
     void absoluteJump(uint16_t address);
 
-    void JP_nn();
-    void JP_HL();
-    void JP_f_nn(ConditionOperand condition);
+    uint8_t JP_nn();
+    uint8_t JP_HL();
+    uint8_t JP_f_nn(ConditionOperand condition);
 
     void relativeJump(int8_t offset);
 
-    void JR_PCdd();
-    void JR_f_PCdd(ConditionOperand condition);
+    uint8_t JR_PCdd();
+    uint8_t JR_f_PCdd(ConditionOperand condition);
 
     void call(uint16_t address);
 
-    void CALL_nn();
-    void CALL_f_nn(ConditionOperand condition);
+    uint8_t CALL_nn();
+    uint8_t CALL_f_nn(ConditionOperand condition);
 
     void ret();
 
-    void RET();
-    void RET_f(ConditionOperand condition);
-    void RETI();
+    uint8_t RET();
+    uint8_t RET_f(ConditionOperand condition);
+    uint8_t RETI();
 
-    void RST(ResetOperand address);
+    uint8_t RST(ResetOperand address);
 
 public:
     void load(const std::array<uint8_t, 0xFFFF> &memory);
 
     void exec();
 
-    void step();
-    void stepPrefix();
+    uint8_t step();
+    uint8_t stepPrefix();
 
     void reset();
 
