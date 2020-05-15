@@ -35,12 +35,12 @@ TEST_F(CPUTest, ADDA_r) {
     #define TEST_FOR_REGISTER(r, instruction) \
         do { \
             for (size_t i = 0; i < aValues.size(); ++i) { \
+                cpu.load(Cartridge::test(OpCode::instruction)); \
                 \
                 cpu.registers().a = aValues[i]; \
                 cpu.registers().r = rValues[i]; \
                 \
-                cpu.load({static_cast<uint8_t>(OpCode::instruction)}); \
-                cpu.exec(); \
+                cpu.step(); \
                 \
                 EXPECT_EQ(cpu.registers().a, static_cast<uint8_t>(aValues[i] + rValues[i])) \
                     << "    in test of instruction " << #instruction << " on register " << #r; \
@@ -56,10 +56,9 @@ TEST_F(CPUTest, ADDA_r) {
 
     // ADDA_A is a special case
     for (uint8_t aValue : aValues) {
+        cpu.load(Cartridge::test(OpCode::ADDA_A));
         cpu.registers().a = aValue;
-
-        cpu.load({static_cast<uint8_t>(OpCode::ADDA_A)});
-        cpu.exec();
+        cpu.step();
 
         EXPECT_EQ(cpu.registers().a, static_cast<uint8_t>(aValue + aValue));
     }

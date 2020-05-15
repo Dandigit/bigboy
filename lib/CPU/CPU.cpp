@@ -11,15 +11,28 @@ const Registers& CPU::registers() const {
     return m_registers;
 }
 
-//void CPU::load(const std::array<uint8_t, 0xFFFF>& memory) {
-//    m_mmu = MMU{memory};
-//    m_pc = 0;
-//}
+void CPU::load(Cartridge cartridge) {
+    reset();
 
-void CPU::exec() {
-    while (m_pc < 0xFFFF) {
-        step();
-    }
+    m_mmu.deregisterDevice(m_cartridge);
+    m_cartridge = cartridge;
+    m_mmu.registerDevice(m_cartridge);
+}
+
+void CPU::reset() {
+    m_mmu.reset();
+
+    //m_cartridge.reset();
+    m_mmu.registerDevice(m_cartridge);
+
+    //m_serial.reset();
+    m_mmu.registerDevice(m_serial);
+
+    m_registers.reset();
+    m_pc = 0;
+    m_halted = false;
+    m_stopped = false;
+    m_ime = true;
 }
 
 void CPU::load(uint8_t& target, uint8_t value) {

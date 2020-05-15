@@ -8,6 +8,10 @@ constexpr unsigned long WINDOW_HEIGHT = 160;
 constexpr unsigned long WINDOW_WIDTH = 144;
 
 int main() {
+    CPU cpu{};
+    cpu.load(Cartridge::fromFile("./resources/games/Tetris.gb"));
+    while (true) cpu.step();
+
     // Create the main window
     sf::RenderWindow window{sf::VideoMode{WINDOW_HEIGHT, WINDOW_WIDTH}, "Bigboy"};
 

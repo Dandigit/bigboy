@@ -6,6 +6,7 @@
 #include <bigboy/CPU/Registers.h>
 #include <bigboy/MMU/MMU.h>
 #include <bigboy/Serial.h>
+#include <bigboy/Cartridge/Cartridge.h>
 
 enum class BitOperand : uint8_t {
     BIT0 = 0, // 000
@@ -37,8 +38,9 @@ public:
     };
 
 private:
+    Cartridge m_cartridge{};
     Serial m_serial{};
-    MMU m_mmu{m_serial};
+    MMU m_mmu{m_cartridge, m_serial};
 
     Registers m_registers{};
     Flags m_flags{m_registers.f};
@@ -269,9 +271,7 @@ private:
     uint8_t RST(ResetOperand address);
 
 public:
-    void load(const std::array<uint8_t, 0xFFFF> &memory);
-
-    void exec();
+    void load(Cartridge cartridge);
 
     uint8_t step();
     uint8_t stepPrefix();

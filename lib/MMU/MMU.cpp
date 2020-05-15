@@ -20,6 +20,21 @@ void MMU::registerDevice(MemoryDevice &device) {
     m_devices.emplace_back(device);
 }
 
+void MMU::deregisterDevice(MemoryDevice& deviceR) {
+    auto device = std::find_if(
+            m_devices.begin(), m_devices.end(), [&](auto device){ return &deviceR == &device.get(); });
+
+    if (device == m_devices.end()) {
+        throw std::runtime_error{"[fatal]: Cannot deregister already deregistered memory device"};
+    }
+
+    m_devices.erase(device);
+}
+
+void MMU::reset() {
+    m_devices.erase(m_devices.begin() + 1);
+}
+
 MemoryDevice& MMU::getDevice(uint16_t address) {
     auto device = std::find_if(
             m_devices.begin(), m_devices.end(),

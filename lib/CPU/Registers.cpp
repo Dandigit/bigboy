@@ -81,3 +81,15 @@ uint16_t Registers::AF() const {
     return static_cast<uint16_t>(a) << 8u
            | static_cast<uint16_t>(f);
 }
+
+void Registers::reset() {
+    b = 0;
+    c = 0;
+    d = 0;
+    e = 0;
+    h = 0;
+    l = 0;
+    a = 0;
+    f = 0;
+    sp = 0;
+}

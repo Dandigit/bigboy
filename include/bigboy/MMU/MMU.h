@@ -21,6 +21,9 @@ public:
     void writeByte(uint16_t address, uint8_t value);
 
     void registerDevice(MemoryDevice& device);
+    void deregisterDevice(MemoryDevice& device);
+
+    void reset();
 
 private:
     MemoryDevice& getDevice(uint16_t address);

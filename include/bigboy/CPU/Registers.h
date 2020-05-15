@@ -82,6 +82,8 @@ struct Registers {
 
     uint16_t& AF();
     uint16_t AF() const;
+
+    void reset();
 };
 
 #endif //BIGBOY_REGISTERS_H
