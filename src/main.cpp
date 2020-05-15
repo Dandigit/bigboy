@@ -9,8 +9,10 @@ constexpr unsigned long WINDOW_WIDTH = 144;
 
 int main() {
     CPU cpu{};
-    cpu.load(Cartridge::fromFile("./resources/games/Tetris.gb"));
-    while (true) cpu.step();
+    cpu.load(Cartridge::fromFile("./resources/tests/10-bit ops.gb"));
+    while (true) {
+        try { cpu.step(); } catch (const std::runtime_error& e) { std::cout << e.what(); };
+    }
 
     // Create the main window
     sf::RenderWindow window{sf::VideoMode{WINDOW_HEIGHT, WINDOW_WIDTH}, "Bigboy"};
