@@ -11,10 +11,10 @@ const Registers& CPU::registers() const {
     return m_registers;
 }
 
-void CPU::load(const std::array<uint8_t, 0xFFFF>& memory) {
-    m_mmu = MMU{memory};
-    m_pc = 0;
-}
+//void CPU::load(const std::array<uint8_t, 0xFFFF>& memory) {
+//    m_mmu = MMU{memory};
+//    m_pc = 0;
+//}
 
 void CPU::exec() {
     while (m_pc < 0xFFFF) {
@@ -32,103 +32,121 @@ uint8_t CPU::LD_r_r(RegisterOperand target, RegisterOperand value) {
 }
 
 uint8_t CPU::LD_r_n(RegisterOperand target) {
-    load(m_registers.get(target), m_mmu.byteAt(m_pc++));
+    load(m_registers.get(target), m_mmu.readByte(m_pc++));
     return 8;
 }
 
 uint8_t CPU::LD_r_HL(RegisterOperand target) {
-    load(m_registers.get(target), m_mmu.byteAt(m_registers.HL()));
+    load(m_registers.get(target), m_mmu.readByte(m_registers.HL()));
     return 8;
 }
 
 uint8_t CPU::LD_HL_r(RegisterOperand value) {
-    load(m_mmu.byteAt(m_registers.HL()), m_registers.get(value));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    load(dummy, m_registers.get(value));
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 8;
 }
 
 uint8_t CPU::LD_HL_n() {
-    load(m_mmu.byteAt(m_registers.HL()), m_mmu.byteAt(m_pc++));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    load(dummy, m_mmu.readByte(m_pc++));
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 12;
 }
 
 uint8_t CPU::LD_A_BC() {
-    load(m_registers.a, m_mmu.byteAt(m_registers.BC()));
+    load(m_registers.a, m_mmu.readByte(m_registers.BC()));
     return 8;
 }
 
 uint8_t CPU::LD_A_DE() {
-    load(m_registers.a, m_mmu.byteAt(m_registers.DE()));
+    load(m_registers.a, m_mmu.readByte(m_registers.DE()));
     return 8;
 }
 
 uint8_t CPU::LD_A_nn() {
-    uint8_t lower = m_mmu.byteAt(m_pc++);
-    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint8_t lower = m_mmu.readByte(m_pc++);
+    uint8_t higher = m_mmu.readByte(m_pc++);
     uint16_t nn = (higher << 8u) | lower;
 
-    load(m_registers.a, m_mmu.byteAt(nn));
+    load(m_registers.a, m_mmu.readByte(nn));
     return 16;
 }
 
 uint8_t CPU::LD_BC_A() {
-    load(m_mmu.byteAt(m_registers.BC()), m_registers.a);
+    uint8_t dummy = m_mmu.readByte(m_registers.BC());
+    load(dummy, m_registers.a);
+    m_mmu.writeByte(m_registers.BC(), dummy);
     return 8;
 }
 
 uint8_t CPU::LD_DE_A() {
-    load(m_mmu.byteAt(m_registers.DE()), m_registers.a);
+    uint8_t dummy = m_mmu.readByte(m_registers.DE());
+    load(dummy, m_registers.a);
+    m_mmu.writeByte(m_registers.DE(), dummy);
     return 8;
 }
 
 uint8_t CPU::LD_nn_A() {
-    uint8_t lower = m_mmu.byteAt(m_pc++);
-    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint8_t lower = m_mmu.readByte(m_pc++);
+    uint8_t higher = m_mmu.readByte(m_pc++);
     uint16_t nn = (higher << 8u) | lower;
 
-    load(m_mmu.byteAt(nn), m_registers.a);
+    uint8_t dummy = m_mmu.readByte(nn);
+    load(dummy, m_registers.a);
+    m_mmu.writeByte(nn, dummy);
     return 16;
 }
 
 uint8_t CPU::LD_A_FF00n() {
-    load(m_registers.a, m_mmu.byteAt(0xFF00 + m_pc++));
+    load(m_registers.a, m_mmu.readByte(0xFF00 + m_pc++));
     return 12;
 }
 
 uint8_t CPU::LD_FF00n_A() {
-    load(m_mmu.byteAt(0xFF00 + m_pc++), m_registers.a);
+    uint16_t addr = 0xFF00 + m_pc++;
+    uint8_t dummy = m_mmu.readByte(addr);
+    load(dummy, m_registers.a);
+    m_mmu.writeByte(addr, dummy);
     return 12;
 }
 
 uint8_t CPU::LD_A_FF00C() {
-    load(m_registers.a, m_mmu.byteAt(0xFF00 + m_registers.c));
+    load(m_registers.a, m_mmu.readByte(0xFF00 + m_registers.c));
     return 8;
 }
 
 uint8_t CPU::LD_FF00C_A() {
-    load(m_mmu.byteAt(0xFF00 + m_registers.c), m_registers.a);
+    uint16_t addr = 0xFF00 + m_registers.c;
+    uint8_t dummy = m_mmu.readByte(addr);
+    load(dummy, m_registers.a);
+    m_mmu.writeByte(addr, dummy);
     return 8;
 }
 
 uint8_t CPU::LDI_HL_A() {
-    load(m_mmu.byteAt(m_registers.HL()), m_registers.a);
-    ++m_registers.HL();
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    load(dummy , m_registers.a);
+    m_mmu.writeByte(m_registers.HL()++, dummy);
     return 8;
 }
 
 uint8_t CPU::LDI_A_HL() {
-    load(m_registers.a, m_mmu.byteAt(m_registers.HL()));
+    load(m_registers.a, m_mmu.readByte(m_registers.HL()));
     ++m_registers.HL();
     return 8;
 }
 
 uint8_t CPU::LDD_HL_A() {
-    load(m_mmu.byteAt(m_registers.HL()), m_registers.a);
-    --m_registers.HL();
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    load(dummy , m_registers.a);
+    m_mmu.writeByte(m_registers.HL()--, dummy);
     return 8;
 }
 
 uint8_t CPU::LDD_A_HL() {
-    load(m_registers.a, m_mmu.byteAt(m_registers.HL()));
+    load(m_registers.a, m_mmu.readByte(m_registers.HL()));
     --m_registers.HL();
     return 8;
 }
@@ -138,8 +156,8 @@ void CPU::load(uint16_t& target, uint16_t value) {
 }
 
 uint8_t CPU::LD_dd_nn(RegisterPairOperand target) {
-    uint8_t lower = m_mmu.byteAt(m_pc++);
-    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint8_t lower = m_mmu.readByte(m_pc++);
+    uint8_t higher = m_mmu.readByte(m_pc++);
     uint16_t nn = (higher << 8u) | lower;
 
     load(m_registers.get(target), nn);
@@ -153,10 +171,10 @@ uint8_t CPU::LD_SP_HL() {
 
 void CPU::push(uint16_t value) {
     uint8_t high = (value >> 8u);
-    m_mmu.byteAt(--m_registers.sp) = high;
+    m_mmu.writeByte(--m_registers.sp, high);
 
     uint8_t low = (value & 0xFFu);
-    m_mmu.byteAt(--m_registers.sp) = low;
+    m_mmu.writeByte(--m_registers.sp, low);
 }
 
 uint8_t CPU::PUSH_qq(RegisterPairStackOperand value) {
@@ -165,8 +183,8 @@ uint8_t CPU::PUSH_qq(RegisterPairStackOperand value) {
 }
 
 void CPU::pop(uint16_t& target) {
-    uint8_t low = m_mmu.byteAt(m_registers.sp--);
-    uint8_t high = m_mmu.byteAt(m_registers.sp--);
+    uint8_t low = m_mmu.readByte(m_registers.sp--);
+    uint8_t high = m_mmu.readByte(m_registers.sp--);
 
     target = (high << 8u) | low;
 }
@@ -194,12 +212,12 @@ uint8_t CPU::ADDA_r(RegisterOperand target) {
 }
 
 uint8_t CPU::ADDA_n() {
-    add(m_mmu.byteAt(m_pc++));
+    add(m_mmu.readByte(m_pc++));
     return 8;
 }
 
 uint8_t CPU::ADDA_HL() {
-    add(m_mmu.byteAt(m_registers.HL()));
+    add(m_mmu.readByte(m_registers.HL()));
     return 8;
 }
 
@@ -214,12 +232,12 @@ uint8_t CPU::ADCA_r(RegisterOperand target) {
 }
 
 uint8_t CPU::ADCA_n() {
-    addWithCarry(m_mmu.byteAt(m_pc++));
+    addWithCarry(m_mmu.readByte(m_pc++));
     return 8;
 }
 
 uint8_t CPU::ADCA_HL() {
-    addWithCarry(m_mmu.byteAt(m_registers.HL()));
+    addWithCarry(m_mmu.readByte(m_registers.HL()));
     return 8;
 }
 
@@ -242,12 +260,12 @@ uint8_t CPU::SUB_r(RegisterOperand target) {
 }
 
 uint8_t CPU::SUB_n() {
-    subtract(m_mmu.byteAt(m_pc++));
+    subtract(m_mmu.readByte(m_pc++));
     return 8;
 }
 
 uint8_t CPU::SUB_HL() {
-    subtract(m_mmu.byteAt(m_registers.HL()));
+    subtract(m_mmu.readByte(m_registers.HL()));
     return 8;
 }
 
@@ -261,12 +279,12 @@ uint8_t CPU::SBCA_r(RegisterOperand target) {
 }
 
 uint8_t CPU::SBCA_n() {
-    subtractWithCarry(m_mmu.byteAt(m_pc++));
+    subtractWithCarry(m_mmu.readByte(m_pc++));
     return 8;
 }
 
 uint8_t CPU::SBCA_HL() {
-    subtractWithCarry(m_mmu.byteAt(m_registers.HL()));
+    subtractWithCarry(m_mmu.readByte(m_registers.HL()));
     return 8;
 }
 
@@ -285,12 +303,12 @@ uint8_t CPU::AND_r(RegisterOperand target) {
 }
 
 uint8_t CPU::AND_n() {
-    bitwiseAnd(m_mmu.byteAt(m_pc++));
+    bitwiseAnd(m_mmu.readByte(m_pc++));
     return 8;
 }
 
 uint8_t CPU::AND_HL() {
-    bitwiseAnd(m_mmu.byteAt(m_registers.HL()));
+    bitwiseAnd(m_mmu.readByte(m_registers.HL()));
     return 8;
 }
 
@@ -309,12 +327,12 @@ uint8_t CPU::XOR_r(RegisterOperand target) {
 }
 
 uint8_t CPU::XOR_n() {
-    bitwiseXor(m_mmu.byteAt(m_pc++));
+    bitwiseXor(m_mmu.readByte(m_pc++));
     return 8;
 }
 
 uint8_t CPU::XOR_HL() {
-    bitwiseXor(m_mmu.byteAt(m_registers.HL()));
+    bitwiseXor(m_mmu.readByte(m_registers.HL()));
     return 8;
 }
 
@@ -333,12 +351,12 @@ uint8_t CPU::OR_r(RegisterOperand target) {
 }
 
 uint8_t CPU::OR_n() {
-    bitwiseOr(m_mmu.byteAt(m_pc++));
+    bitwiseOr(m_mmu.readByte(m_pc++));
     return 8;
 }
 
 uint8_t CPU::OR_HL() {
-    bitwiseOr(m_mmu.byteAt(m_registers.HL()));
+    bitwiseOr(m_mmu.readByte(m_registers.HL()));
     return 8;
 }
 
@@ -359,12 +377,12 @@ uint8_t CPU::CP_r(RegisterOperand target) {
 }
 
 uint8_t CPU::CP_n() {
-    compare(m_mmu.byteAt(m_pc++));
+    compare(m_mmu.readByte(m_pc++));
     return 8;
 }
 
 uint8_t CPU::CP_HL() {
-    compare(m_mmu.byteAt(m_registers.HL()));
+    compare(m_mmu.readByte(m_registers.HL()));
     return 8;
 }
 
@@ -384,7 +402,9 @@ uint8_t CPU::INC_r(RegisterOperand target) {
 }
 
 uint8_t CPU::INC_HL() {
-    increment(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    increment(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 12;
 }
 
@@ -404,7 +424,9 @@ uint8_t CPU::DEC_r(RegisterOperand target) {
 }
 
 uint8_t CPU::DEC_HL_() {
-    decrement(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    decrement(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 12;
 }
 
@@ -495,14 +517,14 @@ void CPU::add(uint16_t &target, int8_t value) {
 }
 
 uint8_t CPU::ADD_SP_s() {
-    auto s = static_cast<int8_t>(m_mmu.byteAt(m_pc++));
+    auto s = static_cast<int8_t>(m_mmu.readByte(m_pc++));
     add(m_registers.sp, s);
     return 16;
 }
 
 uint8_t CPU::LD_HL_SPs() {
     uint16_t value = m_registers.sp;
-    auto s = static_cast<int8_t>(m_mmu.byteAt(m_pc++));
+    auto s = static_cast<int8_t>(m_mmu.readByte(m_pc++));
     add(value, s);
 
     load(m_registers.HL(), value);
@@ -532,7 +554,9 @@ uint8_t CPU::RLC_r(RegisterOperand target) {
 }
 
 uint8_t CPU::RLC_HL() {
-    rotateLeft(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    rotateLeft(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -565,7 +589,9 @@ uint8_t CPU::RL_r(RegisterOperand target) {
 }
 
 uint8_t CPU::RL_HL() {
-    rotateLeftThroughCarry(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    rotateLeftThroughCarry(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -591,7 +617,9 @@ uint8_t CPU::RRC_r(RegisterOperand target) {
 }
 
 uint8_t CPU::RRC_HL() {
-    rotateRight(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    rotateRight(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -623,7 +651,9 @@ uint8_t CPU::RR_r(RegisterOperand target) {
 }
 
 uint8_t CPU::RR_HL() {
-    rotateRightThroughCarry(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    rotateRightThroughCarry(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -644,7 +674,9 @@ uint8_t CPU::SLA_r(RegisterOperand target) {
 }
 
 uint8_t CPU::SLA_HL() {
-    shiftLeft(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    shiftLeft(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -665,7 +697,9 @@ uint8_t CPU::SWAP_r(RegisterOperand target) {
 }
 
 uint8_t CPU::SWAP_HL() {
-    swap(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    swap(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -694,7 +728,9 @@ uint8_t CPU::SRA_r(RegisterOperand target) {
 }
 
 uint8_t CPU::SRA_HL() {
-    shiftTailRight(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    shiftTailRight(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -715,7 +751,9 @@ uint8_t CPU::SRL_r(RegisterOperand target) {
 }
 
 uint8_t CPU::SRL_HL() {
-    shiftRight(m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    shiftRight(dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -734,7 +772,7 @@ uint8_t CPU::BIT_b_r(BitOperand bit, RegisterOperand reg) {
 }
 
 uint8_t CPU::BIT_b_HL(BitOperand bit) {
-    testBit(bit, m_mmu.byteAt(m_registers.HL()));
+    testBit(bit, m_mmu.readByte(m_registers.HL()));
     return 12;
 }
 
@@ -749,7 +787,9 @@ uint8_t CPU::SET_b_r(BitOperand bit, RegisterOperand reg) {
 }
 
 uint8_t CPU::SET_b_HL(BitOperand bit) {
-    setBit(bit, m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    setBit(bit, dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -764,7 +804,9 @@ uint8_t CPU::RES_b_r(BitOperand bit, RegisterOperand reg) {
 }
 
 uint8_t CPU::RES_b_HL(BitOperand bit) {
-    resetBit(bit, m_mmu.byteAt(m_registers.HL()));
+    uint8_t dummy = m_mmu.readByte(m_registers.HL());
+    resetBit(bit, dummy);
+    m_mmu.writeByte(m_registers.HL(), dummy);
     return 16;
 }
 
@@ -818,8 +860,8 @@ void CPU::absoluteJump(uint16_t address) {
 }
 
 uint8_t CPU::JP_nn() {
-    uint8_t lower = m_mmu.byteAt(m_pc++);
-    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint8_t lower = m_mmu.readByte(m_pc++);
+    uint8_t higher = m_mmu.readByte(m_pc++);
     uint16_t nn = (higher << 8u) | lower;
 
     absoluteJump(nn);
@@ -832,8 +874,8 @@ uint8_t CPU::JP_HL() {
 }
 
 uint8_t CPU::JP_f_nn(ConditionOperand condition) {
-    uint8_t lower = m_mmu.byteAt(m_pc++);
-    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint8_t lower = m_mmu.readByte(m_pc++);
+    uint8_t higher = m_mmu.readByte(m_pc++);
     uint16_t nn = (higher << 8u) | lower;
 
     if (m_flags.get(condition)) {
@@ -849,13 +891,13 @@ void CPU::relativeJump(int8_t offset) {
 }
 
 uint8_t CPU::JR_PCdd() {
-    auto dd = static_cast<int8_t>(m_mmu.byteAt(m_pc++));
+    auto dd = static_cast<int8_t>(m_mmu.readByte(m_pc++));
     relativeJump(dd);
     return 12;
 }
 
 uint8_t CPU::JR_f_PCdd(ConditionOperand condition) {
-    auto dd = static_cast<int8_t>(m_mmu.byteAt(m_pc++));
+    auto dd = static_cast<int8_t>(m_mmu.readByte(m_pc++));
     if (m_flags.get(condition)) {
         relativeJump(dd);
         return 16;
@@ -870,8 +912,8 @@ void CPU::call(uint16_t address) {
 }
 
 uint8_t CPU::CALL_nn() {
-    uint8_t lower = m_mmu.byteAt(m_pc++);
-    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint8_t lower = m_mmu.readByte(m_pc++);
+    uint8_t higher = m_mmu.readByte(m_pc++);
     uint16_t nn = (higher << 8u) | lower;
 
     call(nn);
@@ -879,8 +921,8 @@ uint8_t CPU::CALL_nn() {
 }
 
 uint8_t CPU::CALL_f_nn(ConditionOperand condition) {
-    uint8_t lower = m_mmu.byteAt(m_pc++);
-    uint8_t higher = m_mmu.byteAt(m_pc++);
+    uint8_t lower = m_mmu.readByte(m_pc++);
+    uint8_t higher = m_mmu.readByte(m_pc++);
     uint16_t nn = (higher << 8u) | lower;
 
     if (m_flags.get(condition)) {
@@ -927,7 +969,7 @@ uint8_t CPU::step() {
         return NOP();
     }
 
-    auto current = static_cast<OpCode>(m_mmu.byteAt(m_pc++));
+    auto current = static_cast<OpCode>(m_mmu.readByte(m_pc++));
     switch (current) {
         case OpCode::LD_B_B:
             return LD_r_r(RegisterOperand::B, RegisterOperand::B);

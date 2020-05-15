@@ -1,10 +1,11 @@
 #ifndef BIGBOY_CPU_H
 #define BIGBOY_CPU_H
 
-#include <bigboy/CPU/MMU.h>
 #include <bigboy/CPU/OpCode.h>
 #include <bigboy/CPU/PrefixOpCode.h>
 #include <bigboy/CPU/Registers.h>
+#include <bigboy/MMU/MMU.h>
+#include <bigboy/Serial.h>
 
 enum class BitOperand : uint8_t {
     BIT0 = 0, // 000
@@ -36,11 +37,11 @@ public:
     };
 
 private:
-    Clock m_clock{};
+    Serial m_serial{};
+    MMU m_mmu{m_serial};
+
     Registers m_registers{};
     Flags m_flags{m_registers.f};
-
-    MMU m_mmu{};
 
     uint16_t m_pc = 0; // Program counter.
 
