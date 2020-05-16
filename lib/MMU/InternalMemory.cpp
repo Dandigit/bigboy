@@ -2,9 +2,8 @@
 
 #include <string>
 
-bool InternalMemory::doesAddress(uint16_t address) const {
-    return (address >= 0xC000 && address <= 0xFDFF) ||
-            (address >= 0xFF80 && address <= 0xFFFF);
+std::vector<AddressSpace> InternalMemory::addressSpaces() const {
+    return {{0xC000, 0xFDFF}, {0xFF80, 0xFFFF}};
 }
 
 uint8_t InternalMemory::readByte(uint16_t address) const {

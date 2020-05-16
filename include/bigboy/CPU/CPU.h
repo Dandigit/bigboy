@@ -1,12 +1,12 @@
 #ifndef BIGBOY_CPU_H
 #define BIGBOY_CPU_H
 
+#include <bigboy/Cartridge/Cartridge.h>
 #include <bigboy/CPU/OpCode.h>
 #include <bigboy/CPU/PrefixOpCode.h>
 #include <bigboy/CPU/Registers.h>
 #include <bigboy/MMU/MMU.h>
 #include <bigboy/Serial.h>
-#include <bigboy/Cartridge/Cartridge.h>
 
 enum class BitOperand : uint8_t {
     BIT0 = 0, // 000

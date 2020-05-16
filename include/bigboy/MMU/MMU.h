@@ -9,11 +9,11 @@ class MMU {
     // MMU does own some general system memory that belongs nowhere else:
     InternalMemory m_internal;
 
-    // We can initialise with the internal memory device already registered.
-    std::vector<std::reference_wrapper<MemoryDevice>> m_devices{m_internal};
+    // We have to use pointers rather than reference wrappers for default construction
+    std::array<MemoryDevice*, 0xFFFF + 1> m_devices{nullptr};
 
 public:
-    MMU() = default;
+    MMU();
     MMU(std::initializer_list<std::reference_wrapper<MemoryDevice>> devices);
     ~MMU() = default;
 
@@ -21,7 +21,8 @@ public:
     void writeByte(uint16_t address, uint8_t value);
 
     void registerDevice(MemoryDevice& device);
-    void deregisterDevice(MemoryDevice& device);
+
+    void reserveAddressSpace(MemoryDevice& device, AddressSpace addressSpace);
 
     void reset();
 

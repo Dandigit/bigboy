@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include <string>
 
-bool Serial::doesAddress(uint16_t address) const {
-    return address == 0xFF01 || address == 0xFF02;
+std::vector<AddressSpace> Serial::addressSpaces() const {
+    return {{0xFF01, 0xFF02}};
 }
 
 uint8_t Serial::readByte(uint16_t address) const {

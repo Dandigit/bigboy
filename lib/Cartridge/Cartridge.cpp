@@ -35,9 +35,8 @@ void Cartridge::loadFile(std::string fileName) {
     file.close();
 }
 
-bool Cartridge::doesAddress(uint16_t address) const {
-    return (address >= 0x0000 && address <= 0x7FFF) ||
-            (address >= 0xA000 && address <= 0xBFFF);
+std::vector<AddressSpace> Cartridge::addressSpaces() const {
+    return {{0x0000, 0x7FFF}, {0xA000, 0xBFFF}};
 }
 
 uint8_t Cartridge::readByte(uint16_t address) const {

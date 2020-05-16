@@ -9,9 +9,9 @@ constexpr unsigned long WINDOW_WIDTH = 144;
 
 int main() {
     CPU cpu{};
-    cpu.load(Cartridge::fromFile("./resources/tests/10-bit ops.gb"));
+    cpu.load(Cartridge::fromFile("./resources/games/boot.gb"));
     while (true) {
-        try { cpu.step(); } catch (const std::runtime_error& e) { std::cout << e.what(); };
+        try { cpu.step(); } catch (const std::runtime_error& e) { std::cout << e.what() << "\n"; };
     }
 
     // Create the main window

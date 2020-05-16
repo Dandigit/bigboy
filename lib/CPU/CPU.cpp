@@ -14,17 +14,14 @@ const Registers& CPU::registers() const {
 void CPU::load(Cartridge cartridge) {
     reset();
 
-    m_mmu.deregisterDevice(m_cartridge);
     m_cartridge = cartridge;
     m_mmu.registerDevice(m_cartridge);
 }
 
 void CPU::reset() {
     m_mmu.reset();
-
     //m_cartridge.reset();
     m_mmu.registerDevice(m_cartridge);
-
     //m_serial.reset();
     m_mmu.registerDevice(m_serial);
 
