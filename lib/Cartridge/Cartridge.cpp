@@ -9,12 +9,6 @@ Cartridge::Cartridge(std::array<uint8_t, 0x3FFF + 1> bank0, std::array<uint8_t, 
 }
 
 Cartridge Cartridge::fromFile(std::string fileName) {
-    Cartridge cartridge{};
-    cartridge.loadFile(std::move(fileName));
-    return cartridge;
-}
-
-void Cartridge::loadFile(std::string fileName) {
     std::ifstream file{fileName};
     if (!file.is_open()) {
         throw std::runtime_error{"[fatal]: File '" + fileName + "' could not be opened."};
@@ -28,11 +22,15 @@ void Cartridge::loadFile(std::string fileName) {
 
     file.seekg(0, std::ios::beg);
 
-    file.read(reinterpret_cast<char*>(m_bank0.data()), m_bank0.size());
+    std::array<uint8_t, 0x3FFF + 1> bank0{0};
+    file.read(reinterpret_cast<char*>(bank0.data()), bank0.size());
 
-    file.read(reinterpret_cast<char*>(m_bank1.data()), m_bank1.size());
+    std::array<uint8_t, 0x3FFF + 1> bank1{0};
+    file.read(reinterpret_cast<char*>(bank1.data()), bank1.size());
 
     file.close();
+
+    return Cartridge{std::move(bank0), std::move(bank1)};
 }
 
 std::vector<AddressSpace> Cartridge::addressSpaces() const {

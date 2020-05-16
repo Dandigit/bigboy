@@ -21,8 +21,6 @@ public:
     template <typename... T>
     static Cartridge test(T... contents);
 
-    void loadFile(std::string fileName);
-
     std::vector<AddressSpace> addressSpaces() const override;
     uint8_t readByte(uint16_t address) const override;
     void writeByte(uint16_t address, uint8_t value) override;
