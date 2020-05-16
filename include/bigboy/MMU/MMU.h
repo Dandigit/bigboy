@@ -22,13 +22,13 @@ public:
 
     void registerDevice(MemoryDevice& device);
 
-    void reserveAddressSpace(MemoryDevice& device, AddressSpace addressSpace);
-
     void reset();
 
 private:
     MemoryDevice& getDevice(uint16_t address);
     const MemoryDevice& getDevice(uint16_t address) const;
+
+    void reserveAddressSpace(MemoryDevice& device, AddressSpace addressSpace);
 };
 
 #endif //BIGBOY_MMU_H

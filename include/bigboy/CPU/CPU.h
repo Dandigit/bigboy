@@ -5,6 +5,7 @@
 #include <bigboy/CPU/OpCode.h>
 #include <bigboy/CPU/PrefixOpCode.h>
 #include <bigboy/CPU/Registers.h>
+#include <bigboy/GPU/GPU.h>
 #include <bigboy/MMU/MMU.h>
 #include <bigboy/Serial.h>
 
@@ -39,8 +40,10 @@ public:
 
 private:
     Cartridge m_cartridge{};
+    GPU m_gpu{};
     Serial m_serial{};
-    MMU m_mmu{m_cartridge, m_serial};
+
+    MMU m_mmu{m_cartridge, m_gpu, m_serial};
 
     Registers m_registers{};
     Flags m_flags{m_registers.f};

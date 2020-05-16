@@ -28,9 +28,10 @@ void MMU::registerDevice(MemoryDevice &device) {
 }
 
 void MMU::reserveAddressSpace(MemoryDevice &device, AddressSpace addressSpace) {
-    for (uint16_t i = addressSpace.start; i++ < addressSpace.end;) {
+    uint16_t i = addressSpace.start;
+    do {
         m_devices[i] = &device;
-    }
+    } while (++i < addressSpace.end);
 }
 
 void MMU::reset() {
