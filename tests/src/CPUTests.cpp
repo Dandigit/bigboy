@@ -40,7 +40,7 @@ TEST_F(CPUTest, ADDA_r) {
                 cpu.registers().a = aValues[i]; \
                 cpu.registers().r = rValues[i]; \
                 \
-                cpu.step(); \
+                cpu.cycle(); \
                 \
                 EXPECT_EQ(cpu.registers().a, static_cast<uint8_t>(aValues[i] + rValues[i])) \
                     << "    in test of instruction " << #instruction << " on register " << #r; \
@@ -58,7 +58,7 @@ TEST_F(CPUTest, ADDA_r) {
     for (uint8_t aValue : aValues) {
         cpu.load(Cartridge::test(OpCode::ADDA_A));
         cpu.registers().a = aValue;
-        cpu.step();
+        cpu.cycle();
 
         EXPECT_EQ(cpu.registers().a, static_cast<uint8_t>(aValue + aValue));
     }

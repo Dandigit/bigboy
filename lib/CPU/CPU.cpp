@@ -18,15 +18,30 @@ void CPU::load(Cartridge cartridge) {
     m_mmu.registerDevice(m_cartridge);
 }
 
+bool CPU::cycle() {
+    const uint8_t cycles = step();
+
+    m_clock += cycles;
+    bool frameReady = m_gpu.step(cycles);
+
+    return frameReady;
+}
+
+const std::array<Pixel, 160*144>& CPU::getCurrentFrame() const {
+    return m_gpu.getCurrentFrame();
+}
+
 void CPU::reset() {
     m_mmu.reset();
     //m_cartridge.reset();
     m_mmu.registerDevice(m_cartridge);
+    m_gpu.reset();
+    m_mmu.registerDevice(m_gpu);
     //m_serial.reset();
     m_mmu.registerDevice(m_serial);
 
     m_registers.reset();
-    m_pc = 0;
+    m_pc = 0x100;
     m_halted = false;
     m_stopped = false;
     m_ime = true;
@@ -1009,7 +1024,6 @@ uint8_t CPU::step() {
             return LD_r_r(RegisterOperand::C, RegisterOperand::L);
         case OpCode::LD_C_A:
             return LD_r_r(RegisterOperand::C, RegisterOperand::A);
-            break;
         case OpCode::LD_D_B:
             return LD_r_r(RegisterOperand::D, RegisterOperand::B);
         case OpCode::LD_D_C:

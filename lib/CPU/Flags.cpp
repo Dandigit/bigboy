@@ -1,16 +1,16 @@
 #include <bigboy/CPU/Flags.h>
 
-Flag::Flag(uint8_t& register_, uint8_t position) :
-        m_register{register_},
+BitFlag::BitFlag(uint8_t& byte, uint8_t position) :
+        m_byte{byte},
         m_position{position} {}
 
-Flag& Flag::operator=(bool set) {
-    m_register = (m_register & ~(1UL << m_position)) | (m_position << set);
+BitFlag& BitFlag::operator=(bool set) {
+    m_byte = (m_byte & ~(1UL << m_position)) | (m_position << set);
     return *this;
 }
 
-Flag::operator bool() const {
-    return ((m_register >> m_position) & 1u) == 1u;
+BitFlag::operator bool() const {
+    return ((m_byte >> m_position) & 1u) == 1u;
 }
 
 Flags::Flags(uint8_t& register_) :

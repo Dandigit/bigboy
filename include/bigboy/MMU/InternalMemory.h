@@ -22,6 +22,8 @@ public:
     std::vector<AddressSpace> addressSpaces() const override;
     uint8_t readByte(uint16_t address) const override;
     void writeByte(uint16_t address, uint8_t value) override;
+
+    void reset();
 };
 
 #endif //BIGBOY_INTERNALMEMORY_H

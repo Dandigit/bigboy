@@ -65,3 +65,7 @@ void InternalMemory::writeByte(uint16_t address, uint8_t value) {
                                  std::to_string(address)};
     }
 }
+
+void InternalMemory::reset() {
+    m_ie = 0x00;
+}

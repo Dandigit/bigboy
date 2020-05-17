@@ -83,13 +83,9 @@ uint16_t Registers::AF() const {
 }
 
 void Registers::reset() {
-    b = 0;
-    c = 0;
-    d = 0;
-    e = 0;
-    h = 0;
-    l = 0;
-    a = 0;
-    f = 0;
-    sp = 0;
+    AF() = 0x01B0;
+    BC() = 0x0013;
+    DE() = 0x00D8;
+    HL() = 0x014D;
+    sp = 0xFFFE;
 }

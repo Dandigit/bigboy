@@ -48,15 +48,14 @@ uint8_t Cartridge::readByte(uint16_t address) const {
         return m_extRAM[address];
     }
 
-    throw std::runtime_error{"Memory device Cartridge does not support reading the address: " +
-            std::to_string(address)};
+    std::cerr << "Memory device Cartridge does not support reading the address: " << address << '\n';
+    return 0xFF;
 }
 
 void Cartridge::writeByte(uint16_t address, uint8_t value) {
     if (address >= 0xA000 && address <= 0xBFFF) {
         m_extRAM[address] = value;
     } else {
-        throw std::runtime_error{"Memory device Cartridge does not support writing to the address: " +
-                std::to_string(address)};
+        std::cerr << "Memory device Cartridge does not support writing to the address: " << address << '\n';
     }
 }

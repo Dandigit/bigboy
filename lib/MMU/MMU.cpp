@@ -1,7 +1,7 @@
 #include <bigboy/MMU/MMU.h>
 
 #include <algorithm>
-#include <string>
+#include <iostream>
 
 MMU::MMU() {
     registerDevice(m_internal);
@@ -31,11 +31,12 @@ void MMU::reserveAddressSpace(MemoryDevice &device, AddressSpace addressSpace) {
     uint16_t i = addressSpace.start;
     do {
         m_devices[i] = &device;
-    } while (++i < addressSpace.end);
+    } while (i++ < addressSpace.end);
 }
 
 void MMU::reset() {
     m_devices.fill(nullptr);
+    m_internal.reset();
     registerDevice(m_internal);
 }
 
@@ -44,7 +45,7 @@ MemoryDevice& MMU::getDevice(uint16_t address) {
         return *device;
     }
 
-    throw std::runtime_error{"No memory device registered for address: " + std::to_string(address)};
+    std::cerr << "No memory device registered for address: " << address << '\n';
 }
 
 const MemoryDevice& MMU::getDevice(uint16_t address) const {
@@ -52,5 +53,5 @@ const MemoryDevice& MMU::getDevice(uint16_t address) const {
         return *device;
     }
 
-    throw std::runtime_error{"No memory device registered for address: " + std::to_string(address)};
+    std::cerr << "No memory device registered for address: " << address << '\n';
 }

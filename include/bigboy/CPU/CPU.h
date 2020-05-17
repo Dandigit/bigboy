@@ -32,13 +32,6 @@ enum class ResetOperand : uint16_t {
 };
 
 class CPU {
-public:
-    struct Clock {
-        int m;
-        int t;
-    };
-
-private:
     Cartridge m_cartridge{};
     GPU m_gpu{};
     Serial m_serial{};
@@ -47,6 +40,9 @@ private:
 
     Registers m_registers{};
     Flags m_flags{m_registers.f};
+
+    // Total number of cycles since execution began
+    uint64_t m_clock = 0;
 
     uint16_t m_pc = 0; // Program counter.
 
@@ -273,11 +269,16 @@ private:
 
     uint8_t RST(ResetOperand address);
 
+    uint8_t step();
+    uint8_t stepPrefix();
+
 public:
     void load(Cartridge cartridge);
 
-    uint8_t step();
-    uint8_t stepPrefix();
+    // Returns true if the GPU has just finished rendering a frame
+    bool cycle();
+
+    const std::array<Pixel, 160*144>& getCurrentFrame() const;
 
     void reset();
 

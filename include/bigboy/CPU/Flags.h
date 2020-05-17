@@ -10,15 +10,14 @@ enum class ConditionOperand : uint8_t {
     C   // 110 or 111
 };
 
-class Flag {
-    uint8_t& m_register;
+class BitFlag {
+    uint8_t& m_byte;
     uint8_t m_position;
 
 public:
-    // We can treat a Flags object like a normal uint8_t
-    Flag(uint8_t& register_, uint8_t position);
+    BitFlag(uint8_t& byte, uint8_t position);
 
-    Flag& operator=(bool set);
+    BitFlag& operator=(bool set);
 
     operator bool() const;
 };
@@ -33,10 +32,10 @@ private:
     uint8_t& m_register;
 
 public:
-    Flag zero;
-    Flag subtract;
-    Flag halfCarry;
-    Flag carry;
+    BitFlag zero;
+    BitFlag subtract;
+    BitFlag halfCarry;
+    BitFlag carry;
 
     bool get(ConditionOperand condition) const;
 
