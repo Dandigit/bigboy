@@ -39,7 +39,28 @@ class CPU {
     MMU m_mmu{m_cartridge, m_gpu, m_serial};
 
     Registers m_registers{};
-    Flags m_flags{m_registers.f};
+
+    static constexpr uint8_t ZERO_FLAG_BYTE_POSITION = 7;
+    static constexpr uint8_t SUBTRACT_FLAG_BYTE_POSITION = 6;
+    static constexpr uint8_t HALF_CARRY_FLAG_BYTE_POSITION = 5;
+    static constexpr uint8_t CARRY_FLAG_BYTE_POSITION = 4;
+
+    bool getZeroFlag()      const { return (m_registers.f >> ZERO_FLAG_BYTE_POSITION) & 1u; }
+    bool getSubtractFlag()  const { return (m_registers.f >> SUBTRACT_FLAG_BYTE_POSITION) & 1u; }
+    bool getHalfCarryFlag() const { return (m_registers.f >> HALF_CARRY_FLAG_BYTE_POSITION) & 1u; }
+    bool getCarryFlag()     const { return (m_registers.f >> CARRY_FLAG_BYTE_POSITION) & 1u; }
+
+    void setZeroFlag()      { m_registers.f |= (1u << ZERO_FLAG_BYTE_POSITION); }
+    void setSubtractFlag()  { m_registers.f |= (1u << SUBTRACT_FLAG_BYTE_POSITION); }
+    void setHalfCarryFlag() { m_registers.f |= (1u << HALF_CARRY_FLAG_BYTE_POSITION); }
+    void setCarryFlag()     { m_registers.f |= (1u << CARRY_FLAG_BYTE_POSITION); }
+
+    void clearZeroFlag()      { m_registers.f &= ~(1u << ZERO_FLAG_BYTE_POSITION); }
+    void clearSubtractFlag()  { m_registers.f &= ~(1u << SUBTRACT_FLAG_BYTE_POSITION); }
+    void clearHalfCarryFlag() { m_registers.f &= ~(1u << HALF_CARRY_FLAG_BYTE_POSITION); }
+    void clearCarryFlag()     { m_registers.f &= ~(1u << CARRY_FLAG_BYTE_POSITION); }
+
+    bool getCondition(ConditionOperand condition) const;
 
     // Total number of cycles since execution began
     uint64_t m_clock = 0;
@@ -269,6 +290,9 @@ class CPU {
 
     uint8_t RST(ResetOperand address);
 
+    uint8_t nextByte();
+    uint16_t nextWord();
+
     uint8_t step();
     uint8_t stepPrefix();
 
@@ -282,8 +306,11 @@ public:
 
     void reset();
 
-    Registers& registers();
-    const Registers& registers() const;
+private:
+    // Make friends with all the tests
+    friend class CPUTest_registerPairs_Test;
+    friend class CPUTest_flags_Test;
+    friend class CPUTest_ADDA_r_Test;
 };
 
 #endif //BIGBOY_CPU_H

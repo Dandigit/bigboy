@@ -21,6 +21,17 @@ void MMU::writeByte(uint16_t address, uint8_t value) {
     return getDevice(address).writeByte(address, value);
 }
 
+uint16_t MMU::readWord(uint16_t address) const {
+    uint8_t lower = readByte(address);
+    uint8_t higher = readByte(address + 1);
+    return (higher << 8u) | lower;
+}
+
+void MMU::writeWord(uint16_t address, uint16_t value) {
+    writeByte(address, (value & 0xFFu));
+    writeByte(address, ((value >> 8u) & 0xFF));
+}
+
 void MMU::registerDevice(MemoryDevice &device) {
     for (const AddressSpace& addressSpace : device.addressSpaces()) {
         reserveAddressSpace(device, addressSpace);
@@ -35,7 +46,7 @@ void MMU::reserveAddressSpace(MemoryDevice &device, AddressSpace addressSpace) {
 }
 
 void MMU::reset() {
-    m_devices.fill(nullptr);
+    //m_devices.fill(nullptr);
     m_internal.reset();
     registerDevice(m_internal);
 }
@@ -45,7 +56,7 @@ MemoryDevice& MMU::getDevice(uint16_t address) {
         return *device;
     }
 
-    std::cerr << "No memory device registered for address: " << address << '\n';
+    throw std::runtime_error{"No memory device registered for address: " + std::to_string(address)};
 }
 
 const MemoryDevice& MMU::getDevice(uint16_t address) const {
@@ -53,5 +64,5 @@ const MemoryDevice& MMU::getDevice(uint16_t address) const {
         return *device;
     }
 
-    std::cerr << "No memory device registered for address: " << address << '\n';
+    throw std::runtime_error{"No memory device registered for address: " + std::to_string(address)};
 }

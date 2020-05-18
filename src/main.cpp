@@ -26,14 +26,14 @@ void updateVertexArray(sf::VertexArray& vertexArray, const std::array<Pixel, 160
                     vertex.color = sf::Color::Black;
                     break;
             }
+            vertexArray[y * 160 + x] = vertex;
         }
     }
 }
 
 int main() {
     CPU cpu{};
-    cpu.reset();
-    cpu.load(Cartridge::fromFile("./resources/games/testGame.gb"));
+    cpu.load(Cartridge::fromFile("./resources/tests/06-ld r,r.gb"));
 
     // Create the main window
     sf::RenderWindow window{sf::VideoMode{WINDOW_HEIGHT, WINDOW_WIDTH}, "Bigboy"};
@@ -59,7 +59,7 @@ int main() {
         try {
             frameIsReady = cpu.cycle();
         } catch (const std::runtime_error& e) {
-            std::cerr << e.what();
+            std::cerr << e.what() << '\n';
         }
 
         if (frameIsReady) {

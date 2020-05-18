@@ -47,10 +47,10 @@ class GPU : public MemoryDevice {
     uint8_t m_windowY;   // FF4A
     uint8_t m_windowX;   // FF4B
 
-    uint8_t m_backgroundPalette;  // FF47
+    uint8_t m_bgPalette;  // FF47
     Pixel getPaletteColour(uint8_t index) const {
         return static_cast<Pixel>(
-                (m_backgroundPalette >> static_cast<uint8_t>(index)) & 0b11u);
+                (m_bgPalette >> static_cast<uint8_t>(index)) & 0b11u);
     };
 
     uint8_t m_spritePalette0; // FF48
@@ -59,7 +59,7 @@ class GPU : public MemoryDevice {
     uint8_t m_dma;  // FF46
 
     // Cached, processed VRAM data
-    TileSet m_tileset{TileValue::ZERO}; // from 8000-8FFF
+    //TileSet m_tileset{TileValue::ZERO}; // from 8000-8FFF
 
     std::array<Pixel, 160*144> m_bgBuffer{Pixel::OFF};
     std::array<Pixel, 160*144> m_frameBuffer{Pixel::OFF};
@@ -76,7 +76,7 @@ class GPU : public MemoryDevice {
     // blank will take 143 lines, followed by 10 consecutive lines for
     // the following complete vertical blank. Afterwards, this value
     // is reset back to 0.
-    uint8_t m_currentLine = 0;
+    // uint8_t m_currentLine = 0;
 
     // Reset the clock and switch to the new mode
     void switchMode(GPUMode newMode);
@@ -95,7 +95,7 @@ public:
     void renderBackgroundScanline();
 
     // Update the tileset from a given VRAM address
-    void updateTileset(uint16_t address);
+    //void updateTileset(uint16_t address);
 
     void reset();
 

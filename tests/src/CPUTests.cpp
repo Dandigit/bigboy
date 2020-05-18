@@ -2,22 +2,19 @@
 
 #include <bigboy/CPU/CPU.h>
 
-class CPUTest : public ::testing::Test {
-protected:
-    CPU cpu{};
-};
+TEST(CPUTest, registerPairs) {
+    CPU cpu;
 
-TEST_F(CPUTest, registerPairs) {
     constexpr std::array<uint16_t, 5> values{0, 21, 532, 9000, 2};
 
     #define TEST_REGISTER_PAIR(pair, high, low) \
         do { \
             for (const uint16_t value : values) { \
-                cpu.registers().pair = value; \
-                EXPECT_EQ(cpu.registers().pair, value); \
-                EXPECT_EQ(static_cast<const CPU&>(cpu).registers().pair, value); \
-                EXPECT_EQ(cpu.registers().high, (value >> 8u)); \
-                EXPECT_EQ(cpu.registers().low, (value & 0xFFu)); \
+                cpu.m_registers.pair = value; \
+                EXPECT_EQ(cpu.m_registers.pair, value); \
+                EXPECT_EQ(static_cast<const CPU&>(cpu).m_registers.pair, value); \
+                EXPECT_EQ(cpu.m_registers.high, (value >> 8u)); \
+                EXPECT_EQ(cpu.m_registers.low, (value & 0xFFu)); \
             } \
         } while (false)
 
@@ -28,7 +25,30 @@ TEST_F(CPUTest, registerPairs) {
     #undef TEST_REGISTER_PAIR
 }
 
-TEST_F(CPUTest, ADDA_r) {
+TEST(CPUTest, flags) {
+    CPU cpu{};
+    cpu.reset();
+
+    cpu.setCarryFlag();
+    EXPECT_EQ(cpu.getCarryFlag(), true);
+    EXPECT_TRUE(((cpu.m_registers.f >> 7u) & 1u));
+
+    cpu.setSubtractFlag();
+    EXPECT_EQ(cpu.getSubtractFlag(), true);
+    EXPECT_TRUE(((cpu.m_registers.f >> 6u) & 1u));
+
+    cpu.clearHalfCarryFlag();
+    EXPECT_EQ(cpu.getHalfCarryFlag(), false);
+    EXPECT_FALSE(((cpu.m_registers.f >> 5u) & 1u));
+
+    cpu.clearCarryFlag();
+    EXPECT_EQ(cpu.getCarryFlag(), false);
+    EXPECT_FALSE(((cpu.m_registers.f >> 4u) & 1u));
+}
+
+TEST(CPUTest, ADDA_r) {
+    CPU cpu;
+
     constexpr std::array<uint8_t, 5> aValues{21, 0, 67, 99, 255};
     constexpr std::array<uint8_t, 5> rValues{10, 2, 255, 0, 33};
 
@@ -37,12 +57,12 @@ TEST_F(CPUTest, ADDA_r) {
             for (size_t i = 0; i < aValues.size(); ++i) { \
                 cpu.load(Cartridge::test(OpCode::instruction)); \
                 \
-                cpu.registers().a = aValues[i]; \
-                cpu.registers().r = rValues[i]; \
+                cpu.m_registers.a = aValues[i]; \
+                cpu.m_registers.r = rValues[i]; \
                 \
                 cpu.cycle(); \
                 \
-                EXPECT_EQ(cpu.registers().a, static_cast<uint8_t>(aValues[i] + rValues[i])) \
+                EXPECT_EQ(cpu.m_registers.a, static_cast<uint8_t>(aValues[i] + rValues[i])) \
                     << "    in test of instruction " << #instruction << " on register " << #r; \
             } \
         } while (false)
@@ -57,10 +77,10 @@ TEST_F(CPUTest, ADDA_r) {
     // ADDA_A is a special case
     for (uint8_t aValue : aValues) {
         cpu.load(Cartridge::test(OpCode::ADDA_A));
-        cpu.registers().a = aValue;
+        cpu.m_registers.a = aValue;
         cpu.cycle();
 
-        EXPECT_EQ(cpu.registers().a, static_cast<uint8_t>(aValue + aValue));
+        EXPECT_EQ(cpu.m_registers.a, static_cast<uint8_t>(aValue + aValue));
     }
 
     #undef TEST_FOR_REGISTER

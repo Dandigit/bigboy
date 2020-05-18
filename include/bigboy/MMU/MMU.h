@@ -10,7 +10,7 @@ class MMU {
     InternalMemory m_internal;
 
     // We have to use pointers rather than reference wrappers for default construction
-    std::array<MemoryDevice*, 0xFFFF + 1> m_devices{nullptr};
+    std::vector<MemoryDevice*> m_devices{0xFFFF + 1, nullptr};
 
 public:
     MMU();
@@ -19,6 +19,9 @@ public:
 
     uint8_t readByte(uint16_t address) const;
     void writeByte(uint16_t address, uint8_t value);
+
+    uint16_t readWord(uint16_t address) const;
+    void writeWord(uint16_t address, uint16_t value);
 
     void registerDevice(MemoryDevice& device);
 

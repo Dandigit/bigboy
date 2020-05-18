@@ -29,7 +29,7 @@ uint8_t InternalMemory::readByte(uint16_t address) const {
 
     // High RAM (HRAM)
     if (address >= 0xFF80 && address <= 0xFFFE) {
-        return m_hram[address- 0xFF80];
+        return m_hram[address - 0xFF80];
     }
 
     // Interrupt Enable Register
