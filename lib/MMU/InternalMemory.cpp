@@ -3,7 +3,7 @@
 #include <string>
 
 std::vector<AddressSpace> InternalMemory::addressSpaces() const {
-    return {{0xC000, 0xFDFF}, {0xFF80, 0xFFFF}};
+    return {{0xC000, 0xFDFF}, {0xFF80, 0xFFFF}, {0xFF0F, 0xFF0F}};
 }
 
 uint8_t InternalMemory::readByte(uint16_t address) const {
@@ -37,6 +37,11 @@ uint8_t InternalMemory::readByte(uint16_t address) const {
         return m_ie;
     }
 
+    // Interrupt Flag Register
+    if (address == 0xFF0F) {
+        return m_if;
+    }
+
     throw std::runtime_error{"The memory device InternalMemory does not own the address: " +
             std::to_string(address)};
 }
@@ -44,22 +49,25 @@ uint8_t InternalMemory::readByte(uint16_t address) const {
 void InternalMemory::writeByte(uint16_t address, uint8_t value) {
     if (address >= 0xC000 && address <= 0xCFFF) {
         // 4KB Work RAM Bank 0
-        m_wram0[0xCFFF - address] = value;
+        m_wram0[address - 0xC000] = value;
     } else if (address >= 0xD000 && address <= 0xDFFF) {
         // 4KB Work RAM Bank 1
-        m_wram1[0xDFFF - address] = value;
+        m_wram1[address - 0xD000] = value;
     } else if (address >= 0xE000 && address <= 0xEFFF) {
         // ECHO of C000-CFFF
-        m_wram0[0xEFFF - address] = value;
+        m_wram0[address - 0xE000] = value;
     } else if (address >= 0xF000 && address <= 0xFDFF) {
         // ECHO of D000 to DDFF
-        m_wram1[0xFDFF - address] = value;
+        m_wram1[address - 0xF000] = value;
     } else if (address >= 0xFF80 && address <= 0xFFFE) {
         // High RAM (HRAM)
-        m_hram[0xFFFE - address] = value;
+        m_hram[address - 0xFF80] = value;
     } else if (address == 0xFFFF) {
         // Interrupt Enable Register
         m_ie = value;
+    } else if (address == 0xFF0F) {
+        // Interrupt Flag Register
+        m_if = value;
     } else {
         throw std::runtime_error{"The memory device InternalMemory does not own the address: " +
                                  std::to_string(address)};

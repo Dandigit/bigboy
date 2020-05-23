@@ -32,18 +32,24 @@ enum class ResetOperand : uint16_t {
 };
 
 class CPU {
-    Cartridge m_cartridge{};
-    GPU m_gpu{};
-    Serial m_serial{};
+public:
+    void load(Cartridge cartridge);
 
-    MMU m_mmu{m_cartridge, m_gpu, m_serial};
+    // Returns true if the GPU has just finished rendering a frame
+    bool cycle();
 
-    Registers m_registers{};
+    const std::array<Pixel, 160*144>& getCurrentFrame() const;
 
-    static constexpr uint8_t ZERO_FLAG_BYTE_POSITION = 7;
-    static constexpr uint8_t SUBTRACT_FLAG_BYTE_POSITION = 6;
-    static constexpr uint8_t HALF_CARRY_FLAG_BYTE_POSITION = 5;
-    static constexpr uint8_t CARRY_FLAG_BYTE_POSITION = 4;
+    void reset();
+
+private:
+    std::string disassembleCurrent();
+
+    uint8_t nextByte();
+    uint16_t nextWord();
+
+    uint8_t step();
+    uint8_t stepPrefix();
 
     bool getZeroFlag()      const { return (m_registers.f >> ZERO_FLAG_BYTE_POSITION) & 1u; }
     bool getSubtractFlag()  const { return (m_registers.f >> SUBTRACT_FLAG_BYTE_POSITION) & 1u; }
@@ -61,20 +67,6 @@ class CPU {
     void clearCarryFlag()     { m_registers.f &= ~(1u << CARRY_FLAG_BYTE_POSITION); }
 
     bool getCondition(ConditionOperand condition) const;
-
-    // Total number of cycles since execution began
-    uint64_t m_clock = 0;
-
-    uint16_t m_pc = 0; // Program counter.
-
-    // Are we halted? HALT will set this, and interrupts will reset this.
-    bool m_halted = false;
-
-    // Are we stopped? STOP will set this.
-    bool m_stopped = false;
-
-    // Interrupt master enable flag. EI/DI will set/reset this.
-    bool m_ime = true;
 
     void load(uint8_t& target, uint8_t value);
 
@@ -290,23 +282,33 @@ class CPU {
 
     uint8_t RST(ResetOperand address);
 
-    uint8_t nextByte();
-    uint16_t nextWord();
+    Cartridge m_cartridge{};
+    GPU m_gpu{};
+    Serial m_serial{};
 
-    uint8_t step();
-    uint8_t stepPrefix();
+    MMU m_mmu{m_cartridge, m_gpu, m_serial};
 
-public:
-    void load(Cartridge cartridge);
+    Registers m_registers{};
 
-    // Returns true if the GPU has just finished rendering a frame
-    bool cycle();
+    // Total number of cycles since execution began
+    uint64_t m_clock = 0;
 
-    const std::array<Pixel, 160*144>& getCurrentFrame() const;
+    uint16_t m_pc = 0; // Program counter.
 
-    void reset();
+    // Are we halted? HALT will set this, and interrupts will reset this.
+    bool m_halted = false;
 
-private:
+    // Are we stopped? STOP will set this.
+    bool m_stopped = false;
+
+    // Interrupt master enable flag. EI/DI will set/reset this.
+    bool m_ime = true;
+
+    static constexpr uint8_t ZERO_FLAG_BYTE_POSITION = 7;
+    static constexpr uint8_t SUBTRACT_FLAG_BYTE_POSITION = 6;
+    static constexpr uint8_t HALF_CARRY_FLAG_BYTE_POSITION = 5;
+    static constexpr uint8_t CARRY_FLAG_BYTE_POSITION = 4;
+
     // Make friends with all the tests
     friend class CPUTest_registerPairs_Test;
     friend class CPUTest_flags_Test;

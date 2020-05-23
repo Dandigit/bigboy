@@ -18,6 +18,9 @@ class InternalMemory : public MemoryDevice {
     // Interrupt enable register: FFFF
     uint8_t m_ie = 0;
 
+    // Interrupt flag register: FF0F
+    uint8_t m_if = 0;
+
 public:
     std::vector<AddressSpace> addressSpaces() const override;
     uint8_t readByte(uint16_t address) const override;

@@ -55,11 +55,11 @@ struct Registers {
 
     // Accumulator and flags
     #ifdef BIGBOY_BIG_ENDIAN
-    uint8_t f = 0;
     uint8_t a = 0;
+    uint8_t f = 0;
     #else
-    uint8_t a = 0;
     uint8_t f = 0;
+    uint8_t a = 0;
     #endif
 
     // Stack pointer

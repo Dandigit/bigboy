@@ -4,8 +4,8 @@
 
 #include <bigboy/CPU/CPU.h>
 
-constexpr unsigned long WINDOW_HEIGHT = 160;
-constexpr unsigned long WINDOW_WIDTH = 144;
+constexpr unsigned long WINDOW_WIDTH = 160;
+constexpr unsigned long WINDOW_HEIGHT = 144;
 
 void updateVertexArray(sf::VertexArray& vertexArray, const std::array<Pixel, 160*144>& frame) {
     for (int y = 0; y < 144; ++y) {
@@ -32,11 +32,11 @@ void updateVertexArray(sf::VertexArray& vertexArray, const std::array<Pixel, 160
 }
 
 int main() {
-    CPU cpu{};
-    cpu.load(Cartridge::fromFile("./resources/tests/06-ld r,r.gb"));
+    auto cpu = std::make_unique<CPU>();
+    cpu->load(Cartridge::fromFile("./resources/tests/06-ld r,r.gb"));
 
     // Create the main window
-    sf::RenderWindow window{sf::VideoMode{WINDOW_HEIGHT, WINDOW_WIDTH}, "Bigboy"};
+    sf::RenderWindow window{sf::VideoMode{WINDOW_WIDTH, WINDOW_HEIGHT}, "Bigboy"};
 
     sf::VertexArray frame{sf::Points, 160*144};
 
@@ -57,17 +57,17 @@ int main() {
 
         bool frameIsReady = false;
         try {
-            frameIsReady = cpu.cycle();
+            frameIsReady = cpu->cycle();
         } catch (const std::runtime_error& e) {
             std::cerr << e.what() << '\n';
         }
 
         if (frameIsReady) {
-            updateVertexArray(frame, cpu.getCurrentFrame());
+            updateVertexArray(frame, cpu->getCurrentFrame());
         }
 
         // Clear the previous contents of the window
-        window.clear(sf::Color::White);
+        window.clear(sf::Color::Black);
 
         // Render the text
         window.draw(frame);

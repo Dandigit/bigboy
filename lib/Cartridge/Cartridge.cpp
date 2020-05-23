@@ -42,10 +42,10 @@ uint8_t Cartridge::readByte(uint16_t address) const {
         return m_bank0[address];
     }
     if (address >= 0x4000 && address <= 0x7FFF) {
-        return m_bank1[address];
+        return m_bank1[address - 0x4000];
     }
     if (address >= 0xA000 && address <= 0xBFFF) {
-        return m_extRAM[address];
+        return m_extRAM[address - 0xA000];
     }
 
     std::cerr << "Memory device Cartridge does not support reading the address: " << address << '\n';

@@ -1,9 +1,12 @@
-#include <iostream>
-#include <bitset>
-
 #include <bigboy/CPU/CPU.h>
 
+#include <bitset>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+
 bool CPU::cycle() {
+    disassembleCurrent();
     const uint8_t cycles = step();
 
     m_clock += cycles;
@@ -37,6 +40,39 @@ void CPU::reset() {
     m_halted = false;
     m_stopped = false;
     m_ime = true;
+}
+
+std::string CPU::disassembleCurrent() {
+    auto current = static_cast<OpCode>(m_mmu.readByte(m_pc));
+    std::stringstream s;
+
+    s << "-- DISASSEMBLY\n";
+    s << "-- " //<< opCodeToString(current) <<
+            << '(' << (int)current << ")\n";
+    s << "-- b = " << (int) m_registers.b <<
+            ", c = " << (int) m_registers.c <<
+            ", bc = " << m_registers.BC() << '\n';
+    s << "-- d = " << (int) m_registers.d <<
+            ", e = " << (int) m_registers.e <<
+            ", de = " << m_registers.DE() << '\n';
+    s << "-- h = " << (int) m_registers.h <<
+            ", l = " << (int) m_registers.l <<
+            ", hl = " << m_registers.HL() << '\n';
+    s << "-- a = " << (int) m_registers.a <<
+            ", f = " << (int) m_registers.f <<
+            ", af = " << m_registers.AF() << '\n';
+    s << "-- pc = " << m_pc << ", sp = " << m_registers.sp << '\n';
+    s << "-- zero = " << getZeroFlag() <<
+            ", subtract = " << getSubtractFlag() <<
+            ", halfCarry = " << getHalfCarryFlag() <<
+            ", carry = " << getCarryFlag() << '\n';
+
+    std::ofstream outfile;
+    outfile.open("/Users/dboulton/bigboy-dump.txt", std::ios_base::app);
+    outfile << s.str();
+    outfile.close();
+
+    return s.str();
 }
 
 uint8_t CPU::nextByte() {
@@ -130,12 +166,12 @@ uint8_t CPU::LD_nn_A() {
 }
 
 uint8_t CPU::LD_A_FF00n() {
-    load(m_registers.a, m_mmu.readByte(0xFF00 + m_pc++));
+    load(m_registers.a, m_mmu.readByte(0xFF00 + nextByte()));
     return 12;
 }
 
 uint8_t CPU::LD_FF00n_A() {
-    uint16_t addr = 0xFF00 + m_pc++;
+    uint16_t addr = 0xFF00 + nextByte();
     uint8_t dummy = m_mmu.readByte(addr);
     load(dummy, m_registers.a);
     m_mmu.writeByte(addr, dummy);
@@ -211,10 +247,8 @@ uint8_t CPU::PUSH_qq(RegisterPairStackOperand value) {
 }
 
 void CPU::pop(uint16_t& target) {
-    uint8_t low = m_mmu.readByte(m_registers.sp--);
-    uint8_t high = m_mmu.readByte(m_registers.sp--);
-
-    target = (high << 8u) | low;
+    target = m_mmu.readWord(m_registers.sp);
+    m_registers.sp += 2;
 }
 
 uint8_t CPU::POP_qq(RegisterPairStackOperand target) {
@@ -419,7 +453,7 @@ void CPU::increment(uint8_t &target) {
 
     (result == 0) ? setZeroFlag() : clearZeroFlag();
     clearSubtractFlag();
-    ((target & (1 << 2)) != 0 && (result & (1 << 2)) == 0) ? setHalfCarryFlag() : clearHalfCarryFlag();
+    (((target >> 3u) & 1u) != 0 && (((result >> 3u) & 1u) == 0)) ? setHalfCarryFlag() : clearHalfCarryFlag();
 
     target = result;
 }
@@ -990,31 +1024,6 @@ uint8_t CPU::step() {
     }
 
     auto current = static_cast<OpCode>(nextByte());
-
-    //bool debug = true;
-    //if (debug) {
-        std::cout << "-- DISASSEMBLY\n";
-        std::cout << "-- " << opCodeToString(current) << '\n';
-        std::cout << "-- b = " << (int) m_registers.b <<
-                  ", c = " << (int) m_registers.c <<
-                  ", bc = " << m_registers.BC() << '\n';
-        std::cout << "-- d = " << (int) m_registers.d <<
-                  ", e = " << (int) m_registers.e <<
-                  ", de = " << m_registers.DE() << '\n';
-        std::cout << "-- h = " << (int) m_registers.h <<
-                  ", l = " << (int) m_registers.l <<
-                  ", hl = " << m_registers.HL() << '\n';
-        std::cout << "-- a = " << (int) m_registers.a <<
-                  ", f = " << (int) m_registers.f <<
-                  ", af = " << m_registers.AF() << '\n';
-        std::cout << "-- zero = " << getZeroFlag() <<
-                  ", subtract = " << getSubtractFlag() <<
-                  ", halfCarry = " << getHalfCarryFlag() <<
-                  ", carry = " << getCarryFlag() << '\n';
-
-        std::cout << "continue? ";
-        std::cin.get();
-    //}
 
     switch (current) {
         case OpCode::LD_B_B:

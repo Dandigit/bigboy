@@ -50,6 +50,112 @@ bool GPU::step(uint8_t cycles) {
     return false;
 }
 
+void GPU::reset() {
+    m_scrollY = 0x00;
+    m_scrollX = 0x00;
+    m_currentY = 153;
+    m_currentYCompare = 0x00;
+    m_bgPalette = 0xFC;
+    m_spritePalette0 = 0xFF;
+    m_spritePalette1 = 0xFF;
+    m_windowY = 0x00;
+    m_windowX = 0x00;
+}
+
+std::vector<AddressSpace> GPU::addressSpaces() const {
+    return {{0x8000, 0x9FFF}, {0xFE00, 0xFE9F}, {0xFF40, 0xFF4B}};
+}
+
+uint8_t GPU::readByte(uint16_t address) const {
+    // Registers?
+    switch (address) {
+        case 0xFF40: return m_control;
+        case 0xFF41: return m_status;
+        case 0xFF42: return m_scrollY;
+        case 0xFF43: return m_scrollX;
+        case 0xFF44: return m_currentY;
+        case 0xFF45: return m_currentYCompare;
+        case 0xFF46: std::cerr << "Cannot read DMA!" << '\n';
+        case 0xFF47: return m_bgPalette;
+        case 0xFF48: return m_spritePalette0;
+        case 0xFF49: return m_spritePalette1;
+        case 0xFF4A: return m_windowY;
+        case 0xFF4B: return m_windowX;
+        default:     break;
+    }
+
+    if (address >= 0x8000 && address <= 0x9FFF) {
+        return m_vram[0x8000 - address];
+    } else if (address >= 0xFE00 && address <= 0xFE9F) {
+        // TODO: Sprites
+        std::cerr << "Sprites are not yet implemented!" << '\n';
+        return 0xFF;
+    }
+
+    std::cerr << "Memory device GPU does not support reading the address " +
+                 address << '\n';
+    return 0xFF;
+}
+
+void GPU::writeByte(uint16_t address, uint8_t value) {
+    // Registers?
+    switch (address) {
+        case 0xFF40:
+            m_control = value;
+            return;
+        case 0xFF41:
+            m_status = value;
+            return;
+        case 0xFF42:
+            m_scrollY = value;
+            return;
+        case 0xFF43:
+            m_scrollX = value;
+            return;
+        case 0xFF44:
+            m_currentY = 0;
+            return;
+        case 0xFF45:
+            m_currentYCompare = value;
+            return;
+        case 0xFF46:
+            std::cerr << "DMA is not yet implemented!" << '\n';
+            return;
+        case 0xFF47:
+            m_bgPalette = value;
+            return;
+        case 0xFF48:
+            m_spritePalette0 = value;
+            return;
+        case 0xFF49:
+            m_spritePalette1 = value;
+            return;
+        case 0xFF4A:
+            m_windowY = value;
+            return;
+        case 0xFF4B:
+            m_windowX = value;
+            return;
+        default:
+            break;
+    }
+
+    if (address >= 0x8000 && address <= 0x9FFF) {
+        m_vram[0x8000 - address] = value;
+
+        /*// Check if we updated the tileset
+        if (address <= 0x97FF) {
+            updateTileset(address);
+        }*/
+    } else if (address >= 0xFE00 && address <= 0xFE9F) {
+        // TODO: Sprites
+        std::cerr << "Sprites are not yet implemented!" << '\n';
+    } else {
+        std::cerr << "Memory device GPU does not support reading the address " +
+                     address << '\n';
+    }
+}
+
 void GPU::renderScanline() {
     renderBackgroundScanline();
     m_frameBuffer = m_bgBuffer;
@@ -65,17 +171,6 @@ void GPU::renderBackgroundScanline() {
 
         return;
     }
-
-    // The BG palette register looks like this:
-    //  Bit:    | 0      1 | 2      3 | 4      5 | 6      7 |
-    //  Colour: | colour 0 | colour 1 | colour 2 | colour 3 |
-    // We retrieve each colour at its corresponding index.
-    const std::array<Pixel,4> palette {
-            static_cast<Pixel>((m_bgPalette) & 0b11u),
-            static_cast<Pixel>((m_bgPalette >> 2u) & 0b11u),
-            static_cast<Pixel>((m_bgPalette >> 4u) & 0b11u),
-            static_cast<Pixel>((m_bgPalette >> 6u) & 0b11u)};
-
 
     // Where in VRAM is our background tileset?
     // The bgTileset flag indicates which tileset we are using; 1 (0x9C00) or 0 (0x9800).
@@ -138,7 +233,7 @@ void GPU::renderBackgroundScanline() {
         uint8_t pixelHigh = ((rowHigh >> pos) & 1u) ? 0x02 : 0x00;
 
         // Get the colour
-        Pixel colour = palette[pixelLow + pixelHigh];
+        Pixel colour = getPaletteColour(pixelLow + pixelHigh);
 
         // We find the index of this pixel within our background framebuffer:
         size_t index = (m_currentY * 160) + x;
@@ -165,108 +260,8 @@ void GPU::switchMode(GPUMode newMode) {
     }
 }
 
-void GPU::reset() {
-    m_scrollY = 0x00;
-    m_scrollX = 0x00;
-    m_currentY = 153;
-    m_currentYCompare = 0x00;
-    m_bgPalette = 0xFC;
-    m_spritePalette0 = 0xFF;
-    m_spritePalette1 = 0xFF;
-    m_windowY = 0x00;
-    m_windowX = 0x00;
+Pixel GPU::getPaletteColour(uint8_t index) const {
+    return static_cast<Pixel>(
+            (m_bgPalette >> static_cast<uint8_t>(index)) & 0b11u);
 }
 
-std::vector<AddressSpace> GPU::addressSpaces() const {
-    return {{0x8000, 0x9FFF}, {0xFE00, 0xFE9F}, {0xFF40, 0xFF4B}};
-}
-
-uint8_t GPU::readByte(uint16_t address) const {
-    // Registers?
-    switch (address) {
-        case 0xFF40: return m_control;
-        case 0xFF41: return m_status;
-        case 0xFF42: return m_scrollY;
-        case 0xFF43: return m_scrollX;
-        case 0xFF44: return m_currentY;
-        case 0xFF45: return m_currentYCompare;
-        case 0xFF46: std::cerr << "Cannot read DMA!" << '\n';
-        case 0xFF47: return m_bgPalette;
-        case 0xFF48: return m_spritePalette0;
-        case 0xFF49: return m_spritePalette1;
-        case 0xFF4A: return m_windowY;
-        case 0xFF4B: return m_windowX;
-        default:     break;
-    }
-
-    if (address >= 0x8000 && address <= 0x9FFF) {
-        return m_vram[0x8000 - address];
-    } else if (address >= 0xFE00 && address <= 0xFE9F) {
-        // TODO: Sprites
-        std::cerr << "Sprites are not yet implemented!" << '\n';
-        return 0xFF;
-    }
-
-    std::cerr << "Memory device GPU does not support reading the address " +
-            address << '\n';
-    return 0xFF;
-}
-
-void GPU::writeByte(uint16_t address, uint8_t value) {
-    // Registers?
-    switch (address) {
-        case 0xFF40:
-            m_control = value;
-            return;
-        case 0xFF41:
-            m_status = value;
-            return;
-        case 0xFF42:
-            m_scrollY = value;
-            return;
-        case 0xFF43:
-            m_scrollX = value;
-            return;
-        case 0xFF44:
-            m_currentY = 0;
-            return;
-        case 0xFF45:
-            m_currentYCompare = value;
-            return;
-        case 0xFF46:
-            std::cerr << "DMA is not yet implemented!" << '\n';
-            return;
-        case 0xFF47:
-            m_bgPalette = value;
-            return;
-        case 0xFF48:
-            m_spritePalette0 = value;
-            return;
-        case 0xFF49:
-            m_spritePalette1 = value;
-            return;
-        case 0xFF4A:
-            m_windowY = value;
-            return;
-        case 0xFF4B:
-            m_windowX = value;
-            return;
-        default:
-            break;
-    }
-
-    if (address >= 0x8000 && address <= 0x9FFF) {
-        m_vram[0x8000 - address] = value;
-
-        /*// Check if we updated the tileset
-        if (address <= 0x97FF) {
-            updateTileset(address);
-        }*/
-    } else if (address >= 0xFE00 && address <= 0xFE9F) {
-        // TODO: Sprites
-        std::cerr << "Sprites are not yet implemented!" << '\n';
-    } else {
-        std::cerr << "Memory device GPU does not support reading the address " +
-                address << '\n';
-    }
-}

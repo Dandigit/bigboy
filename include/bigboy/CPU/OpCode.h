@@ -1,6 +1,8 @@
 #ifndef BIGBOY_OPCODE_H
 #define BIGBOY_OPCODE_H
 
+#include <string>
+
 enum class OpCode : uint8_t {
     // LD r, r'
     // The contents of the register r' are loaded to the register r.
