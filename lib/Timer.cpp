@@ -48,10 +48,18 @@ uint8_t Timer::readByte(uint16_t address) const {
 
 void Timer::writeByte(uint16_t address, uint8_t value) {
     switch (address) {
-        case 0xFF04: m_div = 0;
-        case 0xFF05: m_tima = value;
-        case 0xFF06: m_tma = value;
-        case 0xFF07: m_tac = value;
+        case 0xFF04:
+            m_div = 0;
+            return;
+        case 0xFF05:
+            m_tima = value;
+            return;
+        case 0xFF06:
+            m_tma = value;
+            return;
+        case 0xFF07:
+            m_tac = value;
+            return;
     }
 
     std::cerr << "Memory device Timer does not support writing to the address " << address << '\n';
