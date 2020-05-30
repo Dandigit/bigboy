@@ -15,9 +15,10 @@ GPU::Request GPU::update(uint8_t cycles) {
     switch (getMode()) {
         case GPUMode::HORIZONTAL_BLANK:
             if (m_clock >= 204) {
+                m_clock -= 204;
                 ++m_currentY;
 
-                if (m_currentY == 143) {
+                if (m_currentY == 144) {
                     // Request a VBLANK interrupt!
                     requestVblank = true;
                     requestStat = switchMode(GPUMode::VERTICAL_BLANK);
@@ -28,9 +29,10 @@ GPU::Request GPU::update(uint8_t cycles) {
             break;
         case GPUMode::VERTICAL_BLANK:
             if (m_clock >= 456) {
+                m_clock -= 456;
                 ++m_currentY;
 
-                if (m_currentY > 153) {
+                if (m_currentY == 154) {
                     m_currentY = 0;
                     requestStat = switchMode(GPUMode::SCANLINE_OAM);
                 }
@@ -38,11 +40,13 @@ GPU::Request GPU::update(uint8_t cycles) {
             break;
         case GPUMode::SCANLINE_OAM:
             if (m_clock >= 80) {
+                m_clock -= 80;
                 requestStat = switchMode(GPUMode::SCANLINE_VRAM);
             }
             break;
         case GPUMode::SCANLINE_VRAM:
             if (m_clock >= 172) {
+                m_clock -= 172;
                 renderScanline();
                 requestStat = switchMode(GPUMode::HORIZONTAL_BLANK);
             }
@@ -62,15 +66,17 @@ GPU::Request GPU::update(uint8_t cycles) {
 }
 
 void GPU::reset() {
+    m_control = 0x91;
     m_scrollY = 0x00;
     m_scrollX = 0x00;
-    m_currentY = 153;
+    m_currentY = 145;
     m_currentYCompare = 0x00;
     m_bgPalette = 0xFC;
     m_spritePalette0 = 0xFF;
     m_spritePalette1 = 0xFF;
     m_windowY = 0x00;
     m_windowX = 0x00;
+    switchMode(GPUMode::VERTICAL_BLANK);
 }
 
 std::vector<AddressSpace> GPU::addressSpaces() const {
@@ -86,7 +92,7 @@ uint8_t GPU::readByte(uint16_t address) const {
         case 0xFF43: return m_scrollX;
         case 0xFF44: return m_currentY;
         case 0xFF45: return m_currentYCompare;
-        case 0xFF46: std::cerr << "Cannot read DMA!" << '\n';
+        case 0xFF46: std::cerr << "Cannot read DMA!" << '\n'; return 0xFF;
         case 0xFF47: return m_bgPalette;
         case 0xFF48: return m_spritePalette0;
         case 0xFF49: return m_spritePalette1;
@@ -96,7 +102,7 @@ uint8_t GPU::readByte(uint16_t address) const {
     }
 
     if (address >= 0x8000 && address <= 0x9FFF) {
-        return m_vram[0x8000 - address];
+        return m_vram[address - 0x8000];
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
         // TODO: Sprites
         std::cerr << "Sprites are not yet implemented!" << '\n';
@@ -193,7 +199,7 @@ void GPU::renderBackgroundScanline() {
     // in memory, the tileMap flag indicated which we are using; 1 (0x8000), or 0 (0x8800).
     // Because tile map 0 uses SIGNED indexes (-127 to 127), we start in the middle, at 0x9000.
     // Again, we subtract 0x8000 for direct VRAM access.
-    ushort tilemapIndex = (tileMap() ? 0x8000 : 0x9000) - 0x8000;
+    uint16_t tilemapIndex = (tileMap() ? 0x8000 : 0x9000) - 0x8000;
 
     // Which row of tiles corresponds to the current scanline? Well, each tile is 8*8 pixels, so
     // we divide by 8, and the tile map is 32*32 tiles, so we mod to find the tile that this line
@@ -254,16 +260,14 @@ void GPU::renderBackgroundScanline() {
 }
 
 bool GPU::switchMode(GPUMode newMode) {
-    m_clock = 0;
-
-    auto modeBits = static_cast<uint8_t>(newMode);
+    const auto modeBits = static_cast<uint8_t>(newMode);
 
     // Set/clear bit 0 of STAT
-    bool bit0Set = (modeBits & 1u) != 0;
+    const bool bit0Set = (modeBits & 1u) != 0;
     m_status = (m_status & ~1u) | bit0Set;
 
     // Set/clear bit 1 of STAT
-    bool bit1Set = (modeBits & (1u << 1)) != 0;
+    const bool bit1Set = (modeBits & (1u << 1)) != 0;
     m_status = (m_status & ~(1u << 1)) | (bit1Set << 1);
 
     // Should we request a STAT interrupt?

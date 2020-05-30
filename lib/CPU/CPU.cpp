@@ -152,7 +152,8 @@ std::string CPU::disassembleCurrent() {
 
     s << "-- DISASSEMBLY\n";
     s << "-- " //<< opCodeToString(current) <<
-            << '(' << (int)current << ")\n";
+            << '(' << (int)current << ") "
+            << '[' << (int)(m_mmu.readByte(m_pc + 1)) << "]\n";
     s << "-- b = " << (int) m_registers.b <<
             ", c = " << (int) m_registers.c <<
             ", bc = " << m_registers.BC() << '\n';

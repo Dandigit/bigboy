@@ -53,7 +53,7 @@ private:
 
     GPUMode getMode() const { return static_cast<GPUMode>(m_status & 0b11u); }
 
-    // Reset the clock and switch to the new mode
+    // Switch to the new mode; updating the STAT register accordingly
     // Returns true if a STAT interrupt is to be requested
     bool switchMode(GPUMode newMode);
 
