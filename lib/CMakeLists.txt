@@ -10,4 +10,6 @@ add_library(bigboy
         ${CMAKE_CURRENT_SOURCE_DIR}/MMU/InternalMemory.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/MMU/MMU.cpp
 
-        ${CMAKE_CURRENT_SOURCE_DIR}/Serial.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/Serial.cpp
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/Timer.cpp)

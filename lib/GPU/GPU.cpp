@@ -6,20 +6,23 @@ const std::array<Pixel, 160*144>& GPU::getCurrentFrame() const {
     return m_frameBuffer;
 }
 
-bool GPU::step(uint8_t cycles) {
+GPU::Request GPU::update(uint8_t cycles) {
     m_clock += cycles;
 
-    switch (m_mode) {
+    bool requestVblank = false;
+    bool requestStat = false;
+
+    switch (getMode()) {
         case GPUMode::HORIZONTAL_BLANK:
             if (m_clock >= 204) {
                 ++m_currentY;
 
                 if (m_currentY == 143) {
-                    switchMode(GPUMode::VERTICAL_BLANK);
-                    // Tell the caller we have finished rendering the frame
-                    return true;
+                    // Request a VBLANK interrupt!
+                    requestVblank = true;
+                    requestStat = switchMode(GPUMode::VERTICAL_BLANK);
                 } else {
-                    switchMode(GPUMode::SCANLINE_OAM);
+                    requestStat = switchMode(GPUMode::SCANLINE_OAM);
                 }
             }
             break;
@@ -29,25 +32,33 @@ bool GPU::step(uint8_t cycles) {
 
                 if (m_currentY > 153) {
                     m_currentY = 0;
-                    switchMode(GPUMode::SCANLINE_OAM);
+                    requestStat = switchMode(GPUMode::SCANLINE_OAM);
                 }
             }
             break;
         case GPUMode::SCANLINE_OAM:
             if (m_clock >= 80) {
-                switchMode(GPUMode::SCANLINE_VRAM);
+                requestStat = switchMode(GPUMode::SCANLINE_VRAM);
             }
             break;
         case GPUMode::SCANLINE_VRAM:
             if (m_clock >= 172) {
                 renderScanline();
-                switchMode(GPUMode::HORIZONTAL_BLANK);
+                requestStat = switchMode(GPUMode::HORIZONTAL_BLANK);
             }
             break;
     }
 
-    // We are not yet finished rendering the frame
-    return false;
+    // LYC STAT interrupt?
+    if (m_currentYCompare == m_currentY &&
+            statInterruptEnabled(StatInterrupt::LYC)) {
+        setCoincidenceFlag();
+        requestStat = true;
+    } else {
+        clearCoincidenceFlag();
+    }
+
+    return Request{requestVblank, requestStat};
 }
 
 void GPU::reset() {
@@ -92,8 +103,7 @@ uint8_t GPU::readByte(uint16_t address) const {
         return 0xFF;
     }
 
-    std::cerr << "Memory device GPU does not support reading the address " +
-                 address << '\n';
+    std::cerr << "Memory device GPU does not support reading the address " << address << '\n';
     return 0xFF;
 }
 
@@ -243,20 +253,29 @@ void GPU::renderBackgroundScanline() {
     }
 }
 
-void GPU::switchMode(GPUMode newMode) {
+bool GPU::switchMode(GPUMode newMode) {
     m_clock = 0;
-    m_mode = newMode;
 
-    if ((static_cast<uint8_t>(m_mode) >> 1u) & 1u) {
-        m_status |= 0b00000001;
-    } else {
-        m_status &= 0b11111110;
-    }
+    auto modeBits = static_cast<uint8_t>(newMode);
 
-    if ((static_cast<uint8_t>(m_mode) >> 2u) & 1u) {
-        m_status |= 0b00000010;
-    } else {
-        m_status &= 0b11111101;
+    // Set/clear bit 0 of STAT
+    bool bit0Set = (modeBits & 1u) != 0;
+    m_status = (m_status & ~1u) | bit0Set;
+
+    // Set/clear bit 1 of STAT
+    bool bit1Set = (modeBits & (1u << 1)) != 0;
+    m_status = (m_status & ~(1u << 1)) | (bit1Set << 1);
+
+    // Should we request a STAT interrupt?
+    switch (newMode) {
+        case GPUMode::HORIZONTAL_BLANK:
+            return statInterruptEnabled(StatInterrupt::HBLANK);
+        case GPUMode::VERTICAL_BLANK:
+            return statInterruptEnabled(StatInterrupt::VBLANK);
+        case GPUMode::SCANLINE_OAM:
+            return statInterruptEnabled(StatInterrupt::OAM);
+        default:
+            return false;
     }
 }
 

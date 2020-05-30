@@ -8,6 +8,7 @@
 #include <bigboy/GPU/GPU.h>
 #include <bigboy/MMU/MMU.h>
 #include <bigboy/Serial.h>
+#include <bigboy/Timer.h>
 
 enum class BitOperand : uint8_t {
     BIT0 = 0, // 000
@@ -31,6 +32,16 @@ enum class ResetOperand : uint16_t {
     x38 = 0x38
 };
 
+enum class Interrupt : uint8_t {
+    VBLANK = 0,
+    LCD_STAT = 1,
+    TIMER = 2,
+    SERIAL = 3,
+    JOYPAD = 4
+};
+
+constexpr uint8_t INTERRUPT_COUNT = 5;
+
 class CPU {
 public:
     void load(Cartridge cartridge);
@@ -50,6 +61,18 @@ private:
 
     uint8_t step();
     uint8_t stepPrefix();
+
+    void handleInterrupts();
+    void serviceInterrupt(Interrupt interrupt);
+
+    bool isInterruptServicable(Interrupt interrupt) const;
+    bool isInterruptEnabled(Interrupt interrupt) const;
+    bool isInterruptRequested(Interrupt interrupt) const;
+
+    void enableInterrupt(Interrupt interrupt);
+    void disableInterrupt(Interrupt interrupt);
+    void requestInterrupt(Interrupt interrupt);
+    void unrequestInterrupt(Interrupt interrupt);
 
     bool getZeroFlag()      const { return (m_registers.f >> ZERO_FLAG_BYTE_POSITION) & 1u; }
     bool getSubtractFlag()  const { return (m_registers.f >> SUBTRACT_FLAG_BYTE_POSITION) & 1u; }
@@ -285,8 +308,9 @@ private:
     Cartridge m_cartridge{};
     GPU m_gpu{};
     Serial m_serial{};
+    Timer m_timer{};
 
-    MMU m_mmu{m_cartridge, m_gpu, m_serial};
+    MMU m_mmu{m_cartridge, m_gpu, m_serial, m_timer};
 
     Registers m_registers{};
 

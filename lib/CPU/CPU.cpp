@@ -5,20 +5,6 @@
 #include <sstream>
 #include <fstream>
 
-bool CPU::cycle() {
-    disassembleCurrent();
-    const uint8_t cycles = step();
-
-    m_clock += cycles;
-    bool frameReady = m_gpu.step(cycles);
-
-    return frameReady;
-}
-
-const std::array<Pixel, 160*144>& CPU::getCurrentFrame() const {
-    return m_gpu.getCurrentFrame();
-}
-
 void CPU::load(Cartridge cartridge) {
     reset();
 
@@ -26,14 +12,132 @@ void CPU::load(Cartridge cartridge) {
     m_mmu.registerDevice(m_cartridge);
 }
 
+bool CPU::cycle() {
+    disassembleCurrent();
+    const uint8_t cycles = step();
+
+    m_clock += cycles;
+
+    const bool timerRequest = m_timer.update(cycles);
+    if (timerRequest) {
+        requestInterrupt(Interrupt::TIMER);
+    }
+
+    const GPU::Request gpuRequest = m_gpu.update(cycles);
+    if (gpuRequest.vblank) {
+        requestInterrupt(Interrupt::VBLANK);
+    }
+    if (gpuRequest.stat) {
+        requestInterrupt(Interrupt::LCD_STAT);
+    }
+
+    handleInterrupts();
+
+    // Return true if the next frame is ready
+    return gpuRequest.vblank;
+}
+
+void CPU::handleInterrupts() {
+    if (!m_ime) return;
+
+    for (int i = 0; i < INTERRUPT_COUNT; ++i) {
+        auto interrupt = static_cast<Interrupt>(i);
+        if (isInterruptServicable(interrupt)) {
+            serviceInterrupt(interrupt);
+            return;
+        }
+    }
+}
+
+void CPU::serviceInterrupt(Interrupt interrupt) {
+    m_ime = false;
+    unrequestInterrupt(interrupt);
+
+    switch (interrupt) {
+        case Interrupt::VBLANK:
+            call(0x40);
+            return;
+        case Interrupt::LCD_STAT:
+            call(0x48);
+            return;
+        case Interrupt::TIMER:
+            call(0x50);
+            return;
+        case Interrupt::SERIAL:
+            call(0x58);
+            return;
+        case Interrupt::JOYPAD:
+            call(0x60);
+            return;
+    }
+}
+
+bool CPU::isInterruptServicable(Interrupt interrupt) const {
+    return isInterruptEnabled(interrupt) && isInterruptRequested(interrupt);
+}
+
+bool CPU::isInterruptEnabled(Interrupt interrupt) const {
+    uint8_t ie = m_mmu.readByte(0xFFFF);
+    auto offset = static_cast<uint8_t>(interrupt);
+    return ((ie >> offset) & 1u) != 0;
+}
+
+bool CPU::isInterruptRequested(Interrupt interrupt) const {
+    uint8_t if_ = m_mmu.readByte(0xFF0F);
+    auto offset = static_cast<uint8_t>(interrupt);
+    return ((if_ >> offset) & 1u) != 0;
+}
+
+void CPU::enableInterrupt(Interrupt interrupt) {
+    uint8_t ie = m_mmu.readByte(0xFFFF);
+    auto offset = static_cast<uint8_t>(interrupt);
+
+    ie |= (1u << offset);
+    m_mmu.writeByte(0xFFFF, ie);
+}
+
+void CPU::disableInterrupt(Interrupt interrupt) {
+    uint8_t ie = m_mmu.readByte(0xFFFF);
+    auto offset = static_cast<uint8_t>(interrupt);
+
+    ie &= ~(1u << offset);
+    m_mmu.writeByte(0xFFFF, ie);
+}
+
+void CPU::requestInterrupt(Interrupt interrupt) {
+    uint8_t if_ = m_mmu.readByte(0xFF0F);
+    auto offset = static_cast<uint8_t>(interrupt);
+
+    if_ |= (1u << offset);
+    m_mmu.writeByte(0xFFFF, if_);
+}
+
+void CPU::unrequestInterrupt(Interrupt interrupt) {
+    uint8_t if_ = m_mmu.readByte(0xFF0F);
+    auto offset = static_cast<uint8_t>(interrupt);
+
+    if_ &= ~(1u << offset);
+    m_mmu.writeByte(0xFFFF, if_);
+}
+
+const std::array<Pixel, 160*144>& CPU::getCurrentFrame() const {
+    return m_gpu.getCurrentFrame();
+}
+
 void CPU::reset() {
     m_mmu.reset();
+
     //m_cartridge.reset();
     m_mmu.registerDevice(m_cartridge);
+
     m_gpu.reset();
     m_mmu.registerDevice(m_gpu);
+
     //m_serial.reset();
     m_mmu.registerDevice(m_serial);
+
+    m_timer.reset();
+    m_mmu.registerDevice(m_timer);
 
     m_registers.reset();
     m_pc = 0x100;
@@ -1521,7 +1625,7 @@ uint8_t CPU::step() {
 }
 
 uint8_t CPU::stepPrefix() {
-    auto current = static_cast<PrefixOpCode>(m_pc++);
+    auto current = static_cast<PrefixOpCode>(nextByte());
     switch (current) {
         case PrefixOpCode::RLC_B:
             return RLC_r(RegisterOperand::B);

@@ -5,10 +5,17 @@
 #include <bigboy/MMU/MemoryDevice.h>
 
 enum class GPUMode {
-    HORIZONTAL_BLANK = 0, // 204 cycles
-    VERTICAL_BLANK = 1, // 4560 cycles
-    SCANLINE_OAM = 2, // 80 cycles
-    SCANLINE_VRAM = 3 // 172 cycles
+    HORIZONTAL_BLANK = 0, // 204 cycles (H-Blank)
+    VERTICAL_BLANK = 1, // 4560 cycles  (V-Blank)
+    SCANLINE_OAM = 2, // 80 cycles      (Searching OAM-RAM)
+    SCANLINE_VRAM = 3 // 172 cycles     (Transferring Data to LCD Driver)
+};
+
+enum class StatInterrupt : uint8_t {
+    HBLANK = 3, // Horizontal blank, bit 3
+    VBLANK = 4, // Vertical blank, bit 4
+    OAM = 5,    // OAM read, bit 5
+    LYC = 6,    // LY coincidence, bit 6
 };
 
 enum class Pixel : uint8_t {
@@ -20,13 +27,18 @@ enum class Pixel : uint8_t {
 
 class GPU : public MemoryDevice {
 public:
+    struct Request {
+        bool vblank;
+        bool stat;
+    };
+
     GPU() = default;
+
+    // Returns true if the GPU has finished rendering a frame, false otherwise
+    Request update(uint8_t cycles);
 
     // Get the current framebuffer
     const std::array<Pixel, 160*144>& getCurrentFrame() const;
-
-    // Returns true if the GPU has finished rendering a frame, false otherwise
-    bool step(uint8_t cycles);
 
     void reset();
 
@@ -39,8 +51,17 @@ private:
     void renderScanline();
     void renderBackgroundScanline();
 
+    GPUMode getMode() const { return static_cast<GPUMode>(m_status & 0b11u); }
+
     // Reset the clock and switch to the new mode
-    void switchMode(GPUMode newMode);
+    // Returns true if a STAT interrupt is to be requested
+    bool switchMode(GPUMode newMode);
+
+    bool statInterruptEnabled(StatInterrupt interrupt) const
+            { return (m_status >> static_cast<uint8_t>(interrupt)) & 1u; }
+
+    void setCoincidenceFlag()   { m_status |= (1u << 2u); };
+    void clearCoincidenceFlag() { m_status &= ~(1u << 2u); };
 
     bool displayEnable() const { return (m_control >> 7u) & 1u; }
     bool windowTileset() const { return (m_control >> 6u) & 1u; };
@@ -82,9 +103,6 @@ private:
 
     std::array<Pixel, 160*144> m_bgBuffer{Pixel::OFF};
     std::array<Pixel, 160*144> m_frameBuffer{Pixel::OFF};
-
-    // The kind of work we are (supposedly) doing
-    GPUMode m_mode = GPUMode::HORIZONTAL_BLANK;
 
     // Keep track of how long it has taken us to do this work
     // Once we have had enough time to (supposedly) get it done,

@@ -18,7 +18,7 @@ class InternalMemory : public MemoryDevice {
     // Interrupt enable register: FFFF
     uint8_t m_ie = 0;
 
-    // Interrupt flag register: FF0F
+    // Interrupt flag (request) register: FF0F
     uint8_t m_if = 0;
 
 public:
