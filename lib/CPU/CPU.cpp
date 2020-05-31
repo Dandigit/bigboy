@@ -378,7 +378,7 @@ void CPU::add(uint8_t value) {
 
     result == 0 ? setZeroFlag() : clearZeroFlag();
     clearSubtractFlag();
-    result < value ? setZeroFlag() : clearZeroFlag();
+    result < value ? setCarryFlag() : clearCarryFlag();
     (m_registers.a & 0xF) + (value & 0xF) > 0xF ? setHalfCarryFlag() : clearHalfCarryFlag();
 
     m_registers.a = result;

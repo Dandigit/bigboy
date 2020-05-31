@@ -8,10 +8,6 @@ const std::array<Colour, 160*144>& GPU::getCurrentFrame() const {
 
 GPU::Request GPU::update(uint8_t cycles) {
     if (!displayEnable()) {
-        m_clock = 0;
-        m_currentY = 0;
-        m_status &= 252u;
-        m_status |= 1u;
         return Request{false, false};
     }
 
@@ -135,7 +131,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
             m_control = value;
             if (wasEnabled && !displayEnable()) {
                 // Display has been turned off. We need to clear the screen.
-                m_frameBuffer.fill(Colour{0, 0, 0, 255});
+                m_frameBuffer.fill(Colour{255, 255, 255, 255});
                 m_currentY = 153;
                 m_clock = 456;
                 switchMode(GPUMode::VERTICAL_BLANK);
