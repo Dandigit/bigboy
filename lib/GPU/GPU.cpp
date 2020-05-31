@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-const std::array<Pixel, 160*144>& GPU::getCurrentFrame() const {
+const std::array<Colour, 160*144>& GPU::getCurrentFrame() const {
     return m_frameBuffer;
 }
 
@@ -130,7 +130,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
             m_control = value;
             if (wasEnabled && !displayEnable()) {
                 // Display has been turned off. We need to clear the screen.
-                m_frameBuffer.fill(Pixel::OFF);
+                m_frameBuffer.fill(Colour{0, 0, 0, 255});
                 m_currentY = 153;
                 m_clock = 456;
                 switchMode(GPUMode::VERTICAL_BLANK);
@@ -201,7 +201,7 @@ void GPU::renderBackgroundScanline() {
         // If BG is disabled, render a white background and exit early
         for (int x = 0; x < 160; x++) {
             int index = (m_currentY * 160) + x;
-            m_bgBuffer[index] = Pixel::OFF;
+            m_bgBuffer[index] = Colour{255, 255, 255, 255};
         }
 
         return;
@@ -268,7 +268,7 @@ void GPU::renderBackgroundScanline() {
         uint8_t pixelHigh = ((rowHigh >> pos) & 1u) ? 0x02 : 0x00;
 
         // Get the colour
-        Pixel colour = getPaletteColour(pixelLow + pixelHigh);
+        Colour colour = getPaletteColour(pixelLow + pixelHigh);
 
         // We find the index of this pixel within our background framebuffer:
         size_t index = (m_currentY * 160) + x;
@@ -279,15 +279,9 @@ void GPU::renderBackgroundScanline() {
 }
 
 bool GPU::switchMode(GPUMode newMode) {
-    const auto modeBits = static_cast<uint8_t>(newMode);
-
-    // Set/clear bit 0 of STAT
-    const bool bit0Set = (modeBits & 1u) != 0;
-    m_status = (m_status & ~1u) | bit0Set;
-
-    // Set/clear bit 1 of STAT
-    const bool bit1Set = (modeBits & (1u << 1)) != 0;
-    m_status = (m_status & ~(1u << 1)) | (bit1Set << 1);
+    // Set the lower 2 bits of STAT to newMode
+    m_status &= ~0b11u;
+    m_status |= static_cast<uint8_t>(newMode);
 
     // Should we request a STAT interrupt?
     switch (newMode) {
@@ -302,8 +296,17 @@ bool GPU::switchMode(GPUMode newMode) {
     }
 }
 
-Pixel GPU::getPaletteColour(uint8_t index) const {
-    return static_cast<Pixel>(
-            (m_bgPalette >> static_cast<uint8_t>(index)) & 0b11u);
+Colour GPU::getPaletteColour(uint8_t index) const {
+    const uint8_t value = (m_bgPalette >> static_cast<uint8_t>(index)) & 0b11u;
+    switch (value) {
+        case 0: return Colour{255, 255, 255, 255}; // White (off)
+        case 1: return Colour{192, 192, 192, 255}; // Light grey (33% on)
+        case 2: return Colour{96, 96, 96, 255};    // Dark grey (66% on)
+        case 3: return Colour{0, 0, 0, 255};       // Black (on)
+        default:
+            // Unreachable!
+            std::cerr << "unreachable: GPU::getPalletteColour was passed an out-of-bounds index.\n";
+            exit(2);
+    }
 }
 

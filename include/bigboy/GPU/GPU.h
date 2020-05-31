@@ -18,11 +18,11 @@ enum class StatInterrupt : uint8_t {
     LYC = 6,    // LY coincidence, bit 6
 };
 
-enum class Pixel : uint8_t {
-    OFF = 0,
-    LIGHT_GREY = 1,
-    DARK_GREY = 2,
-    BLACK = 3
+struct Colour {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
 };
 
 class GPU : public MemoryDevice {
@@ -38,7 +38,7 @@ public:
     Request update(uint8_t cycles);
 
     // Get the current framebuffer
-    const std::array<Pixel, 160*144>& getCurrentFrame() const;
+    const std::array<Colour, 160*144>& getCurrentFrame() const;
 
     void reset();
 
@@ -72,7 +72,7 @@ private:
     bool spriteEnable()  const { return (m_control >> 1u) & 1u; };
     bool bgEnable()      const { return m_control         & 1u; };
 
-    Pixel getPaletteColour(uint8_t index) const;
+    Colour getPaletteColour(uint8_t index) const;
 
     // VRAM: 8000-9FFF
     std::array<uint8_t, 0x1FFF + 1> m_vram{0};
@@ -101,8 +101,8 @@ private:
 
     uint8_t m_dma;  // FF46
 
-    std::array<Pixel, 160*144> m_bgBuffer{Pixel::OFF};
-    std::array<Pixel, 160*144> m_frameBuffer{Pixel::OFF};
+    std::array<Colour, 160*144> m_bgBuffer{Colour{0, 0, 0, 255}};
+    std::array<Colour, 160*144> m_frameBuffer{Colour{0, 0, 0, 255}};
 
     // Keep track of how long it has taken us to do this work
     // Once we have had enough time to (supposedly) get it done,

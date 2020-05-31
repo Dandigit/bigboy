@@ -46,21 +46,20 @@ class CPU {
 public:
     void load(Cartridge cartridge);
 
-    // Returns true if the GPU has just finished rendering a frame
-    bool cycle();
-
-    const std::array<Pixel, 160*144>& getCurrentFrame() const;
+    const std::array<Colour, 160*144>& stepFrame();
 
     void reset();
 
 private:
-    std::string disassembleCurrent();
+    void update();
 
     uint8_t nextByte();
     uint16_t nextWord();
 
     uint8_t step();
     uint8_t stepPrefix();
+
+    std::string disassembleCurrent();
 
     void handleInterrupts();
     void serviceInterrupt(Interrupt interrupt);

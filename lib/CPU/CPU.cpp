@@ -12,17 +12,20 @@ void CPU::load(Cartridge cartridge) {
     m_mmu.registerDevice(m_cartridge);
 }
 
-bool CPU::cycle() {
+const std::array<Colour, 160*144>& CPU::stepFrame() {
+    while (m_clock < 70224) {
+        update();
+    }
+
+    m_clock -= 70224;
+    return m_gpu.getCurrentFrame();
+}
+
+void CPU::update() {
     disassembleCurrent();
     const uint8_t cycles = step();
 
-    bool frameIsReady = false;
-
     m_clock += cycles;
-    if (m_clock >= 70224) {
-        m_clock -= 70224;
-        frameIsReady = true;
-    }
 
     const bool timerRequest = m_timer.update(cycles);
     if (timerRequest) {
@@ -38,9 +41,6 @@ bool CPU::cycle() {
     }
 
     handleInterrupts();
-
-    // Return true if the next frame is ready
-    return frameIsReady;
 }
 
 void CPU::handleInterrupts() {
@@ -124,10 +124,6 @@ void CPU::unrequestInterrupt(Interrupt interrupt) {
 
     if_ &= ~(1u << offset);
     m_mmu.writeByte(0xFFFF, if_);
-}
-
-const std::array<Pixel, 160*144>& CPU::getCurrentFrame() const {
-    return m_gpu.getCurrentFrame();
 }
 
 void CPU::reset() {
