@@ -424,9 +424,9 @@ uint8_t CPU::ADCA_HL() {
 void CPU::subtract(uint8_t value) {
     uint8_t result = m_registers.a - value;
 
-    result == 0 ? setCarryFlag() : clearCarryFlag();
+    result == 0 ? setZeroFlag() : clearZeroFlag();
     setSubtractFlag();
-    result > value ? setCarryFlag() : clearCarryFlag();
+    (m_registers.a < value) ? setCarryFlag() : clearCarryFlag();
     ((m_registers.a & 0x0F) < (value & 0x0F)) ? setHalfCarryFlag() : clearHalfCarryFlag();
 
     m_registers.a = result;
@@ -545,7 +545,7 @@ void CPU::compare(uint8_t value) {
 
     (result == 0) ? setZeroFlag() : clearZeroFlag();
     setSubtractFlag();
-    (result > value) ? setCarryFlag() : clearCarryFlag();
+    (m_registers.a < value) ? setCarryFlag() : clearCarryFlag();
     ((m_registers.a & 0x0F) < (value & 0x0F)) ? setHalfCarryFlag() : clearHalfCarryFlag();
 }
 
