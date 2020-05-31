@@ -111,6 +111,11 @@ uint8_t GPU::readByte(uint16_t address) const {
     }
 
     if (address >= 0x8000 && address <= 0x9FFF) {
+        if (getMode() == GPUMode::SCANLINE_VRAM) {
+            std::cerr << "Tried to read VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
+            return 0xFF; // Bogus value.
+        }
+
         return m_vram[address - 0x8000];
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
         // TODO: Sprites
@@ -176,12 +181,12 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
     }
 
     if (address >= 0x8000 && address <= 0x9FFF) {
-        m_vram[address - 0x8000] = value;
+        if (getMode() == GPUMode::SCANLINE_VRAM) {
+            std::cerr << "Tried to write to VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
+            return; // Do nothing.
+        }
 
-        /*// Check if we updated the tileset
-        if (address <= 0x97FF) {
-            updateTileset(address);
-        }*/
+        m_vram[address - 0x8000] = value;
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
         // TODO: Sprites
         std::cerr << "Sprites are not yet implemented!" << '\n';
