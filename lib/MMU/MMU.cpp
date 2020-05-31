@@ -14,11 +14,21 @@ MMU::MMU(std::initializer_list<std::reference_wrapper<MemoryDevice>> devices) : 
 }
 
 uint8_t MMU::readByte(uint16_t address) const {
-    return getDevice(address).readByte(address);
+    if (const MemoryDevice* device = getDevice(address)) {
+        return device->readByte(address);
+    }
+
+    std::cerr << "No memory device registered for address: " << address << '\n';
+    return 0xFF; // Return bogus
 }
 
 void MMU::writeByte(uint16_t address, uint8_t value) {
-    return getDevice(address).writeByte(address, value);
+    if (MemoryDevice* device = getDevice(address)) {
+        return device->writeByte(address, value);
+    }
+
+    std::cerr << "No memory device registered for address: " << address << '\n';
+    // Do nothing.
 }
 
 uint16_t MMU::readWord(uint16_t address) const {
@@ -51,18 +61,18 @@ void MMU::reset() {
     registerDevice(m_internal);
 }
 
-MemoryDevice& MMU::getDevice(uint16_t address) {
+MemoryDevice* MMU::getDevice(uint16_t address) {
     if (MemoryDevice* device = m_devices[address]) {
-        return *device;
+        return device;
     }
 
-    throw std::runtime_error{"No memory device registered for address: " + std::to_string(address)};
+    return nullptr;
 }
 
-const MemoryDevice& MMU::getDevice(uint16_t address) const {
+const MemoryDevice* MMU::getDevice(uint16_t address) const {
     if (const MemoryDevice* device = m_devices[address]) {
-        return *device;
+        return device;
     }
 
-    throw std::runtime_error{"No memory device registered for address: " + std::to_string(address)};
+    return nullptr;
 }

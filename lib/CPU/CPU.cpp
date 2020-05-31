@@ -154,7 +154,7 @@ std::string CPU::disassembleCurrent() {
 
     s << "-- DISASSEMBLY\n";
     s << "-- clock = " << m_clock << '\n';
-    s << "-- " << opCodeToString(current)
+    s << "-- " //<< opCodeToString(current)
             << '(' << (int)current << ") "
             << '[' << (int)(m_mmu.readByte(m_pc + 1)) << "]\n";
     s << "-- b = " << (int) m_registers.b <<
@@ -175,7 +175,7 @@ std::string CPU::disassembleCurrent() {
             ", halfCarry = " << getHalfCarryFlag() <<
             ", carry = " << getCarryFlag() << '\n';
     s << "-- lcdc = " << (int)(m_mmu.readByte(0xFF40)) <<
-            ", stat = " << (int)(m_mmu.readByte(0xFF41)) <<
+            //", stat = " << (int)(m_mmu.readByte(0xFF41)) <<
             ", ly = " << (int)(m_mmu.readByte(0xFF44)) << '\n';
 
     std::ofstream outfile;
@@ -283,9 +283,9 @@ uint8_t CPU::LD_A_FF00n() {
 
 uint8_t CPU::LD_FF00n_A() {
     uint16_t addr = 0xFF00 + nextByte();
-    uint8_t dummy = m_mmu.readByte(addr);
-    load(dummy, m_registers.a);
-    m_mmu.writeByte(addr, dummy);
+    //uint8_t dummy = m_mmu.readByte(addr);
+    //load(dummy, m_registers.a);
+    m_mmu.writeByte(addr, m_registers.a);
     return 12;
 }
 

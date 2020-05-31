@@ -33,11 +33,11 @@ int main() {
             }
         }
 
-        try {
-            frame.update(reinterpret_cast<const sf::Uint8*>(cpu->stepFrame().data()));
-        } catch (const std::runtime_error& e) {
-            std::cerr << e.what() << '\n';
-        }
+        //try {
+        frame.update(reinterpret_cast<const sf::Uint8*>(cpu->stepFrame().data()));
+        //} catch (const std::runtime_error& e) {
+        //    std::cerr << e.what() << '\n';
+        //}
 
         // Clear the previous contents of the window
         window.clear(sf::Color::Black);
