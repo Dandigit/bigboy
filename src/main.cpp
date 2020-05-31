@@ -34,7 +34,7 @@ int main() {
         }
 
         try {
-            frame.update((sf::Uint8*)(cpu->stepFrame().data()));
+            frame.update(reinterpret_cast<const sf::Uint8*>(cpu->stepFrame().data()));
         } catch (const std::runtime_error& e) {
             std::cerr << e.what() << '\n';
         }
