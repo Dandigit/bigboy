@@ -802,24 +802,28 @@ uint8_t CPU::RRC_HL() {
 }
 
 void CPU::rotateRightThroughCarry(uint8_t &target) {
+    // TODO: refactor this
     uint8_t prevCarryFlag = (getCarryFlag() ? 1 : 0);
 
     std::bitset<9> value{target};
     value <<= 1u;
     value[0] = prevCarryFlag;
 
+    value[1] ? setCarryFlag() : clearCarryFlag();
+
     value >>= 1u;
     value[8] = prevCarryFlag;
 
     target = static_cast<uint8_t>((value >> 1).to_ulong());
 
-    value[0] ? setCarryFlag() : clearCarryFlag();
-    clearHalfCarryFlag();
+    (target == 0) ? setZeroFlag() : clearZeroFlag();
     clearSubtractFlag();
+    clearHalfCarryFlag();
 }
 
 uint8_t CPU::RRA() {
     rotateRightThroughCarry(m_registers.a);
+    clearZeroFlag(); // RRA always clears zero flag
     return 4;
 }
 
