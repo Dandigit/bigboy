@@ -918,7 +918,7 @@ void CPU::shiftRight(uint8_t& target) {
 
     target >>= 1u;
 
-    (target == 0) ? setCarryFlag() : clearCarryFlag();
+    (target == 0) ? setZeroFlag() : clearZeroFlag();
     clearHalfCarryFlag();
     clearSubtractFlag();
 }
