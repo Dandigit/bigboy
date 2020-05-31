@@ -7,6 +7,14 @@ const std::array<Pixel, 160*144>& GPU::getCurrentFrame() const {
 }
 
 GPU::Request GPU::update(uint8_t cycles) {
+    if (!displayEnable()) {
+        m_clock = 0;
+        m_currentY = 0;
+        m_status &= 252u;
+        m_status |= 1u;
+        return Request{false, false};
+    }
+
     m_clock += cycles;
 
     bool requestVblank = false;
@@ -66,6 +74,7 @@ GPU::Request GPU::update(uint8_t cycles) {
 }
 
 void GPU::reset() {
+    m_clock = 456;
     m_control = 0x91;
     m_scrollY = 0x00;
     m_scrollX = 0x00;
@@ -116,11 +125,21 @@ uint8_t GPU::readByte(uint16_t address) const {
 void GPU::writeByte(uint16_t address, uint8_t value) {
     // Registers?
     switch (address) {
-        case 0xFF40:
+        case 0xFF40: {
+            const bool wasEnabled = displayEnable();
             m_control = value;
+            if (wasEnabled && !displayEnable()) {
+                // Display has been turned off. We need to clear the screen.
+                m_frameBuffer.fill(Pixel::OFF);
+                m_currentY = 153;
+                m_clock = 456;
+                switchMode(GPUMode::VERTICAL_BLANK);
+            }
             return;
+        }
         case 0xFF41:
-            m_status = value;
+            // Only bits 3-7 are writable
+            m_status = (value & 0xF8) | (m_status & 0x07);
             return;
         case 0xFF42:
             m_scrollY = value;
@@ -157,7 +176,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
     }
 
     if (address >= 0x8000 && address <= 0x9FFF) {
-        m_vram[0x8000 - address] = value;
+        m_vram[address - 0x8000] = value;
 
         /*// Check if we updated the tileset
         if (address <= 0x97FF) {
@@ -218,7 +237,7 @@ void GPU::renderBackgroundScanline() {
 
         // We can now read into the tile map to find the index (into the selected tileset) of
         // the tile we need to render
-        uint8_t tileIndex = m_vram[tilesetIndex + (tileY * 32) + tileX];
+        uint8_t tileIndex = m_vram[static_cast<uint16_t>(tilesetIndex + (tileY * 32) + tileX)];
 
         // Depending on the currently selected tilemap, this index may be signed or unsigned.
         // Tilemap 1 uses unsigned indexes, whereas tilemap 0 uses signed indexes. Either way,
@@ -238,7 +257,7 @@ void GPU::renderBackgroundScanline() {
 
         // Read the two bytes!
         uint8_t rowLow = m_vram[pixelRowIndex];
-        uint8_t rowHigh = m_vram[pixelRowIndex + 1];
+        uint8_t rowHigh = m_vram[static_cast<uint16_t>(pixelRowIndex + 1)];
 
         // Now we obtain the low and high bits of the pixel we are looking at. The low bit
         // is stored at the xth position in the low byte of the row, and the high bit is stored

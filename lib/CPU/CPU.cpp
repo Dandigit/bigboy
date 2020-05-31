@@ -16,7 +16,13 @@ bool CPU::cycle() {
     disassembleCurrent();
     const uint8_t cycles = step();
 
+    bool frameIsReady = false;
+
     m_clock += cycles;
+    if (m_clock >= 70224) {
+        m_clock -= 70224;
+        frameIsReady = true;
+    }
 
     const bool timerRequest = m_timer.update(cycles);
     if (timerRequest) {
@@ -34,7 +40,7 @@ bool CPU::cycle() {
     handleInterrupts();
 
     // Return true if the next frame is ready
-    return gpuRequest.vblank;
+    return frameIsReady;
 }
 
 void CPU::handleInterrupts() {
@@ -151,7 +157,8 @@ std::string CPU::disassembleCurrent() {
     std::stringstream s;
 
     s << "-- DISASSEMBLY\n";
-    s << "-- " //<< opCodeToString(current) <<
+    s << "-- clock = " << m_clock << '\n';
+    s << "-- " << opCodeToString(current)
             << '(' << (int)current << ") "
             << '[' << (int)(m_mmu.readByte(m_pc + 1)) << "]\n";
     s << "-- b = " << (int) m_registers.b <<
@@ -171,6 +178,9 @@ std::string CPU::disassembleCurrent() {
             ", subtract = " << getSubtractFlag() <<
             ", halfCarry = " << getHalfCarryFlag() <<
             ", carry = " << getCarryFlag() << '\n';
+    s << "-- lcdc = " << (int)(m_mmu.readByte(0xFF40)) <<
+            ", stat = " << (int)(m_mmu.readByte(0xFF41)) <<
+            ", ly = " << (int)(m_mmu.readByte(0xFF44)) << '\n';
 
     std::ofstream outfile;
     outfile.open("/Users/dboulton/bigboy-dump.txt", std::ios_base::app);
@@ -358,6 +368,11 @@ void CPU::pop(uint16_t& target) {
 
 uint8_t CPU::POP_qq(RegisterPairStackOperand target) {
     pop(m_registers.get(target));
+
+    if (target == RegisterPairStackOperand::AF) {
+        m_registers.f &= 0xF0;
+    }
+
     return 12;
 }
 
@@ -1063,10 +1078,10 @@ uint8_t CPU::JR_f_PCdd(ConditionOperand condition) {
     auto dd = static_cast<int8_t>(nextByte());
     if (getCondition(condition)) {
         relativeJump(dd);
-        return 16;
+        return 12;
     }
 
-    return 12;
+    return 8;
 }
 
 void CPU::call(uint16_t address) {
