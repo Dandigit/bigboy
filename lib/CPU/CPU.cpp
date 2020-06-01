@@ -145,7 +145,7 @@ void CPU::reset() {
     m_pc = 0x100;
     m_halted = false;
     m_stopped = false;
-    m_ime = true;
+    m_ime = false;
 }
 
 std::string CPU::disassembleCurrent() {
@@ -177,6 +177,9 @@ std::string CPU::disassembleCurrent() {
     s << "-- lcdc = " << (int)(m_mmu.readByte(0xFF40)) <<
             //", stat = " << (int)(m_mmu.readByte(0xFF41)) <<
             ", ly = " << (int)(m_mmu.readByte(0xFF44)) << '\n';
+    s << "-- ime = " << m_ime <<
+            ", ie = " << (int)(m_mmu.readByte(0xFFFF)) <<
+            ", if = " << (int)(m_mmu.readByte(0xFF0F)) << '\n';
 
     std::ofstream outfile;
     outfile.open("/Users/dboulton/bigboy-dump.txt", std::ios_base::app);

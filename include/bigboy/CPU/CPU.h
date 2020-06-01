@@ -325,7 +325,7 @@ private:
     bool m_stopped = false;
 
     // Interrupt master enable flag. EI/DI will set/reset this.
-    bool m_ime = true;
+    bool m_ime = false;
 
     static constexpr uint8_t ZERO_FLAG_BYTE_POSITION = 7;
     static constexpr uint8_t SUBTRACT_FLAG_BYTE_POSITION = 6;
