@@ -6,8 +6,8 @@ bool Timer::update(uint8_t cycles) {
     // Check if the divider register needs to be incremented
     m_divClock += cycles;
 
-    if (m_divClock >= CPU_CLOCK_SPEED / DIVIDER_FREQUENCY) {
-        m_divClock = 0;
+    if (m_divClock >= DIVIDER_FREQUENCY) {
+        m_divClock -= DIVIDER_FREQUENCY;
         ++m_div;
     }
 
@@ -16,8 +16,8 @@ bool Timer::update(uint8_t cycles) {
 
     m_timaClock += cycles;
 
-    if (m_timaClock >= CPU_CLOCK_SPEED / getTimerFrequency()) {
-        m_timaClock = 0;
+    if (m_timaClock >= getTimerFrequency()) {
+        m_timaClock -= getTimerFrequency();
         if (m_tima == UINT8_MAX) {
             m_tima = m_tma;
             // Request an interrupt!
@@ -74,12 +74,12 @@ void Timer::reset() {
 uint32_t Timer::getTimerFrequency() const {
     switch (static_cast<FrequencySelect>(m_tac & 0b11u)) {
         case FrequencySelect::HZ_4096:
-            return 4096;
+            return CPU_CLOCK_SPEED / 4096;
         case FrequencySelect::HZ_16384:
-            return 16384;
+            return CPU_CLOCK_SPEED / 16384;
         case FrequencySelect::HZ_65536:
-            return 65536;
+            return CPU_CLOCK_SPEED / 65536;
         case FrequencySelect::HZ_262144:
-            return 262144;
+            return CPU_CLOCK_SPEED / 262144;
     }
 }

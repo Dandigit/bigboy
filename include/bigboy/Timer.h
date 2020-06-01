@@ -55,7 +55,7 @@ private:
     //    - 11: 16384 Hz
     uint8_t m_tac = 0;
 
-    static constexpr uint32_t CPU_CLOCK_SPEED = 4194204; // Hz
+    static constexpr uint32_t CPU_CLOCK_SPEED = 4194304; // Hz
     static constexpr uint32_t DIVIDER_FREQUENCY = CPU_CLOCK_SPEED / 16384;
 };
 

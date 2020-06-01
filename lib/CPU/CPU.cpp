@@ -115,7 +115,7 @@ void CPU::requestInterrupt(Interrupt interrupt) {
     auto offset = static_cast<uint8_t>(interrupt);
 
     if_ |= (1u << offset);
-    m_mmu.writeByte(0xFFFF, if_);
+    m_mmu.writeByte(0xFF0F, if_);
 }
 
 void CPU::unrequestInterrupt(Interrupt interrupt) {
@@ -123,7 +123,7 @@ void CPU::unrequestInterrupt(Interrupt interrupt) {
     auto offset = static_cast<uint8_t>(interrupt);
 
     if_ &= ~(1u << offset);
-    m_mmu.writeByte(0xFFFF, if_);
+    m_mmu.writeByte(0xFF0F, if_);
 }
 
 void CPU::reset() {
@@ -180,6 +180,9 @@ std::string CPU::disassembleCurrent() {
     s << "-- ime = " << m_ime <<
             ", ie = " << (int)(m_mmu.readByte(0xFFFF)) <<
             ", if = " << (int)(m_mmu.readByte(0xFF0F)) << '\n';
+    s << "-- div = " << (int)(m_mmu.readByte(0xFF04)) <<
+            ", tima = " << (int)(m_mmu.readByte(0xFF05)) <<
+            ", tma = " << (int)(m_mmu.readByte(0xFF06)) << '\n';
 
     std::ofstream outfile;
     outfile.open("/Users/dboulton/bigboy-dump.txt", std::ios_base::app);
