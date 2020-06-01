@@ -471,8 +471,8 @@ enum class OpCode : uint8_t {
     // Clock cycles: 4
     // Bit-by-bit: 1 0 1 1 1 <r r r>
     CP_B = 0b10111000,
-    CP_D = 0b10111001,
-    CP_C = 0b10111010,
+    CP_C = 0b10111001,
+    CP_D = 0b10111010,
     CP_E = 0b10111011,
     CP_H = 0b10111100,
     CP_L = 0b10111101,

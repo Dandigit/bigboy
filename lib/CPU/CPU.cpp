@@ -519,8 +519,8 @@ void CPU::bitwiseOr(uint8_t value) {
 
     (m_registers.a == 0) ? setZeroFlag() : clearZeroFlag();
     clearSubtractFlag();
-    clearCarryFlag();
     clearHalfCarryFlag();
+    clearCarryFlag();
 }
 
 uint8_t CPU::OR_r(RegisterOperand target) {
@@ -614,6 +614,7 @@ uint8_t CPU::DAA() {
         // After a subtraction, only adjust if a carry and/or half carry occurred
         if (getCarryFlag()) {
             m_registers.a -= 0x60;
+            setCarryFlag();
         }
 
         if (getHalfCarryFlag()) {

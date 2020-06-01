@@ -9,7 +9,7 @@ constexpr unsigned long WINDOW_HEIGHT = 144;
 
 int main() {
     auto cpu = std::make_unique<CPU>();
-    cpu->load(Cartridge::fromFile("./resources/tests/06-ld r,r.gb"));
+    cpu->load(Cartridge::fromFile("./resources/tests/01-special.gb"));
 
     // Create the main window
     sf::RenderWindow window{sf::VideoMode{WINDOW_WIDTH, WINDOW_HEIGHT}, "Bigboy"};
