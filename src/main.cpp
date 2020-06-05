@@ -8,8 +8,8 @@ constexpr unsigned long WINDOW_WIDTH = 160;
 constexpr unsigned long WINDOW_HEIGHT = 144;
 
 int main() {
-    auto cpu = std::make_unique<CPU>();
-    cpu->load(Cartridge::fromFile("./resources/tests/02-interrupts.gb"));
+    CPU cpu{};
+    cpu.load(Cartridge::fromFile("./resources/games/Tetris.gb"));
 
     // Create the main window
     sf::RenderWindow window{sf::VideoMode{WINDOW_WIDTH, WINDOW_HEIGHT}, "Bigboy"};
@@ -33,11 +33,7 @@ int main() {
             }
         }
 
-        //try {
-        frame.update(reinterpret_cast<const sf::Uint8*>(cpu->stepFrame().data()));
-        //} catch (const std::runtime_error& e) {
-        //    std::cerr << e.what() << '\n';
-        //}
+        frame.update(reinterpret_cast<const sf::Uint8*>(cpu.stepFrame().data()));
 
         // Clear the previous contents of the window
         window.clear(sf::Color::Black);
