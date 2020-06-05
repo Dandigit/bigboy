@@ -187,7 +187,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
         // TODO: Sprites
         std::cerr << "Sprites are not yet implemented!" << '\n';
     } else {
-        std::cerr << "Memory device GPU does not support reading the address " +
+        std::cerr << "Memory device GPU does not support reading the address " <<
                      address << '\n';
     }
 }
