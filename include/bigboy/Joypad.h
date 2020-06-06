@@ -15,7 +15,7 @@ struct KeyState {
     bool select = false;
 };
 
-enum class KeyInput {
+enum class InputEvent {
     UP_PRESSED,
     UP_RELEASED,
 
@@ -43,14 +43,15 @@ enum class KeyInput {
 
 class Joypad : public MemoryDevice {
 public:
-    void handleInput(KeyInput input);
+    bool update();
+    void handleInput(InputEvent input);
 
     std::vector<AddressSpace> addressSpaces() const;
     uint8_t readByte(uint16_t address) const;
     void writeByte(uint16_t address, uint8_t value);
 
 private:
-    void updateKeystate(KeyInput input);
+    void updateKeystate(InputEvent input);
     void updateRegister();
 
     // 0 = Selected
@@ -83,6 +84,9 @@ private:
     //   Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
     //   Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
     uint8_t m_joyp;
+
+    // Request a joypad interrupt? (INT 60)
+    bool m_requestInterruptOnNextUpdate = false;
 
     static constexpr uint8_t BUTTONS_SELECT_POSITION = 5;
     static constexpr uint8_t DIRECTIONS_SELECT_POSITION = 4;

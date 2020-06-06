@@ -1,59 +1,76 @@
 #include <bigboy/Joypad.h>
 #include <iostream>
 
-void Joypad::handleInput(const KeyInput input) {
+bool Joypad::update() {
+    if (m_requestInterruptOnNextUpdate) {
+        m_requestInterruptOnNextUpdate = false;
+        return true;
+    }
+
+    return false;
+}
+
+void Joypad::handleInput(const InputEvent input) {
     updateKeystate(input);
     updateRegister();
 }
 
-void Joypad::updateKeystate(const KeyInput input) {
+void Joypad::updateKeystate(const InputEvent input) {
     switch (input) {
-        case KeyInput::UP_PRESSED:
+        case InputEvent::UP_PRESSED:
+            if (!m_keys.up) m_requestInterruptOnNextUpdate = true;
             m_keys.up = true;
             break;
-        case KeyInput::UP_RELEASED:
+        case InputEvent::UP_RELEASED:
             m_keys.up = false;
             break;
-        case KeyInput::DOWN_PRESSED:
+        case InputEvent::DOWN_PRESSED:
+            if (!m_keys.down) m_requestInterruptOnNextUpdate = true;
             m_keys.down = true;
             break;
-        case KeyInput::DOWN_RELEASED:
+        case InputEvent::DOWN_RELEASED:
             m_keys.down = false;
             break;
-        case KeyInput::LEFT_PRESSED:
+        case InputEvent::LEFT_PRESSED:
+            if (!m_keys.left) m_requestInterruptOnNextUpdate = true;
             m_keys.left = true;
             break;
-        case KeyInput::LEFT_RELEASED:
+        case InputEvent::LEFT_RELEASED:
             m_keys.left = false;
             break;
-        case KeyInput::RIGHT_PRESSED:
+        case InputEvent::RIGHT_PRESSED:
+            if (!m_keys.right) m_requestInterruptOnNextUpdate = true;
             m_keys.right = true;
             break;
-        case KeyInput::RIGHT_RELEASED:
+        case InputEvent::RIGHT_RELEASED:
             m_keys.right = false;
             break;
-        case KeyInput::A_PRESSED:
+        case InputEvent::A_PRESSED:
+            if (!m_keys.a) m_requestInterruptOnNextUpdate = true;
             m_keys.a = true;
             break;
-        case KeyInput::A_RELEASED:
+        case InputEvent::A_RELEASED:
             m_keys.a = false;
             break;
-        case KeyInput::B_PRESSED:
+        case InputEvent::B_PRESSED:
+            if (!m_keys.b) m_requestInterruptOnNextUpdate = true;
             m_keys.b = true;
             break;
-        case KeyInput::B_RELEASED:
+        case InputEvent::B_RELEASED:
             m_keys.b = false;
             break;
-        case KeyInput::START_PRESSED:
+        case InputEvent::START_PRESSED:
+            if (!m_keys.start) m_requestInterruptOnNextUpdate = true;
             m_keys.start = true;
             break;
-        case KeyInput::START_RELEASED:
+        case InputEvent::START_RELEASED:
             m_keys.start = false;
             break;
-        case KeyInput::SELECT_PRESSED:
+        case InputEvent::SELECT_PRESSED:
+            if (!m_keys.select) m_requestInterruptOnNextUpdate = true;
             m_keys.select = true;
             break;
-        case KeyInput::SELECT_RELEASED:
+        case InputEvent::SELECT_RELEASED:
             m_keys.select = false;
             break;
     }
