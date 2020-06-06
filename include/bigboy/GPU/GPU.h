@@ -50,6 +50,7 @@ private:
     // Render one scanline into the framebuffer
     void renderScanline();
     void renderBackgroundScanline();
+    void renderSpriteScanline();
 
     GPUMode getMode() const { return static_cast<GPUMode>(m_status & 0b11u); }
 
@@ -72,7 +73,7 @@ private:
     bool spriteEnable()  const { return (m_control >> 1u) & 1u; };
     bool bgEnable()      const { return m_control         & 1u; };
 
-    Colour getPaletteColour(uint8_t index) const;
+    Colour getPaletteColour(uint8_t palette, uint8_t index) const;
 
     // VRAM: 8000-9FFF
     std::array<uint8_t, 0x1FFF + 1> m_vram{0};
@@ -101,7 +102,6 @@ private:
 
     uint8_t m_dma;  // FF46
 
-    std::array<Colour, 160*144> m_bgBuffer{Colour{0, 0, 0, 255}};
     std::array<Colour, 160*144> m_frameBuffer{Colour{0, 0, 0, 255}};
 
     // Keep track of how long it has taken us to do this work

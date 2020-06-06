@@ -114,9 +114,7 @@ uint8_t GPU::readByte(uint16_t address) const {
 
         return m_vram[address - 0x8000];
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
-        // TODO: Sprites
-        std::cerr << "Sprites are not yet implemented!" << '\n';
-        return 0xFF;
+        return m_oam[address - 0xFE00];
     }
 
     std::cerr << "Memory device GPU does not support reading the address " << address << '\n';
@@ -184,8 +182,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
 
         m_vram[address - 0x8000] = value;
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
-        // TODO: Sprites
-        std::cerr << "Sprites are not yet implemented!" << '\n';
+        m_oam[address - 0xFE00] = value;
     } else {
         std::cerr << "Memory device GPU does not support reading the address " <<
                      address << '\n';
@@ -194,7 +191,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
 
 void GPU::renderScanline() {
     renderBackgroundScanline();
-    m_frameBuffer = m_bgBuffer;
+    renderSpriteScanline();
 }
 
 void GPU::renderBackgroundScanline() {
@@ -202,7 +199,7 @@ void GPU::renderBackgroundScanline() {
         // If BG is disabled, render a white background and exit early
         for (int x = 0; x < 160; x++) {
             int index = (m_currentY * 160) + x;
-            m_bgBuffer[index] = Colour{255, 255, 255, 255};
+            m_frameBuffer[index] = Colour{255, 255, 255, 255};
         }
 
         return;
@@ -269,13 +266,77 @@ void GPU::renderBackgroundScanline() {
         uint8_t pixelHigh = ((rowHigh >> pos) & 1u) ? 0x02 : 0x00;
 
         // Get the colour
-        Colour colour = getPaletteColour(pixelLow + pixelHigh);
+        Colour colour = getPaletteColour(m_bgPalette, pixelLow + pixelHigh);
 
         // We find the index of this pixel within our background framebuffer:
         size_t index = (m_currentY * 160) + x;
 
         // And set it to the appropriate colour.
-        m_bgBuffer[index] = colour;
+        m_frameBuffer[index] = colour;
+    }
+}
+
+void GPU::renderSpriteScanline() {
+    // Walk the Sprite Attribute Table backwards
+    for (int i = m_oam.size(); i >= 0; i -= 4) {
+        const uint8_t spriteYMinus16 = m_oam[i];
+        const uint8_t spriteY = spriteYMinus16 - 16;
+        const uint8_t spriteHeight = spriteSize() ? 16 : 8;
+
+        const uint8_t flags = m_oam[i + 3];
+
+        // Is the sprite on the current scanline?
+        if ((spriteY <= m_currentY) && (spriteY + spriteHeight > m_currentY)) {
+            const uint8_t spriteXMinus8 = m_oam[i + 1];
+            const uint8_t spriteX = spriteXMinus8 + 8;
+            uint8_t tileNumber = m_oam[i + 2];
+
+            if (spriteHeight == 16) {
+                // In 8x16 mode, the lower bit of the tile number is ignored.
+                tileNumber &= 0xFE;
+            }
+
+            // Each tile is 16 bytes
+            const uint16_t absoluteTileIndex = tileNumber * 16;
+
+            // We need to find the our current line in the tile
+            bool yFlip = (flags >> 6) & 1u;
+            const uint8_t tileYOffset = yFlip ?
+                    ((spriteHeight - 1) - (m_currentY - spriteY)) :
+                    (m_currentY - spriteY);
+
+            const uint16_t rowIndex = absoluteTileIndex + tileYOffset * 2;
+            const uint8_t rowLow = m_vram[rowIndex];
+            const uint8_t rowHigh = m_vram[static_cast<uint16_t>(rowIndex + 1)];
+
+            // Loop through the row
+            for (int x = 0; x < 8; ++x) {
+                int pixelX = spriteX + x;
+                // Is the pixel on screen?
+                if (pixelX >= 0 && pixelX < 160) {
+                    const bool xFlip = (flags >> 5) & 1u;
+                    const uint8_t pos = xFlip ? x : (7 - x);
+
+                    const uint8_t pixelLow = ((rowLow >> pos) & 1u) ? 1 : 0;
+                    const uint8_t pixelHigh = ((rowHigh >> pos) & 1u) ? 2 : 0;
+                    const uint8_t pixel = pixelLow + pixelHigh;
+
+                    const bool usePallete0 = (flags >> 4) & 1u;
+                    const Colour colour = usePallete0 ?
+                            getPaletteColour(m_spritePalette0, pixel) :
+                            getPaletteColour(m_spritePalette1, pixel);
+
+                    // If the pixel is not transparent
+                    if (pixel != 0) {
+                        // Render above BG?
+                        const bool hasPriority0 = (flags >> 7) & 1u;
+                        if (hasPriority0) {
+                            m_frameBuffer[m_currentY * 160 + x] = colour;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -297,8 +358,8 @@ bool GPU::switchMode(GPUMode newMode) {
     }
 }
 
-Colour GPU::getPaletteColour(uint8_t index) const {
-    const uint8_t value = (m_bgPalette >> static_cast<uint8_t>(index)) & 0b11u;
+Colour GPU::getPaletteColour(uint8_t palette, uint8_t index) const {
+    const uint8_t value = (palette >> index) & 0b11u;
     switch (value) {
         case 0: return Colour{255, 255, 255, 255}; // White (off)
         case 1: return Colour{192, 192, 192, 255}; // Light grey (33% on)
@@ -310,4 +371,3 @@ Colour GPU::getPaletteColour(uint8_t index) const {
             exit(2);
     }
 }
-

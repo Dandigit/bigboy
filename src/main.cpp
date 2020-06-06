@@ -4,8 +4,8 @@
 
 #include <bigboy/CPU/CPU.h>
 
-constexpr unsigned long WINDOW_WIDTH = 160;
-constexpr unsigned long WINDOW_HEIGHT = 144;
+constexpr unsigned long SCREEN_WIDTH = 160;
+constexpr unsigned long SCREEN_HEIGHT = 144;
 
 void handleInput(CPU& cpu,
         const sf::Keyboard::Key key,
@@ -35,7 +35,7 @@ int main() {
     cpu.load(Cartridge::fromFile("./resources/games/opus5.gb"));
 
     // Create the main window
-    sf::RenderWindow window{sf::VideoMode{WINDOW_WIDTH, WINDOW_HEIGHT}, "Bigboy"};
+    sf::RenderWindow window{sf::VideoMode{SCREEN_WIDTH, SCREEN_HEIGHT}, "Bigboy"};
 
     sf::Texture frame{};
     frame.create(160,144);
@@ -56,16 +56,10 @@ int main() {
         }
 
         handleInputs(cpu);
-
         frame.update(reinterpret_cast<const sf::Uint8*>(cpu.stepFrame().data()));
 
-        // Clear the previous contents of the window
         window.clear(sf::Color::Black);
-
-        // Render the text
         window.draw(sf::Sprite{frame});
-
-        // Display the changes that we have made to the window since the last iteration
         window.display();
     }
 
