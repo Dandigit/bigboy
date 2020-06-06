@@ -21,11 +21,20 @@ const std::array<Colour, 160*144>& CPU::stepFrame() {
     return m_gpu.getCurrentFrame();
 }
 
+void CPU::handleInput(const InputEvent event) {
+    m_joypad.handleInput(event);
+}
+
 void CPU::update() {
     disassembleCurrent();
     const uint8_t cycles = step();
 
     m_clock += cycles;
+
+    const bool joypadRequest = m_joypad.update();
+    if (joypadRequest) {
+        requestInterrupt(Interrupt::JOYPAD);
+    }
 
     const bool timerRequest = m_timer.update(cycles);
     if (timerRequest) {
@@ -134,6 +143,9 @@ void CPU::reset() {
 
     m_gpu.reset();
     m_mmu.registerDevice(m_gpu);
+
+    m_joypad.reset();
+    m_mmu.registerDevice(m_joypad);
 
     //m_serial.reset();
     m_mmu.registerDevice(m_serial);

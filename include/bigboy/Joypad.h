@@ -46,6 +46,8 @@ public:
     bool update();
     void handleInput(InputEvent input);
 
+    void reset();
+
     std::vector<AddressSpace> addressSpaces() const;
     uint8_t readByte(uint16_t address) const;
     void writeByte(uint16_t address, uint8_t value);

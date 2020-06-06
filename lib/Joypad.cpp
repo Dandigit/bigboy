@@ -120,3 +120,9 @@ void Joypad::writeByte(const uint16_t address, const uint8_t value) {
         // Do nothing
     }
 }
+
+void Joypad::reset() {
+    m_joyp = 0b00001111;
+    m_keys = {};
+    m_requestInterruptOnNextUpdate = false;
+}

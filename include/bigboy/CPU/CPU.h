@@ -6,6 +6,7 @@
 #include <bigboy/CPU/PrefixOpCode.h>
 #include <bigboy/CPU/Registers.h>
 #include <bigboy/GPU/GPU.h>
+#include <bigboy/Joypad.h>
 #include <bigboy/MMU/MMU.h>
 #include <bigboy/Serial.h>
 #include <bigboy/Timer.h>
@@ -47,6 +48,7 @@ public:
     void load(Cartridge cartridge);
 
     const std::array<Colour, 160*144>& stepFrame();
+    void handleInput(InputEvent event);
 
     void reset();
 
@@ -306,10 +308,11 @@ private:
 
     Cartridge m_cartridge{};
     GPU m_gpu{};
+    Joypad m_joypad{};
     Serial m_serial{};
     Timer m_timer{};
 
-    MMU m_mmu{m_cartridge, m_gpu, m_serial, m_timer};
+    MMU m_mmu{m_cartridge, m_gpu, m_joypad, m_serial, m_timer};
 
     Registers m_registers{};
 
