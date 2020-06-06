@@ -26,6 +26,7 @@ void CPU::handleInput(const InputEvent event) {
 }
 
 void CPU::update() {
+    //disassembleCurrent();
     const uint8_t cycles = step();
 
     m_clock += cycles;
@@ -119,6 +120,7 @@ void CPU::disableInterrupt(Interrupt interrupt) {
 }
 
 void CPU::requestInterrupt(Interrupt interrupt) {
+    m_halted = false;
     uint8_t if_ = m_mmu.readByte(0xFF0F);
     auto offset = static_cast<uint8_t>(interrupt);
 
