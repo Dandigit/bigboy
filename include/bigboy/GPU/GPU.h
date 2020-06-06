@@ -32,7 +32,9 @@ public:
         bool stat;
     };
 
-    GPU() = default;
+    const MMU& m_mmu;
+
+    GPU(const MMU& mmu) : m_mmu{mmu} {}
 
     // Returns true if the GPU has finished rendering a frame, false otherwise
     Request update(uint8_t cycles);
@@ -47,6 +49,8 @@ public:
     void writeByte(uint16_t address, uint8_t value) override;
 
 private:
+    void launchDMATransfer(uint8_t location);
+
     // Render one scanline into the framebuffer
     void renderScanline();
     void renderBackgroundScanline();
@@ -100,7 +104,9 @@ private:
     uint8_t m_spritePalette0; // FF48
     uint8_t m_spritePalette1; // FF49
 
-    uint8_t m_dma;  // FF46
+    // For how long have we been conducting a DMA transfer?
+    // Should take 160 microseconds (~752 clocks)
+    int m_dmaCountdown;
 
     std::array<Colour, 160*144> m_frameBuffer{Colour{0, 0, 0, 255}};
 

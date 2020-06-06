@@ -26,7 +26,6 @@ void CPU::handleInput(const InputEvent event) {
 }
 
 void CPU::update() {
-    disassembleCurrent();
     const uint8_t cycles = step();
 
     m_clock += cycles;

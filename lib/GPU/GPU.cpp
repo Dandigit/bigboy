@@ -1,4 +1,5 @@
 #include <bigboy/GPU/GPU.h>
+#include <bigboy/MMU/MMU.h>
 
 #include <iostream>
 
@@ -9,6 +10,10 @@ const std::array<Colour, 160*144>& GPU::getCurrentFrame() const {
 GPU::Request GPU::update(uint8_t cycles) {
     if (!displayEnable()) {
         return Request{false, false};
+    }
+
+    if (m_dmaCountdown > 0) {
+        m_dmaCountdown -= cycles;
     }
 
     m_clock += cycles;
@@ -70,6 +75,7 @@ GPU::Request GPU::update(uint8_t cycles) {
 }
 
 void GPU::reset() {
+    m_dmaCountdown = 0;
     m_clock = 456;
     m_control = 0x91;
     m_scrollY = 0x00;
@@ -153,7 +159,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
             m_currentYCompare = value;
             return;
         case 0xFF46:
-            std::cerr << "DMA is not yet implemented!" << '\n';
+            launchDMATransfer(value);
             return;
         case 0xFF47:
             m_bgPalette = value;
@@ -189,9 +195,20 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
     }
 }
 
+void GPU::launchDMATransfer(const uint8_t location) {
+    const uint16_t start = (location << 8u | 0u);
+    const uint16_t end = start + m_oam.size();
+
+    for (uint16_t i = start; i < end; ++i) {
+        m_oam[i - 0xFE00] = m_mmu.readByte(i);
+    }
+
+    m_dmaCountdown = 752;
+}
+
 void GPU::renderScanline() {
     renderBackgroundScanline();
-    renderSpriteScanline();
+    if (spriteEnable()) renderSpriteScanline();
 }
 
 void GPU::renderBackgroundScanline() {
@@ -359,7 +376,7 @@ bool GPU::switchMode(GPUMode newMode) {
 }
 
 Colour GPU::getPaletteColour(uint8_t palette, uint8_t index) const {
-    const uint8_t value = (palette >> index) & 0b11u;
+    const uint8_t value = (palette >> (index * 2)) & 0b11u;
     switch (value) {
         case 0: return Colour{255, 255, 255, 255}; // White (off)
         case 1: return Colour{192, 192, 192, 255}; // Light grey (33% on)

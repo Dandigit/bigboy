@@ -307,7 +307,7 @@ private:
     uint8_t RST(ResetOperand address);
 
     Cartridge m_cartridge{};
-    GPU m_gpu{};
+    GPU m_gpu{m_mmu};
     Joypad m_joypad{};
     Serial m_serial{};
     Timer m_timer{};

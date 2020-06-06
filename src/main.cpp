@@ -32,7 +32,7 @@ void handleInputs(CPU& cpu) {
 
 int main() {
     CPU cpu{};
-    cpu.load(Cartridge::fromFile("./resources/games/opus5.gb"));
+    cpu.load(Cartridge::fromFile("./resources/games/Tetris.gb"));
 
     // Create the main window
     sf::RenderWindow window{sf::VideoMode{SCREEN_WIDTH, SCREEN_HEIGHT}, "Bigboy"};
