@@ -108,7 +108,12 @@ uint8_t Joypad::readByte(const uint16_t address) const {
 
 void Joypad::writeByte(const uint16_t address, const uint8_t value) {
     if (address == 0xFF00) {
-        m_joyp = value;
+        // Bits 4 & 5 are writable
+        constexpr uint8_t mask = 0b00110000;
+
+        // Clear & set
+        m_joyp &= ~mask;
+        m_joyp |= (value & mask);
     } else {
         std::cerr << "Memory device Joypad does not support writing to the address " <<
                   address << '\n';
