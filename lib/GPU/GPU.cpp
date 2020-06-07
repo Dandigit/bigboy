@@ -196,11 +196,10 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
 }
 
 void GPU::launchDMATransfer(const uint8_t location) {
-    const uint16_t start = (location << 8u | 0u);
-    const uint16_t end = start + m_oam.size();
+    const uint16_t start = location << 8u;
 
-    for (uint16_t i = start; i < end; ++i) {
-        m_oam[i - 0xFE00] = m_mmu.readByte(i);
+    for (uint8_t i = 0; i < 160; ++i) {
+        m_oam[i] = m_mmu.readByte(start + i);
     }
 
     m_dmaCountdown = 752;
@@ -294,8 +293,64 @@ void GPU::renderBackgroundScanline() {
 }
 
 void GPU::renderSpriteScanline() {
+    // Walk the Sprite Attibute Table
+    for (uint8_t sprite = 0; sprite < 40; ++sprite) {
+        // Each sprite takes up 4 bytes in the SAT
+        const uint8_t index = sprite * 4;
+        const uint8_t yPos = m_oam[index] - 16;
+        const uint8_t xPos = m_oam[index + 1] - 8;
+        const uint8_t tileNumber = m_oam[index + 2];
+        const uint8_t flags = m_oam[index + 3];
+
+        const bool yFlip = (flags >> 6) & 1u;
+        const bool xFlip = (flags >> 5) & 1u;
+
+        const bool usePalette0 = (flags >> 4) & 1u;
+
+        // 8x16 or 8x8 mode?
+        const uint8_t ySize = spriteSize() ? 16 : 8;
+
+        // Is this sprite on the current scanline?
+        if ((m_currentY >= yPos) && (m_currentY < (yPos + ySize))) {
+            // Do we read the sprite backwards in the Y axis?
+            const uint8_t line = yFlip ?
+                    (m_currentY - yPos - ySize) * -1 :
+                    m_currentY - yPos;
+
+            // Each tile takes up 16 bytes, and every line takes up 2 bytes
+            const uint16_t dataAddress = tileNumber * 16 + line * 2;
+            const uint8_t dataLow = m_vram[dataAddress];
+            const uint8_t dataHigh = m_vram[static_cast<uint16_t>(dataAddress + 1)];
+
+            // Walk through each pixel in the row
+            // Data is read from right to left and drawn from left to right
+            for (int i = 7; i >= 0; --i) {
+                const uint8_t offset = xFlip ? ((i - 7) * -1) : i;
+
+                const uint8_t colourIndexLow = (dataLow >> offset) & 1u;
+                const uint8_t colourIndexHigh = (dataHigh >> offset) & 1u;
+                const uint8_t colourIndex = (colourIndexHigh << 1u) | colourIndexLow;
+
+                const Colour colour = usePalette0 ?
+                        getPaletteColour(m_spritePalette0, colourIndex) :
+                        getPaletteColour(m_spritePalette1, colourIndex);
+
+                // White is transparent for sprites
+                if (colour == Colour{255, 255, 255, 255}) continue;
+
+                int xIndex = 0 - i + 7 + xPos;
+                if ((m_currentY < 0) || (m_currentY > 143) ||
+                        (index < 0) || (index > 159)) {
+                    continue;
+                }
+
+                m_frameBuffer[m_currentY * 160 + xIndex] = colour;
+            }
+        }
+    }
+
     // Walk the Sprite Attribute Table backwards
-    for (int i = m_oam.size(); i >= 0; i -= 4) {
+    /*for (int i = 156; i >= 0; i -= 4) {
         const uint8_t spriteYMinus16 = m_oam[i];
         const uint8_t spriteY = spriteYMinus16 - 16;
         const uint8_t spriteHeight = spriteSize() ? 16 : 8;
@@ -303,7 +358,7 @@ void GPU::renderSpriteScanline() {
         const uint8_t flags = m_oam[i + 3];
 
         // Is the sprite on the current scanline?
-        if ((spriteY <= m_currentY) && (spriteY + spriteHeight > m_currentY)) {
+        if ((spriteY <= m_currentY) && ((spriteY + spriteHeight) > m_currentY)) {
             const uint8_t spriteXMinus8 = m_oam[i + 1];
             const uint8_t spriteX = spriteXMinus8 + 8;
             uint8_t tileNumber = m_oam[i + 2];
@@ -345,16 +400,18 @@ void GPU::renderSpriteScanline() {
 
                     // If the pixel is not transparent
                     if (pixel != 0) {
+                        const uint16_t index = m_currentY * 160 + pixelX;
                         // Render above BG?
-                        const bool hasPriority0 = (flags >> 7) & 1u;
-                        if (hasPriority0) {
-                            m_frameBuffer[m_currentY * 160 + x] = colour;
+                        const bool hasPriority0 = ((flags >> 7u) & 1u) == 0;
+                        const bool bgPixelIsEmpty = m_frameBuffer[index] == getPaletteColour(m_bgPalette, 0);
+                        if (hasPriority0 || bgPixelIsEmpty) {
+                            m_frameBuffer[index] = colour;
                         }
                     }
                 }
             }
         }
-    }
+    }*/
 }
 
 bool GPU::switchMode(GPUMode newMode) {

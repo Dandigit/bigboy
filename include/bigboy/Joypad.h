@@ -65,16 +65,16 @@ private:
     //bool rightOrAIsPressed() const;
 
     // 0 = Pressed
-    void pressDownOrStart() { m_joyp &= ~(1u >> DOWN_OR_START_POSITION); }
-    void pressUpOrSelect()  { m_joyp &= ~(1u >> UP_OR_SELECT_POSITION); }
-    void pressLeftOrB()     { m_joyp &= ~(1u >> LEFT_OR_B_POSITION); }
-    void pressRightOrA()    { m_joyp &= ~(1u >> RIGHT_OR_A_POSITION); }
+    void pressDownOrStart() { m_joyp &= ~(1u << DOWN_OR_START_POSITION); }
+    void pressUpOrSelect()  { m_joyp &= ~(1u << UP_OR_SELECT_POSITION); }
+    void pressLeftOrB()     { m_joyp &= ~(1u << LEFT_OR_B_POSITION); }
+    void pressRightOrA()    { m_joyp &= ~(1u << RIGHT_OR_A_POSITION); }
 
     // 1 = Released
-    void releaseDownOrStart() { m_joyp |= (1u >> DOWN_OR_START_POSITION); }
-    void releaseUpOrSelect()  { m_joyp |= (1u >> UP_OR_SELECT_POSITION); }
-    void releaseLeftOrB()     { m_joyp |= (1u >> LEFT_OR_B_POSITION); }
-    void releaseRightOrA()    { m_joyp |= (1u >> RIGHT_OR_A_POSITION); }
+    void releaseDownOrStart() { m_joyp |= (1u << DOWN_OR_START_POSITION); }
+    void releaseUpOrSelect()  { m_joyp |= (1u << UP_OR_SELECT_POSITION); }
+    void releaseLeftOrB()     { m_joyp |= (1u << LEFT_OR_B_POSITION); }
+    void releaseRightOrA()    { m_joyp |= (1u << RIGHT_OR_A_POSITION); }
 
     KeyState m_keys;
 

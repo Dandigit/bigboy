@@ -24,15 +24,15 @@ void handleInputs(CPU& cpu) {
     handleInput(cpu, sf::Keyboard::Left, InputEvent::LEFT_PRESSED, InputEvent::LEFT_RELEASED);
     handleInput(cpu, sf::Keyboard::Right, InputEvent::RIGHT_PRESSED, InputEvent::RIGHT_RELEASED);
 
-    handleInput(cpu, sf::Keyboard::X, InputEvent::START_PRESSED, InputEvent::START_RELEASED);
-    handleInput(cpu, sf::Keyboard::S, InputEvent::SELECT_PRESSED, InputEvent::SELECT_RELEASED);
-    handleInput(cpu, sf::Keyboard::C, InputEvent::B_PRESSED, InputEvent::B_RELEASED);
-    handleInput(cpu, sf::Keyboard::Z, InputEvent::A_PRESSED, InputEvent::A_RELEASED);
+    handleInput(cpu, sf::Keyboard::Z, InputEvent::START_PRESSED, InputEvent::START_RELEASED);
+    handleInput(cpu, sf::Keyboard::X, InputEvent::SELECT_PRESSED, InputEvent::SELECT_RELEASED);
+    handleInput(cpu, sf::Keyboard::S, InputEvent::B_PRESSED, InputEvent::B_RELEASED);
+    handleInput(cpu, sf::Keyboard::A, InputEvent::A_PRESSED, InputEvent::A_RELEASED);
 }
 
 int main() {
     CPU cpu{};
-    cpu.load(Cartridge::fromFile("./resources/tests/11-op a,(hl).gb"));
+    cpu.load(Cartridge::fromFile("./resources/games/Dr. Mario.gb"));
 
     // Create the main window
     sf::RenderWindow window{sf::VideoMode{SCREEN_WIDTH, SCREEN_HEIGHT}, "Bigboy"};

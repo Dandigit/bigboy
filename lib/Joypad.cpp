@@ -18,56 +18,56 @@ void Joypad::handleInput(const InputEvent input) {
 void Joypad::updateKeystate(const InputEvent input) {
     switch (input) {
         case InputEvent::UP_PRESSED:
-            if (!m_keys.up) m_requestInterruptOnNextUpdate = true;
+            if (directionKeysSelected() && !m_keys.up) m_requestInterruptOnNextUpdate = true;
             m_keys.up = true;
             break;
         case InputEvent::UP_RELEASED:
             m_keys.up = false;
             break;
         case InputEvent::DOWN_PRESSED:
-            if (!m_keys.down) m_requestInterruptOnNextUpdate = true;
+            if (directionKeysSelected() && !m_keys.down) m_requestInterruptOnNextUpdate = true;
             m_keys.down = true;
             break;
         case InputEvent::DOWN_RELEASED:
             m_keys.down = false;
             break;
         case InputEvent::LEFT_PRESSED:
-            if (!m_keys.left) m_requestInterruptOnNextUpdate = true;
+            if (directionKeysSelected() && !m_keys.left) m_requestInterruptOnNextUpdate = true;
             m_keys.left = true;
             break;
         case InputEvent::LEFT_RELEASED:
             m_keys.left = false;
             break;
         case InputEvent::RIGHT_PRESSED:
-            if (!m_keys.right) m_requestInterruptOnNextUpdate = true;
+            if (directionKeysSelected() && !m_keys.right) m_requestInterruptOnNextUpdate = true;
             m_keys.right = true;
             break;
         case InputEvent::RIGHT_RELEASED:
             m_keys.right = false;
             break;
         case InputEvent::A_PRESSED:
-            if (!m_keys.a) m_requestInterruptOnNextUpdate = true;
+            if (buttonKeysSelected() && !m_keys.a) m_requestInterruptOnNextUpdate = true;
             m_keys.a = true;
             break;
         case InputEvent::A_RELEASED:
             m_keys.a = false;
             break;
         case InputEvent::B_PRESSED:
-            if (!m_keys.b) m_requestInterruptOnNextUpdate = true;
+            if (buttonKeysSelected() && !m_keys.b) m_requestInterruptOnNextUpdate = true;
             m_keys.b = true;
             break;
         case InputEvent::B_RELEASED:
             m_keys.b = false;
             break;
         case InputEvent::START_PRESSED:
-            if (!m_keys.start) m_requestInterruptOnNextUpdate = true;
+            if (buttonKeysSelected() && !m_keys.start) m_requestInterruptOnNextUpdate = true;
             m_keys.start = true;
             break;
         case InputEvent::START_RELEASED:
             m_keys.start = false;
             break;
         case InputEvent::SELECT_PRESSED:
-            if (!m_keys.select) m_requestInterruptOnNextUpdate = true;
+            if (buttonKeysSelected() && !m_keys.select) m_requestInterruptOnNextUpdate = true;
             m_keys.select = true;
             break;
         case InputEvent::SELECT_RELEASED:
@@ -98,6 +98,7 @@ std::vector<AddressSpace> Joypad::addressSpaces() const {
 
 uint8_t Joypad::readByte(const uint16_t address) const {
     if (address == 0xFF00) {
+        //std::cout << std::bitset<8>(m_joyp) << '\n';
         return m_joyp;
     }
 
@@ -114,6 +115,7 @@ void Joypad::writeByte(const uint16_t address, const uint8_t value) {
         // Clear & set
         m_joyp &= ~mask;
         m_joyp |= (value & mask);
+        updateRegister();
     } else {
         std::cerr << "Memory device Joypad does not support writing to the address " <<
                   address << '\n';
@@ -122,7 +124,7 @@ void Joypad::writeByte(const uint16_t address, const uint8_t value) {
 }
 
 void Joypad::reset() {
-    m_joyp = 0b00001111;
+    m_joyp = 0;
     m_keys = {};
     m_requestInterruptOnNextUpdate = false;
 }

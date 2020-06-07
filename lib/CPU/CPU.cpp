@@ -244,16 +244,12 @@ uint8_t CPU::LD_r_HL(RegisterOperand target) {
 }
 
 uint8_t CPU::LD_HL_r(RegisterOperand value) {
-    uint8_t dummy = m_mmu.readByte(m_registers.HL());
-    load(dummy, m_registers.get(value));
-    m_mmu.writeByte(m_registers.HL(), dummy);
+    m_mmu.writeByte(m_registers.HL(), m_registers.get(value));
     return 8;
 }
 
 uint8_t CPU::LD_HL_n() {
-    uint8_t dummy = m_mmu.readByte(m_registers.HL());
-    load(dummy, nextByte());
-    m_mmu.writeByte(m_registers.HL(), dummy);
+    m_mmu.writeByte(m_registers.HL(), nextByte());
     return 12;
 }
 
@@ -269,15 +265,12 @@ uint8_t CPU::LD_A_DE() {
 
 uint8_t CPU::LD_A_nn() {
     uint16_t nn = nextWord();
-
     load(m_registers.a, m_mmu.readByte(nn));
     return 16;
 }
 
 uint8_t CPU::LD_BC_A() {
-    uint8_t dummy = m_mmu.readByte(m_registers.BC());
-    load(dummy, m_registers.a);
-    m_mmu.writeByte(m_registers.BC(), dummy);
+    m_mmu.writeByte(m_registers.BC(), m_registers.a);
     return 8;
 }
 
@@ -358,6 +351,11 @@ uint8_t CPU::LD_dd_nn(RegisterPairOperand target) {
     return 12;
 }
 
+uint8_t CPU::LD_nn_SP() {
+    m_mmu.writeWord(nextWord(), m_registers.sp);
+    return 20;
+}
+
 uint8_t CPU::LD_SP_HL() {
     load(m_registers.sp, m_registers.HL());
     return 8;
@@ -395,10 +393,10 @@ uint8_t CPU::POP_qq(RegisterPairStackOperand target) {
 void CPU::add(uint8_t value) {
     uint8_t result = m_registers.a + value;
 
-    result == 0 ? setZeroFlag() : clearZeroFlag();
+    (result == 0) ? setZeroFlag() : clearZeroFlag();
     clearSubtractFlag();
-    result < value ? setCarryFlag() : clearCarryFlag();
-    (m_registers.a & 0xF) + (value & 0xF) > 0xF ? setHalfCarryFlag() : clearHalfCarryFlag();
+    (((result ^ value ^ m_registers.a) & 0x10) == 0x10) ? setHalfCarryFlag() : clearHalfCarryFlag();
+    (result < m_registers.a) ? setCarryFlag() : clearCarryFlag();
 
     m_registers.a = result;
 }
@@ -420,7 +418,24 @@ uint8_t CPU::ADDA_HL() {
 
 // Add `value` plus the carry flag to the register A, and set/reset the necessary flags
 void CPU::addWithCarry(uint8_t value) {
-    add(value + (getCarryFlag() ? 1 : 0));
+    //add(value + (getCarryFlag() ? 1 : 0));
+    const int iA         = static_cast<int>(m_registers.a);
+    const int iValue     = static_cast<int>(value);
+    const int iCarry     = getCarryFlag() ? 1 : 0;
+    const uint8_t result = m_registers.a + value + static_cast<uint8_t>(iCarry);
+
+    (result == 0) ? setZeroFlag() : clearZeroFlag();
+    clearSubtractFlag();
+
+    (((iA & 0x0F) + (iValue & 0x0F) + iCarry) > 0x0F) ?
+        setHalfCarryFlag() :
+        clearHalfCarryFlag();
+
+    ((iA + iValue + iCarry) > 0xFF) ?
+        setCarryFlag() :
+        clearCarryFlag();
+
+    m_registers.a = result;
 }
 
 uint8_t CPU::ADCA_r(RegisterOperand target) {
@@ -467,7 +482,20 @@ uint8_t CPU::SUB_HL() {
 }
 
 void CPU::subtractWithCarry(uint8_t value) {
-    subtract(value + (getCarryFlag() ? 1 : 0));
+    int iValue = static_cast<int>(value) & 0xFF;
+    int iA = static_cast<int>(m_registers.a) & 0xFF;
+    int iCarry = getCarryFlag() ? 1 : 0;
+
+    int iResult = iA - iValue - iCarry;
+
+    setSubtractFlag();
+    (iResult < 0) ? setCarryFlag() : clearCarryFlag();
+
+    iResult &= 0xFF;
+    (iResult == 0) ? setZeroFlag() : clearZeroFlag();
+    (((iResult ^ iValue ^ iA) & 0x10) == 0x10) ? setHalfCarryFlag() : clearHalfCarryFlag();
+
+    m_registers.a = static_cast<uint8_t>(iResult);
 }
 
 uint8_t CPU::SBCA_r(RegisterOperand target) {
@@ -488,10 +516,10 @@ uint8_t CPU::SBCA_HL() {
 void CPU::bitwiseAnd(uint8_t value) {
     m_registers.a &= value;
 
-    m_registers.a == 0 ? setZeroFlag() : clearZeroFlag();
+    (m_registers.a == 0) ? setZeroFlag() : clearZeroFlag();
     clearSubtractFlag();
-    clearCarryFlag();
     setHalfCarryFlag();
+    clearCarryFlag();
 }
 
 uint8_t CPU::AND_r(RegisterOperand target) {
@@ -512,7 +540,7 @@ uint8_t CPU::AND_HL() {
 void CPU::bitwiseXor(uint8_t value) {
     m_registers.a ^= value;
 
-    m_registers.a == 0 ? setZeroFlag() : clearZeroFlag();
+    (m_registers.a == 0) ? setZeroFlag() : clearZeroFlag();
     clearSubtractFlag();
     clearCarryFlag();
     clearHalfCarryFlag();
@@ -564,8 +592,8 @@ void CPU::compare(uint8_t value) {
 
     (result == 0) ? setZeroFlag() : clearZeroFlag();
     setSubtractFlag();
-    (m_registers.a < value) ? setCarryFlag() : clearCarryFlag();
     ((m_registers.a & 0x0F) < (value & 0x0F)) ? setHalfCarryFlag() : clearHalfCarryFlag();
+    (m_registers.a < value) ? setCarryFlag() : clearCarryFlag();
 }
 
 uint8_t CPU::CP_r(RegisterOperand target) {
@@ -733,16 +761,17 @@ uint8_t CPU::LD_HL_SPs() {
 void CPU::rotateLeft(uint8_t &target) {
     uint8_t signBit = target >> 7u;
 
-    target <<= 1u;
-    target ^= signBit;
+    target = (target << 1u) ^ signBit;
 
-    (signBit != 0) ? setCarryFlag() : clearCarryFlag();
+    (target == 0) ? setZeroFlag() : clearZeroFlag();
     clearHalfCarryFlag();
     clearSubtractFlag();
+    (signBit != 0) ? setCarryFlag() : clearCarryFlag();
 }
 
 uint8_t CPU::RLCA() {
     rotateLeft(m_registers.a);
+    clearZeroFlag();
     return 4;
 }
 
@@ -771,13 +800,15 @@ void CPU::rotateLeftThroughCarry(uint8_t &target) {
 
     target = static_cast<uint8_t>(value.to_ulong());
 
-    value[8] ? setCarryFlag() : clearCarryFlag();
-    clearHalfCarryFlag();
+    (target == 0) ? setZeroFlag() : clearZeroFlag();
     clearSubtractFlag();
+    clearHalfCarryFlag();
+    value[8] ? setCarryFlag() : clearCarryFlag();
 }
 
 uint8_t CPU::RLA() {
     rotateLeftThroughCarry(m_registers.a);
+    clearZeroFlag();
     return 4;
 }
 
@@ -799,13 +830,15 @@ void CPU::rotateRight(uint8_t &target) {
     target >>= 1u;
     target ^= (zerothBit << 7u);
 
-    (zerothBit != 0) ? setCarryFlag() : clearCarryFlag();
-    clearHalfCarryFlag();
+    (target == 0) ? setZeroFlag() : clearZeroFlag();
     clearSubtractFlag();
+    clearHalfCarryFlag();
+    (zerothBit != 0) ? setCarryFlag() : clearCarryFlag();
 }
 
 uint8_t CPU::RRCA() {
     rotateRight(m_registers.a);
+    clearZeroFlag();
     return 4;
 }
 
@@ -861,7 +894,7 @@ uint8_t CPU::RR_HL() {
 
 // Shift `target` to the left by 1 bit position, after copying bit 7 into the carry flag
 void CPU::shiftLeft(uint8_t& target) {
-    ((target >> 7u) != 0) ? setCarryFlag() : clearCarryFlag();
+    (target >> 7u) ? setCarryFlag() : clearCarryFlag();
 
     target <<= 1u;
 
@@ -908,7 +941,8 @@ uint8_t CPU::SWAP_HL() {
 // Shift the lower 7 bits (0-6) of `target` 1 bit position to the right,
 // after copying bit 0 into the carry flag.
 void CPU::shiftTailRight(uint8_t& target) {
-    ((target & 1u) != 0) ? setCarryFlag() : clearCarryFlag();
+    // Store bit 0 in the carry flag
+    (target & 1u) ? setCarryFlag() : clearCarryFlag();
 
     // Save the 7th bit
     uint8_t bit7 = (target >> 7u);
@@ -917,9 +951,9 @@ void CPU::shiftTailRight(uint8_t& target) {
     target >>= 1u;
 
     // Restore the 7th bit
-    target |= (bit7 << 7u);
+    target ^= (bit7 << 7u);
 
-    (target == 0) ? setCarryFlag() : clearCarryFlag();
+    (target == 0) ? setZeroFlag() : clearZeroFlag();
     clearHalfCarryFlag();
     clearSubtractFlag();
 }
@@ -938,6 +972,7 @@ uint8_t CPU::SRA_HL() {
 
 // Shift `target` to the right by 1 bit position, after copying bit 0 into the carry flag
 void CPU::shiftRight(uint8_t& target) {
+    // Store bit 0 in the carry flag
     ((target & 1u) != 0) ? setCarryFlag() : clearCarryFlag();
 
     target >>= 1u;
@@ -1344,6 +1379,8 @@ uint8_t CPU::step() {
             return LD_dd_nn(RegisterPairOperand::HL);
         case OpCode::LD_SP_nn:
             return LD_dd_nn(RegisterPairOperand::SP);
+        case OpCode::LD_nn_SP:
+            return LD_nn_SP();
         case OpCode::LD_SP_HL:
             return LD_SP_HL();
         case OpCode::PUSH_BC:

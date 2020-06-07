@@ -124,6 +124,7 @@ private:
     void load(uint16_t& target, uint16_t value);
 
     uint8_t LD_dd_nn(RegisterPairOperand target);
+    uint8_t LD_nn_SP();
     uint8_t LD_SP_HL();
 
     void push(uint16_t value);

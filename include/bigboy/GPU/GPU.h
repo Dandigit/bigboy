@@ -23,6 +23,10 @@ struct Colour {
     uint8_t g;
     uint8_t b;
     uint8_t a;
+
+    bool operator==(const Colour& colour) const {
+        return colour.r == r && colour.g == g && colour.b == b && colour.a == a;
+    }
 };
 
 class GPU : public MemoryDevice {
@@ -83,7 +87,7 @@ private:
     std::array<uint8_t, 0x1FFF + 1> m_vram{0};
 
     // OAM: FE00-FE9F
-    std::array<uint8_t, 0x9FFF + 1> m_oam{0};
+    std::array<uint8_t, 0x009F + 1> m_oam{0};
 
     // I/O registers: FF40-FF4B
     uint8_t m_control; // FF40

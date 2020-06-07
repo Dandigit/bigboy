@@ -39,7 +39,7 @@ uint16_t MMU::readWord(uint16_t address) const {
 
 void MMU::writeWord(uint16_t address, uint16_t value) {
     writeByte(address, (value & 0xFFu));
-    writeByte(address, ((value >> 8u) & 0xFF));
+    writeByte(address + 1, ((value >> 8u) & 0xFF));
 }
 
 void MMU::registerDevice(MemoryDevice &device) {

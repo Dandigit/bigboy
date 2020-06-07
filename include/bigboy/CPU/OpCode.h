@@ -223,6 +223,13 @@ enum class OpCode : uint8_t {
     LD_HL_nn = 0b00100001,
     LD_SP_nn = 0b00110001,
 
+    // LD (nn), SP
+    // The contents of the 16-bit SP register are loaded to the word at the
+    // memory address specified in the 16-bit operand nn.
+    // Clock cycles: 20
+    // Bit-by-bit: 0 0 0 0 1 0 0 0 <n n n n n n n n> <n n n n n n n n>
+    LD_nn_SP = 0b00001000,
+
     // LD SP, HL
     // The contents of the register pair HL are loaded to the stack pointer
     // (SP).
@@ -871,6 +878,7 @@ std::string opCodeToString(OpCode opCode) {
         case OpCode::LD_DE_nn: return "LD DE, nn";
         case OpCode::LD_HL_nn: return "LD HL, nn";
         case OpCode::LD_SP_nn: return "LD SP, nn";
+        case OpCode::LD_nn_SP: return "LD (nn), SP";
         case OpCode::LD_SP_HL: return "LD SP, HL";
         case OpCode::PUSH_BC: return "PUSH BC";
         case OpCode::PUSH_DE: return "PUSH DE";
