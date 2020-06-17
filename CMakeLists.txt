@@ -15,6 +15,8 @@ if(${BIGBOY_BIG_ENDIAN})
     add_compile_definitions(BIGBOY_BIG_ENDIAN)
 endif()
 
+add_compile_definitions(BIGBOY_SCREEN_TINT)
+
 include_directories(include)
 
 add_subdirectory(extern)

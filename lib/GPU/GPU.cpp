@@ -336,7 +336,7 @@ void GPU::renderSpriteScanline() {
                         getPaletteColour(m_spritePalette1, colourIndex);
 
                 // White is transparent for sprites
-                if (colour == Colour{255, 255, 255, 255}) continue;
+                if (colour == COLOUR_LIGHTEST) continue;
 
                 int xIndex = 0 - i + 7 + xPos;
                 if ((m_currentY < 0) || (m_currentY > 143) ||
@@ -435,10 +435,10 @@ bool GPU::switchMode(GPUMode newMode) {
 Colour GPU::getPaletteColour(uint8_t palette, uint8_t index) const {
     const uint8_t value = (palette >> (index * 2)) & 0b11u;
     switch (value) {
-        case 0: return Colour{255, 255, 255, 255}; // White (off)
-        case 1: return Colour{192, 192, 192, 255}; // Light grey (33% on)
-        case 2: return Colour{96, 96, 96, 255};    // Dark grey (66% on)
-        case 3: return Colour{0, 0, 0, 255};       // Black (on)
+        case 0: return COLOUR_LIGHTEST; // White (off)
+        case 1: return COLOUR_LIGHTER; // Light grey (33% on)
+        case 2: return COLOUR_DARKER;    // Dark grey (66% on)
+        case 3: return COLOUR_DARKEST;       // Black (on)
         default:
             // Unreachable!
             std::cerr << "unreachable: GPU::getPalletteColour was passed an out-of-bounds index.\n";

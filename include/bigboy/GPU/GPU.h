@@ -29,6 +29,38 @@ struct Colour {
     }
 };
 
+constexpr Colour COLOUR_DARKEST = Colour{
+#ifdef BIGBOY_SCREEN_TINT
+        15, 56, 15, 255
+#else
+        0, 0, 0, 255
+#endif
+};
+
+constexpr Colour COLOUR_DARKER = Colour{
+#ifdef BIGBOY_SCREEN_TINT
+        48, 98, 48, 255
+#else
+        192, 192, 192, 255
+#endif
+};
+
+constexpr Colour COLOUR_LIGHTER = Colour{
+#ifdef BIGBOY_SCREEN_TINT
+        139, 172, 15, 255
+#else
+        96, 96, 96, 255
+#endif
+};
+
+constexpr Colour COLOUR_LIGHTEST = Colour{
+#ifdef BIGBOY_SCREEN_TINT
+        155, 188, 15, 255
+#else
+        0, 0, 0, 255
+#endif
+};
+
 class GPU : public MemoryDevice {
 public:
     struct Request {
