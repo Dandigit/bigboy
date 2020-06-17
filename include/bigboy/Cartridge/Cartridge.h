@@ -52,9 +52,10 @@ public:
     uint8_t readByte(uint16_t address) const override;
     void writeByte(uint16_t address, uint8_t value) override;
 
+    std::string getGameTitle() const;
+
 private:
     MBCType getMBCType() const;
-    std::string getGameTitle() const;
 
     // 0000-3FFF: 16KB ROM Bank 00 (in cartridge, fixed at bank 00)
     std::array<uint8_t, 0x3FFF + 1> m_bank0{0};

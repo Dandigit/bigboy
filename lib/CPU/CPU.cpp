@@ -25,6 +25,10 @@ void CPU::handleInput(const InputEvent event) {
     m_joypad.handleInput(event);
 }
 
+std::string CPU::getGameTitle() const {
+    return m_cartridge.getGameTitle();
+}
+
 void CPU::update() {
     //disassembleCurrent();
     const uint8_t cycles = step();

@@ -6,6 +6,7 @@
 
 constexpr unsigned long SCREEN_WIDTH = 160;
 constexpr unsigned long SCREEN_HEIGHT = 144;
+constexpr unsigned long SCREEN_SCALE = 3;
 
 void handleInput(CPU& cpu,
         const sf::Keyboard::Key key,
@@ -35,11 +36,16 @@ int main() {
     cpu.load(Cartridge::fromFile("./resources/games/Tetris.gb"));
 
     // Create the main window
-    sf::RenderWindow window{sf::VideoMode{SCREEN_WIDTH, SCREEN_HEIGHT}, "Bigboy"};
+    sf::RenderWindow window{
+        sf::VideoMode{SCREEN_WIDTH * SCREEN_SCALE, SCREEN_HEIGHT * SCREEN_SCALE},
+        "Bigboy - " + cpu.getGameTitle()};
     window.setFramerateLimit(60);
 
-    sf::Texture frame{};
-    frame.create(160,144);
+    sf::Texture frameTexture{};
+    frameTexture.create(160,144);
+
+    sf::Sprite frameSprite{frameTexture};
+    frameSprite.setScale(SCREEN_SCALE, SCREEN_SCALE);
 
     // Keep it open
     while (window.isOpen()) {
@@ -57,10 +63,10 @@ int main() {
         }
 
         handleInputs(cpu);
-        frame.update(reinterpret_cast<const sf::Uint8*>(cpu.stepFrame().data()));
+        frameTexture.update(reinterpret_cast<const sf::Uint8*>(cpu.stepFrame().data()));
 
         window.clear(sf::Color::Black);
-        window.draw(sf::Sprite{frame});
+        window.draw(frameSprite);
         window.display();
     }
 

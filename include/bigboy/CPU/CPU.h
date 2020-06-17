@@ -46,11 +46,12 @@ constexpr uint8_t INTERRUPT_COUNT = 5;
 class CPU {
 public:
     void load(Cartridge cartridge);
+    void reset();
 
     const std::array<Colour, 160*144>& stepFrame();
     void handleInput(InputEvent event);
 
-    void reset();
+    std::string getGameTitle() const;
 
 private:
     void update();
