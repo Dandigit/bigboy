@@ -6,15 +6,18 @@
 
 Cartridge::Cartridge(const std::vector<uint8_t>& bytes) {
     if (bytes.size() < m_bank0.size()) {
-        throw std::runtime_error{"Tried to load illegally small ROM."};
+        throw CartridgeLoadError{"Tried to load illegally small ROM."};
     }
 
     for (int i = 0; i < m_bank0.size(); i++) {
         m_bank0[i] = bytes[i];
     }
 
+    m_bank1Onwards.resize(getROMSizeInBytes());
+    m_extRAM.resize(getRAMSizeInBytes());
+
     std::copy(bytes.begin() + m_bank0.size(), bytes.end(),
-            std::back_inserter(m_bank1Onwards));
+            m_bank1Onwards.begin());
 
     switch (getMBCType()) {
         case MBCType::ROM_RAM_BATTERY: {
@@ -25,23 +28,24 @@ Cartridge::Cartridge(const std::vector<uint8_t>& bytes) {
                 const size_t length = saveFile.tellg();
                 saveFile.seekg(0, std::ios::beg);
 
-                if (length != 0x2000) {
-                    throw std::runtime_error{"Save file '" + saveFileName + "' is not the right size."};
+                if (length != getRAMSizeInBytes()) {
+                    throw CartridgeLoadError{"Save file '" + saveFileName + "' is not the right size."};
                 }
 
-                m_extRAM.reserve(0x2000);
-                saveFile.read(reinterpret_cast<char*>(m_extRAM.data()), 0x2000);
+                m_extRAM.reserve(getRAMSizeInBytes());
+                saveFile.read(reinterpret_cast<char*>(m_extRAM.data()), getRAMSizeInBytes());
             }
         }
         // Fallthrough
         case MBCType::ROM_RAM:
         case MBCType::ROM:
             if (m_bank1Onwards.size() != 0x4000) {
-                throw std::runtime_error{"Tried to load MBC0 ROM that was not 32KB in size."};
+                throw CartridgeLoadError{"Tried to load MBC0 ROM that was not 32KB in size."};
             }
             break;
         default:
-            throw std::runtime_error{"Unimplemented MBC type: " + std::to_string(static_cast<int>(getMBCType()))};
+            throw CartridgeLoadError{"Unimplemented MBC type: " +
+                    std::to_string(static_cast<int>(getMBCType()))};
     }
 }
 
@@ -51,7 +55,7 @@ Cartridge::~Cartridge() {
             const std::string saveFileName = getGameTitle() + ".gbsave";
             std::ofstream saveFile{saveFileName};
             if (!saveFile.is_open()) {
-                throw std::runtime_error{"Could not write save file '" + saveFileName + "'."};
+                throw CartridgeLoadError{"Could not write save file '" + saveFileName + "'."};
             }
 
             saveFile.write(reinterpret_cast<char*>(m_extRAM.data()), 0x2000);
@@ -65,7 +69,7 @@ Cartridge::~Cartridge() {
 Cartridge Cartridge::fromFile(std::string fileName) {
     std::ifstream file{fileName};
     if (!file.is_open()) {
-        throw std::runtime_error{"[fatal]: File '" + fileName + "' could not be opened."};
+        throw CartridgeLoadError{"[fatal]: File '" + fileName + "' could not be opened."};
     }
 
     file.seekg(0, std::ios::end);
@@ -128,10 +132,6 @@ void Cartridge::writeByte(uint16_t address, uint8_t value) {
     std::cerr << "Memory device Cartridge does not support writing to the address: " << address << '\n';
 }
 
-MBCType Cartridge::getMBCType() const {
-    return static_cast<MBCType>(m_bank0[0x0147]);
-}
-
 std::string Cartridge::getGameTitle() const {
     std::string name{};
     for (int i = 0x0134; i < 0x0143; i++) {
@@ -141,4 +141,57 @@ std::string Cartridge::getGameTitle() const {
         name.push_back(c);
     }
     return name;
+}
+
+MBCType Cartridge::getMBCType() const {
+    return static_cast<MBCType>(m_bank0[0x0147]);
+}
+
+ROMSize Cartridge::getROMSize() const {
+    return static_cast<ROMSize>(m_bank0[0x0148]);
+}
+
+uint32_t Cartridge::getROMSizeInBytes() const {
+    switch (getROMSize()) {
+        case ROMSize::KB_32: return 16384;
+        case ROMSize::KB_64: return 49152;
+        case ROMSize::KB_128: return 114688;
+        case ROMSize::KB_256: return 245760;
+        case ROMSize::KB_512: return 5007904;
+        case ROMSize::MB_1: return 1007616;
+        case ROMSize::MB_2: return 2031616;
+        case ROMSize::MB_4: return 4079616;
+        case ROMSize::MB_1_1: return 1110016;
+        case ROMSize::MB_1_2: return 1212416;
+        case ROMSize::MB_1_5: return 1519616;
+    }
+}
+
+RAMSize Cartridge::getRAMSize() const {
+    return static_cast<RAMSize>(m_bank0[0x0149]);
+}
+
+uint32_t Cartridge::getRAMSizeInBytes() const {
+    switch (getRAMSize()) {
+        case RAMSize::NONE: return 0;
+        case RAMSize::KB_2: return 2048;
+        case RAMSize::KB_8: return 8192;
+        case RAMSize::KB_32: return 32768;
+    }
+}
+
+DestinationCode Cartridge::getDestinationCode() const {
+    return static_cast<DestinationCode>(m_bank0[0x014A]);
+}
+
+bool Cartridge::isRAMEnabled() const {
+    return m_ramEnable == 0x0A;
+}
+
+uint8_t Cartridge::getROMBankNumber() const {
+    if (m_bankingModeSelect == 0) {
+        return m_romBankSelect;
+    }
+
+    return (m_ramBankSelect << 5u) | m_romBankSelect;
 }

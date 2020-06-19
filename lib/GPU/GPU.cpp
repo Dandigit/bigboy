@@ -215,7 +215,7 @@ void GPU::renderBackgroundScanline() {
         // If BG is disabled, render a white background and exit early
         for (int x = 0; x < 160; x++) {
             int index = (m_currentY * 160) + x;
-            m_frameBuffer[index] = Colour{255, 255, 255, 255};
+            m_frameBuffer[index] = COLOUR_LIGHTEST;
         }
 
         return;
