@@ -20,32 +20,41 @@ Cartridge::Cartridge(const std::vector<uint8_t>& bytes) {
             m_bank1Onwards.begin());
 
     switch (getMBCType()) {
-        case MBCType::ROM_RAM_BATTERY: {
-            const std::string saveFileName = getGameTitle() + ".gbsave";
-            std::ifstream saveFile{saveFileName};
-            if (saveFile.is_open()) {
-                saveFile.seekg(0, std::ios::end);
-                const size_t length = saveFile.tellg();
-                saveFile.seekg(0, std::ios::beg);
-
-                if (length != getRAMSizeInBytes()) {
-                    throw CartridgeLoadError{"Save file '" + saveFileName + "' is not the right size."};
-                }
-
-                m_extRAM.reserve(getRAMSizeInBytes());
-                saveFile.read(reinterpret_cast<char*>(m_extRAM.data()), getRAMSizeInBytes());
-            }
-        }
-        // Fallthrough
+        case MBCType::ROM_RAM_BATTERY:
         case MBCType::ROM_RAM:
         case MBCType::ROM:
             if (m_bank1Onwards.size() != 0x4000) {
                 throw CartridgeLoadError{"Tried to load MBC0 ROM that was not 32KB in size."};
             }
             break;
+        case MBCType::MBC1_RAM_BATTERY:
+        case MBCType::MBC1_RAM:
+        case MBCType::MBC1:
+            if (m_bank1Onwards.size() != getROMSizeInBytes()) {
+                throw CartridgeLoadError{"Tried to load MBC1 ROM of incorrect size."};
+            }
+            break;
         default:
             throw CartridgeLoadError{"Unimplemented MBC type: " +
                     std::to_string(static_cast<int>(getMBCType()))};
+    }
+
+    if (getMBCType() == MBCType::ROM_RAM_BATTERY ||
+            getMBCType() == MBCType::MBC1_RAM_BATTERY) {
+        const std::string saveFileName = getGameTitle() + ".gbsave";
+        std::ifstream saveFile{saveFileName};
+        if (saveFile.is_open()) {
+            saveFile.seekg(0, std::ios::end);
+            const size_t length = saveFile.tellg();
+            saveFile.seekg(0, std::ios::beg);
+
+            if (length != getRAMSizeInBytes()) {
+                throw CartridgeLoadError{"Save file '" + saveFileName + "' is not the right size."};
+            }
+
+            m_extRAM.reserve(getRAMSizeInBytes());
+            saveFile.read(reinterpret_cast<char*>(m_extRAM.data()), getRAMSizeInBytes());
+        }
     }
 }
 
@@ -98,6 +107,10 @@ uint8_t Cartridge::readByte(uint16_t address) const {
             case MBCType::ROM_RAM:
             case MBCType::ROM_RAM_BATTERY:
                 return m_bank1Onwards[address - 0x4000];
+            case MBCType::MBC1:
+            case MBCType::MBC1_RAM:
+            case MBCType::MBC1_RAM_BATTERY:
+                return m_bank1Onwards[address - 0x4000 + ((getROMBankNumber() - 1) * 0x4000)];
             default:
                 break;
         }
@@ -107,6 +120,9 @@ uint8_t Cartridge::readByte(uint16_t address) const {
             case MBCType::ROM_RAM:
             case MBCType::ROM_RAM_BATTERY:
                 return m_extRAM[address - 0xA000];
+            case MBCType::MBC1_RAM:
+            case MBCType::MBC1_RAM_BATTERY:
+                return m_extRAM[address - 0xA000 + ((m_ramBankSelect - 1) * 0xA000)];
             default:
                 break;
         }
@@ -117,12 +133,23 @@ uint8_t Cartridge::readByte(uint16_t address) const {
 }
 
 void Cartridge::writeByte(uint16_t address, uint8_t value) {
+    if (address >= 0x0000 && address <= 0x1FFF) {
+        // Write the lowest 4 bits
+        m_ramEnable &= ~0b1111u;
+        m_ramEnable |= (value & 0b1111u);
+    }
+
     if (address >= 0xA000 && address <= 0xBFFF) {
         switch (getMBCType()) {
             case MBCType::ROM:
             case MBCType::ROM_RAM:
             case MBCType::ROM_RAM_BATTERY:
                 m_extRAM[address - 0xA000] = value;
+                return;
+            case MBCType::MBC1:
+            case MBCType::MBC1_RAM:
+            case MBCType::MBC1_RAM_BATTERY:
+                m_extRAM[address - 0xA000 + ((m_ramBankSelect - 1) * 0xA000)] = value;
                 return;
             default:
                 break;
