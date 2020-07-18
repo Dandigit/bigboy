@@ -45,7 +45,7 @@ constexpr uint8_t INTERRUPT_COUNT = 5;
 
 class CPU {
 public:
-    void load(Cartridge cartridge);
+    void load(std::unique_ptr<Cartridge> cartridge);
     void reset();
 
     const std::array<Colour, 160*144>& stepFrame();
@@ -308,13 +308,13 @@ private:
 
     uint8_t RST(ResetOperand address);
 
-    Cartridge m_cartridge{};
+    std::unique_ptr<Cartridge> m_cartridge = nullptr;
     GPU m_gpu{m_mmu};
     Joypad m_joypad{};
     Serial m_serial{};
     Timer m_timer{};
 
-    MMU m_mmu{m_cartridge, m_gpu, m_joypad, m_serial, m_timer};
+    MMU m_mmu{};
 
     Registers m_registers{};
 

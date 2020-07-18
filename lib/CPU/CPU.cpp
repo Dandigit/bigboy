@@ -5,11 +5,9 @@
 #include <sstream>
 #include <fstream>
 
-void CPU::load(Cartridge cartridge) {
+void CPU::load(std::unique_ptr<Cartridge> cartridge) {
+    m_cartridge = std::move(cartridge);
     reset();
-
-    m_cartridge = cartridge;
-    m_mmu.registerDevice(m_cartridge);
 }
 
 const std::array<Colour, 160*144>& CPU::stepFrame() {
@@ -26,7 +24,7 @@ void CPU::handleInput(const InputEvent event) {
 }
 
 std::string CPU::getGameTitle() const {
-    return m_cartridge.getGameTitle();
+    return m_cartridge->getGameTitle();
 }
 
 void CPU::update() {
@@ -144,7 +142,7 @@ void CPU::reset() {
     m_mmu.reset();
 
     //m_cartridge.reset();
-    m_mmu.registerDevice(m_cartridge);
+    m_mmu.registerDevice(*m_cartridge);
 
     m_gpu.reset();
     m_mmu.registerDevice(m_gpu);

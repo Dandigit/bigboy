@@ -65,7 +65,7 @@ enum class RAMSize {
 };
 
 // 014A: Destination Code
-// Specifies if this version of the game is supposed to be sold in japan,
+// Specifies if this version of the game is supposed to be sold in Japan,
 // or anywhere else. Only two values are defined.
 enum class DestinationCode {
     JAPAN     = 0x00,
@@ -81,5 +81,13 @@ struct CartridgeHeader {
 };
 
 CartridgeHeader makeCartridgeHeader(const std::vector<uint8_t>& rom);
+
+//uint32_t romSizeInBytes(ROMSize romSize);
+uint32_t ramSizeInBytes(RAMSize ramSize);
+
+std::string serialise(MBCType mbcType);
+std::string serialise(ROMSize romSize);
+std::string serialise(RAMSize ramSize);
+std::string serialise(DestinationCode destinationCode);
 
 #endif //BIGBOY_CARTRIDGEHEADER_H
