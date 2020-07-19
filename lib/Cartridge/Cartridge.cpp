@@ -165,6 +165,10 @@ std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom, std::vector<u
         case MBCType::MBC1_RAM:
         case MBCType::MBC1_RAM_BATTERY:
             return std::make_unique<MBC1>(std::move(rom), std::move(ram), std::move(header));
+        case MBCType::MBC5:
+        case MBCType::MBC5_RAM:
+        case MBCType::MBC5_RAM_BATTERY:
+            return std::make_unique<MBC5>(std::move(rom), std::move(ram), std::move(header));
         default:
             std::cerr << "Unimplemented MBC type: " << serialise(header.mbcType) << '\n';
             abort();
