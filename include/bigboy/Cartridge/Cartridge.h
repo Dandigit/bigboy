@@ -108,12 +108,12 @@ private:
     //  - 0Ah  RTC H   Hours     0-23 (0-17h)
     uint8_t m_rtcHours = 0x00;
     //  - 0Bh  RTC DL  Lower 8 bits of Day Counter (0-FFh)
-    uint8_t m_dayCounterLower = 0x00;
+    uint8_t m_rtcDaysLower = 0x00;
     //  - 0Ch  RTC DH  Upper 1 bit of Day Counter, Carry Bit, Halt Flag
     //    - Bit 0  Most significant bit of Day Counter (Bit 8)
     //    - Bit 6  Halt (0=Active, 1=Stop Timer)
     //    - Bit 7  Day Counter Carry Bit (1=Counter Overflow)
-    uint8_t m_dayCounterHigher = 0x00;
+    uint8_t m_rtcDaysHigher = 0x00;
 
     // Notes: The Day Counter
     // The total 9 bits of the Day Counter allow to count days in range from 0-511 (0-1FFh).

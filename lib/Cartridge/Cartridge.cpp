@@ -1,6 +1,7 @@
 #include <bigboy/Cartridge/Cartridge.h>
 
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 
@@ -108,6 +109,100 @@ void MBC1::writeByte(const uint16_t address, const uint8_t value) {
     }
 }
 
+MBC3::MBC3(std::vector<uint8_t> rom, std::vector<uint8_t> ram, CartridgeHeader header) :
+        Cartridge{std::move(rom), std::move(ram), std::move(header)} {
+}
+
+uint8_t MBC3::readByte(uint16_t address) const {
+    if (address >= 0x0000 && address <= 0x3FFF) {
+        return m_rom[address];
+    }
+    if (address >= 0x4000 && address <= 0x7FFF) {
+        return m_rom[address + 0x4000 * m_romBankNumber];
+    }
+    if (address >= 0xA000 && address <= 0xBFFF &&
+        m_ramAndTimerEnable) {
+        // Are we addressing RAM?
+        if (m_ramBankNumberOrRtcRegisterSelect >= 0x00 && m_ramBankNumberOrRtcRegisterSelect <= 0x03) {
+            return m_ram[address - 0xA000 + 0x2000 * m_ramBankNumberOrRtcRegisterSelect];
+        }
+        // Are we addressing the RTC?
+        switch (m_ramBankNumberOrRtcRegisterSelect) {
+            case 0x08: return m_rtcSeconds;
+            case 0x09: return m_rtcMinutes;
+            case 0x0A: return m_rtcHours;
+            case 0x0B: return m_rtcDaysLower;
+            case 0x0C: return m_rtcDaysHigher;
+            default:   break;
+        }
+    }
+
+    std::cerr << "Memory device Cartridge (" << serialise(m_header.mbcType) <<
+              ") does not support reading the address " << std::to_string(address) << '\n';
+    return 0xFF;
+}
+
+void MBC3::writeByte(uint16_t address, uint8_t value) {
+    if (address >= 0x0000 && address <= 0x1FFF) {
+        m_ramAndTimerEnable = (value & 0b1111u) == 0x0A;
+    } else if (address >= 0x2000 && address <= 0x3FFF) {
+        m_romBankNumber = (value == 0x00)
+                          ? 0x01
+                          : (value & 0b1111111u);
+    } else if (address >= 0x4000 && address <= 0x5FFF) {
+        m_ramBankNumberOrRtcRegisterSelect = (value & 0b1111u);
+    } else if (address >= 0x6000 && address <= 0x7FFF) {
+        if (m_latchClockData == 0x00 && value == 0x01) {
+            m_latchClockData = 0x02;
+            
+            std::time_t currentClock = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+            std::tm* currentTime = std::localtime(&currentClock);
+            if (!currentTime) {
+                std::cerr << "Could not get the current time\n";
+                return;
+            }
+
+            m_rtcSeconds = currentTime->tm_sec;
+            m_rtcMinutes = currentTime->tm_min;
+            m_rtcHours = currentTime->tm_hour;
+            m_rtcDaysLower = (currentTime->tm_yday & 0b11111111u);
+            m_rtcDaysHigher = (currentTime->tm_yday >> 8u);
+        } else {
+            m_latchClockData = value;
+        }
+    } else if (address >= 0xA000 && address <= 0xBFFF &&
+               m_ramAndTimerEnable) {
+        // Are we addressing RAM?
+        if (m_ramBankNumberOrRtcRegisterSelect >= 0x00 && m_ramBankNumberOrRtcRegisterSelect <= 0x03) {
+            m_ram[address - 0xA000 + 0x2000 * m_ramBankNumberOrRtcRegisterSelect] = value;
+        }
+        // Are we addressing the RTC?
+        else switch (m_ramBankNumberOrRtcRegisterSelect) {
+            case 0x08:
+                m_rtcSeconds = (value & 0b111111u);
+                break;
+            case 0x09:
+                m_rtcMinutes = (value & 0b111111u);
+                break;
+            case 0x0A:
+                m_rtcHours = (value & 0b11111u);
+                break;
+            case 0x0B:
+                m_rtcDaysLower = value;
+                break;
+            case 0x0C:
+                m_rtcDaysHigher = value;
+                break;
+            default:
+                std::cerr << "Memory device Cartridge (" << serialise(m_header.mbcType) <<
+                          ") does not support writing to the address " << std::to_string(address) << '\n';
+        }
+    } else {
+        std::cerr << "Memory device Cartridge (" << serialise(m_header.mbcType) <<
+                  ") does not support writing to the address " << std::to_string(address) << '\n';
+    }
+}
+
 MBC5::MBC5(std::vector<uint8_t> rom, std::vector<uint8_t> ram, CartridgeHeader header) :
         Cartridge{std::move(rom), std::move(ram), std::move(header)} {
 }
@@ -124,8 +219,8 @@ uint8_t MBC5::readByte(const uint16_t address) const {
     }
     if (address >= 0xA000 && address <= 0xBFFF &&
         m_ramEnable &&
-        (m_header.mbcType == MBCType::MBC1_RAM ||
-         m_header.mbcType == MBCType::MBC1_RAM_BATTERY)) {
+        (m_header.mbcType == MBCType::MBC5_RAM ||
+         m_header.mbcType == MBCType::MBC5_RAM_BATTERY)) {
         return m_ram[address - 0xA000 + 0x2000 * m_ramBankNumber];
     }
 
