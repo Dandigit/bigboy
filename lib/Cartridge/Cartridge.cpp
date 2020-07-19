@@ -108,6 +108,52 @@ void MBC1::writeByte(const uint16_t address, const uint8_t value) {
     }
 }
 
+MBC5::MBC5(std::vector<uint8_t> rom, std::vector<uint8_t> ram, CartridgeHeader header) :
+        Cartridge{std::move(rom), std::move(ram), std::move(header)} {
+}
+
+uint8_t MBC5::readByte(const uint16_t address) const {
+    if (address >= 0x0000 && address <= 0x3FFF) {
+        return m_rom[address];
+    }
+    if (address >= 0x4000 && address <= 0x7FFF) {
+        const uint16_t romBankNumber =
+                (static_cast<uint16_t>(m_romBankNumberHigher) << 8u) |
+                static_cast<uint16_t>(m_romBankNumberLower);
+        return m_rom[address + 0x4000 * romBankNumber];
+    }
+    if (address >= 0xA000 && address <= 0xBFFF &&
+        m_ramEnable &&
+        (m_header.mbcType == MBCType::MBC1_RAM ||
+         m_header.mbcType == MBCType::MBC1_RAM_BATTERY)) {
+        return m_ram[address - 0xA000 + 0x2000 * m_ramBankNumber];
+    }
+
+    std::cerr << "Memory device Cartridge (" << serialise(m_header.mbcType) <<
+              ") does not support reading the address " << std::to_string(address) << '\n';
+    return 0xFF;
+}
+
+void MBC5::writeByte(const uint16_t address, const uint8_t value) {
+    if (address >= 0x0000 && address <= 0x1FFF) {
+        m_ramEnable = (value & 0b1111u) == 0x0A;
+    } else if (address >= 0x2000 && address <= 0x2FFF) {
+        m_romBankNumberLower = value;
+    } else if (address >= 0x3000 && address <= 0x3FFF) {
+        m_romBankNumberHigher = (value & 0b1u);
+    } else if (address >= 0x4000 && address <= 0x5FFF) {
+        m_ramBankNumber = (value & 0b11111u);
+    } else if (address >= 0xA000 && address <= 0xBFFF &&
+               m_ramEnable &&
+               (m_header.mbcType == MBCType::MBC1_RAM ||
+                m_header.mbcType == MBCType::MBC1_RAM_BATTERY)) {
+        m_ram[address - 0xA000 + 0x2000 * m_ramBankNumber] = value;
+    } else {
+        std::cerr << "Memory device Cartridge (" << serialise(m_header.mbcType) <<
+                  ") does not support writing to the address " << std::to_string(address) << '\n';
+    }
+}
+
 std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom, std::vector<uint8_t> ram) {
     CartridgeHeader header = makeCartridgeHeader(rom);
     switch (header.mbcType) {

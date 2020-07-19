@@ -33,7 +33,7 @@ void handleInputs(CPU& cpu) {
 
 int main() {
     CPU cpu{};
-    cpu.load(readCartridgeFile("./resources/tests/cpu_instrs.gb"));
+    cpu.load(readCartridgeFile("./resources/games/Tetris.gb"));
 
     // Create the main window
     sf::RenderWindow window{

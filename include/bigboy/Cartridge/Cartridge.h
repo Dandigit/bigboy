@@ -66,6 +66,33 @@ private:
     bool m_romRamModeSelect = false;
 };
 
+class MBC5 : public Cartridge {
+public:
+    MBC5(std::vector<uint8_t> rom, std::vector<uint8_t> ram, CartridgeHeader header);
+
+    uint8_t readByte(uint16_t address) const override;
+    void writeByte(uint16_t address, uint8_t value) override;
+
+private:
+    // 0000-1FFF: RAM Enable (write only; lower 4 bits)
+    //  - 00: Disable RAM (default)
+    //  - 0A: Enable RAM
+    bool m_ramEnable = false;
+
+    // 2000-2FFF: Lower 8 bits of ROM Bank Number (write only)
+    // The lower 8 bits of the ROM bank number are stored here. Writing 0 will
+    // actually result in bank 0, unlike other MBCs.
+    uint8_t m_romBankNumberLower = 0x00;
+
+    // 3000-3FFF: Highest 1 bit of ROM Bank Number (write only)
+    // The highest (8th) bit of the ROM Bank Number.
+    uint8_t m_romBankNumberHigher = 0x00;
+
+    // 4000-5FFF: RAM Bank Number (write only)
+    // Selects the 5-bit RAM bank number (in range 00-0F)
+    uint8_t m_ramBankNumber = 0x00;
+};
+
 std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom, std::vector<uint8_t> ram);
 std::unique_ptr<Cartridge> readCartridgeFile(const std::string& filename);
 
