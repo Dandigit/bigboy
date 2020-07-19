@@ -71,7 +71,7 @@ uint8_t MBC1::readByte(const uint16_t address) const {
         const uint8_t romBankNumber = m_romRamModeSelect
                                       ? ((m_ramBankNumber << 5u) | m_romBankNumber)
                                       : m_romBankNumber;
-        return m_rom[address + 0x4000 * romBankNumber];
+        return m_rom[address - 0x4000 + 0x4000 * romBankNumber];
     }
     if (address >= 0xA000 && address <= 0xBFFF &&
             m_ramEnable &&
@@ -88,7 +88,7 @@ uint8_t MBC1::readByte(const uint16_t address) const {
 
 void MBC1::writeByte(const uint16_t address, const uint8_t value) {
     if (address >= 0x0000 && address <= 0x1FFF) {
-        m_ramEnable = (value & 0b1111u) == 0x0A;
+        m_ramEnable = (value & 0x0A) == 0x0A;
     } else if (address >= 0x2000 && address <= 0x3FFF) {
         m_romBankNumber = (value == 0x00)
                 ? 0x01
@@ -118,7 +118,7 @@ uint8_t MBC3::readByte(uint16_t address) const {
         return m_rom[address];
     }
     if (address >= 0x4000 && address <= 0x7FFF) {
-        return m_rom[address + 0x4000 * m_romBankNumber];
+        return m_rom[address - 0x4000 + 0x4000 * m_romBankNumber];
     }
     if (address >= 0xA000 && address <= 0xBFFF &&
         m_ramAndTimerEnable) {
@@ -144,17 +144,17 @@ uint8_t MBC3::readByte(uint16_t address) const {
 
 void MBC3::writeByte(uint16_t address, uint8_t value) {
     if (address >= 0x0000 && address <= 0x1FFF) {
-        m_ramAndTimerEnable = (value & 0b1111u) == 0x0A;
+        m_ramAndTimerEnable = (value & 0x0A) == 0x0A;
     } else if (address >= 0x2000 && address <= 0x3FFF) {
         m_romBankNumber = (value == 0x00)
                           ? 0x01
                           : (value & 0b1111111u);
     } else if (address >= 0x4000 && address <= 0x5FFF) {
-        m_ramBankNumberOrRtcRegisterSelect = (value & 0b1111u);
+        m_ramBankNumberOrRtcRegisterSelect = value;
     } else if (address >= 0x6000 && address <= 0x7FFF) {
         if (m_latchClockData == 0x00 && value == 0x01) {
             m_latchClockData = 0x02;
-            
+
             std::time_t currentClock = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
             std::tm* currentTime = std::localtime(&currentClock);
             if (!currentTime) {
@@ -173,29 +173,36 @@ void MBC3::writeByte(uint16_t address, uint8_t value) {
     } else if (address >= 0xA000 && address <= 0xBFFF &&
                m_ramAndTimerEnable) {
         // Are we addressing RAM?
-        if (m_ramBankNumberOrRtcRegisterSelect >= 0x00 && m_ramBankNumberOrRtcRegisterSelect <= 0x03) {
+        if (m_ramBankNumberOrRtcRegisterSelect >= 0x00 && m_ramBankNumberOrRtcRegisterSelect <= 0x03 &&
+                (m_header.mbcType == MBCType::MBC3_RAM ||
+                 m_header.mbcType == MBCType::MBC3_RAM_BATTERY ||
+                 m_header.mbcType == MBCType::MBC3_TIMER_RAM_BATTERY)) {
             m_ram[address - 0xA000 + 0x2000 * m_ramBankNumberOrRtcRegisterSelect] = value;
         }
         // Are we addressing the RTC?
-        else switch (m_ramBankNumberOrRtcRegisterSelect) {
-            case 0x08:
-                m_rtcSeconds = (value & 0b111111u);
-                break;
-            case 0x09:
-                m_rtcMinutes = (value & 0b111111u);
-                break;
-            case 0x0A:
-                m_rtcHours = (value & 0b11111u);
-                break;
-            case 0x0B:
-                m_rtcDaysLower = value;
-                break;
-            case 0x0C:
-                m_rtcDaysHigher = value;
-                break;
-            default:
-                std::cerr << "Memory device Cartridge (" << serialise(m_header.mbcType) <<
-                          ") does not support writing to the address " << std::to_string(address) << '\n';
+        else if (m_ramBankNumberOrRtcRegisterSelect >= 0x08 && m_ramBankNumberOrRtcRegisterSelect <= 0x0C &&
+                (m_header.mbcType == MBCType::MBC3_TIMER_BATTERY ||
+                 m_header.mbcType == MBCType::MBC3_TIMER_RAM_BATTERY)) {
+            switch (m_ramBankNumberOrRtcRegisterSelect) {
+                case 0x08:
+                    m_rtcSeconds = value;
+                    break;
+                case 0x09:
+                    m_rtcMinutes = value;
+                    break;
+                case 0x0A:
+                    m_rtcHours = value;
+                    break;
+                case 0x0B:
+                    m_rtcDaysLower = value;
+                    break;
+                case 0x0C:
+                    m_rtcDaysHigher = value;
+                    break;
+            }
+        } else {
+            std::cerr << "Memory device Cartridge (" << serialise(m_header.mbcType) <<
+                      ") does not support writing to the address " << std::to_string(address) << '\n';
         }
     } else {
         std::cerr << "Memory device Cartridge (" << serialise(m_header.mbcType) <<
@@ -215,7 +222,7 @@ uint8_t MBC5::readByte(const uint16_t address) const {
         const uint16_t romBankNumber =
                 (static_cast<uint16_t>(m_romBankNumberHigher) << 8u) |
                 static_cast<uint16_t>(m_romBankNumberLower);
-        return m_rom[address + 0x4000 * romBankNumber];
+        return m_rom[address - 0x4000 + 0x4000 * romBankNumber];
     }
     if (address >= 0xA000 && address <= 0xBFFF &&
         m_ramEnable &&
@@ -231,7 +238,7 @@ uint8_t MBC5::readByte(const uint16_t address) const {
 
 void MBC5::writeByte(const uint16_t address, const uint8_t value) {
     if (address >= 0x0000 && address <= 0x1FFF) {
-        m_ramEnable = (value & 0b1111u) == 0x0A;
+        m_ramEnable = (value & 0x0A) == 0x0A;
     } else if (address >= 0x2000 && address <= 0x2FFF) {
         m_romBankNumberLower = value;
     } else if (address >= 0x3000 && address <= 0x3FFF) {
@@ -251,6 +258,7 @@ void MBC5::writeByte(const uint16_t address, const uint8_t value) {
 
 std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom, std::vector<uint8_t> ram) {
     CartridgeHeader header = makeCartridgeHeader(rom);
+    ram.resize(ramSizeInBytes(header.ramSize));
     switch (header.mbcType) {
         case MBCType::ROM:
         case MBCType::ROM_RAM:
@@ -260,6 +268,12 @@ std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom, std::vector<u
         case MBCType::MBC1_RAM:
         case MBCType::MBC1_RAM_BATTERY:
             return std::make_unique<MBC1>(std::move(rom), std::move(ram), std::move(header));
+        case MBCType::MBC3:
+        case MBCType::MBC3_RAM:
+        case MBCType::MBC3_RAM_BATTERY:
+        case MBCType::MBC3_TIMER_BATTERY:
+        case MBCType::MBC3_TIMER_RAM_BATTERY:
+            return std::make_unique<MBC3>(std::move(rom), std::move(ram), std::move(header));
         case MBCType::MBC5:
         case MBCType::MBC5_RAM:
         case MBCType::MBC5_RAM_BATTERY:

@@ -171,7 +171,8 @@ std::string CPU::disassembleCurrent() {
     s << "-- clock = " << m_clock << '\n';
     s << "-- " //<< opCodeToString(current)
             << '(' << (int)current << ") "
-            << '[' << (int)(m_mmu.readByte(m_pc + 1)) << "]\n";
+            << '[' << (int)(m_mmu.readByte(m_pc + 1)) << "] "
+            << '[' << (int)(m_mmu.readByte(m_pc + 2)) << "]\n";
     s << "-- b = " << (int) m_registers.b <<
             ", c = " << (int) m_registers.c <<
             ", bc = " << m_registers.BC() << '\n';
@@ -283,10 +284,7 @@ uint8_t CPU::LD_DE_A() {
 
 uint8_t CPU::LD_nn_A() {
     uint16_t nn = nextWord();
-
-    uint8_t dummy = m_mmu.readByte(nn);
-    load(dummy, m_registers.a);
-    m_mmu.writeByte(nn, dummy);
+    m_mmu.writeByte(nn, m_registers.a);
     return 16;
 }
 
