@@ -29,7 +29,7 @@ struct Colour {
     }
 };
 
-constexpr Colour COLOUR_DARKEST = Colour{
+constexpr Colour COLOUR_0 = Colour{
 #ifdef BIGBOY_SCREEN_TINT
         15, 56, 15, 255
 #else
@@ -37,7 +37,7 @@ constexpr Colour COLOUR_DARKEST = Colour{
 #endif
 };
 
-constexpr Colour COLOUR_DARKER = Colour{
+constexpr Colour COLOUR_33 = Colour{
 #ifdef BIGBOY_SCREEN_TINT
         48, 98, 48, 255
 #else
@@ -45,7 +45,7 @@ constexpr Colour COLOUR_DARKER = Colour{
 #endif
 };
 
-constexpr Colour COLOUR_LIGHTER = Colour{
+constexpr Colour COLOUR_66 = Colour{
 #ifdef BIGBOY_SCREEN_TINT
         139, 172, 15, 255
 #else
@@ -53,7 +53,7 @@ constexpr Colour COLOUR_LIGHTER = Colour{
 #endif
 };
 
-constexpr Colour COLOUR_LIGHTEST = Colour{
+constexpr Colour COLOUR_100 = Colour{
 #ifdef BIGBOY_SCREEN_TINT
         155, 188, 15, 255
 #else
@@ -90,6 +90,7 @@ private:
     // Render one scanline into the framebuffer
     void renderScanline();
     void renderBackgroundScanline();
+    void renderWindowScanline();
     void renderSpriteScanline();
 
     GPUMode getMode() const { return static_cast<GPUMode>(m_status & 0b11u); }
