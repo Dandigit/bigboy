@@ -135,7 +135,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
             m_control = value;
             if (wasEnabled && !displayEnable()) {
                 // Display has been turned off. We need to clear the screen.
-                m_frameBuffer.fill(Colour{255, 255, 255, 255});
+                m_frameBuffer.fill(COLOUR_0);
                 m_currentY = 153;
                 m_clock = 456;
                 switchMode(GPUMode::VERTICAL_BLANK);
@@ -296,14 +296,14 @@ void GPU::renderWindowScanline() {
     // Where in VRAM is our window tileset?
     // The windowTileset flag indicates which tileset we are using; 1 (0x9C00) or 0 (0x9800).
     // We subtract 0x8000 so we can index directly into VRAM.
-    uint16_t tilesetIndex = (windowTileset() ? 0x9C00 : 0x9800) - 0x8000;
+    uint16_t tilesetIndex = (tileMap() ? 0x8000 : 0x9000) - 0x8000;
 
     // Which of these tiles are we actually rendering?
     // We find this in the tile map, a 32*32 set of indexes into the currently selected tileset.
     // There are two tile maps in memory, the tileMap flag indicated which we are using; 1 (0x8000),
     // or 0 (0x8800). Because tile map 0 uses SIGNED indexes (-127 to 127), we start in the middle,
     // at 0x9000. Again, we subtract 0x8000 for direct VRAM access.
-    uint16_t tilemapIndex = (tileMap() ? 0x8000 : 0x9000) - 0x8000;
+    uint16_t tilemapIndex = (windowTileset() ? 0x9C00 : 0x9800) - 0x8000;
 
     // Tiles are 8 pixels tall, so we figure out which tile we need by dividing our current Y pos by 8.
     uint8_t tileYIndex = windowY / 8;
@@ -416,7 +416,7 @@ void GPU::renderSpriteScanline() {
         // Is the sprite on the current scanline?
         if ((spriteY <= m_currentY) && ((spriteY + spriteHeight) > m_currentY)) {
             const uint8_t spriteXMinus8 = m_oam[i + 1];
-            const uint8_t spriteX = spriteXMinus8 + 8;
+            const uint8_t spriteX = spriteXMinus8 - 8;
             uint8_t tileNumber = m_oam[i + 2];
 
             if (spriteHeight == 16) {
