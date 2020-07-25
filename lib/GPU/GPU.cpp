@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-const std::array<Colour, 160*144>& GPU::getCurrentFrame() const {
+const std::array<Colour, 160 * 144>& GPU::getCurrentFrame() const {
     return m_frameBuffer;
 }
 
@@ -64,7 +64,7 @@ GPU::Request GPU::update(uint8_t cycles) {
 
     // LYC STAT interrupt?
     if (m_currentYCompare == m_currentY &&
-            statInterruptEnabled(StatInterrupt::LYC)) {
+        statInterruptEnabled(StatInterrupt::LYC)) {
         setCoincidenceFlag();
         requestStat = true;
     } else {
@@ -91,7 +91,9 @@ void GPU::reset() {
 }
 
 std::vector<AddressSpace> GPU::addressSpaces() const {
-    return {{0x8000, 0x9FFF}, {0xFE00, 0xFE9F}, {0xFF40, 0xFF4B}};
+    return {{0x8000, 0x9FFF},
+            {0xFE00, 0xFE9F},
+            {0xFF40, 0xFF4B}};
 }
 
 uint8_t GPU::readByte(uint16_t address) const {
@@ -103,13 +105,14 @@ uint8_t GPU::readByte(uint16_t address) const {
         case 0xFF43: return m_scrollX;
         case 0xFF44: return m_currentY;
         case 0xFF45: return m_currentYCompare;
-        case 0xFF46: std::cerr << "Cannot read DMA!" << '\n'; return 0xFF;
+        case 0xFF46: std::cerr << "Cannot read DMA!" << '\n';
+            return 0xFF;
         case 0xFF47: return m_bgPalette;
         case 0xFF48: return m_spritePalette0;
         case 0xFF49: return m_spritePalette1;
         case 0xFF4A: return m_windowY;
         case 0xFF4B: return m_windowX;
-        default:     break;
+        default: break;
     }
 
     if (address >= 0x8000 && address <= 0x9FFF) {
@@ -146,38 +149,27 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
             // Only bits 3-7 are writable
             m_status = (value & 0xF8) | (m_status & 0x07);
             return;
-        case 0xFF42:
-            m_scrollY = value;
+        case 0xFF42:m_scrollY = value;
             return;
-        case 0xFF43:
-            m_scrollX = value;
+        case 0xFF43:m_scrollX = value;
             return;
-        case 0xFF44:
-            m_currentY = 0;
+        case 0xFF44:m_currentY = 0;
             return;
-        case 0xFF45:
-            m_currentYCompare = value;
+        case 0xFF45:m_currentYCompare = value;
             return;
-        case 0xFF46:
-            launchDMATransfer(value);
+        case 0xFF46:launchDMATransfer(value);
             return;
-        case 0xFF47:
-            m_bgPalette = value;
+        case 0xFF47:m_bgPalette = value;
             return;
-        case 0xFF48:
-            m_spritePalette0 = value;
+        case 0xFF48:m_spritePalette0 = value;
             return;
-        case 0xFF49:
-            m_spritePalette1 = value;
+        case 0xFF49:m_spritePalette1 = value;
             return;
-        case 0xFF4A:
-            m_windowY = value;
+        case 0xFF4A:m_windowY = value;
             return;
-        case 0xFF4B:
-            m_windowX = value;
+        case 0xFF4B:m_windowX = value;
             return;
-        default:
-            break;
+        default:break;
     }
 
     if (address >= 0x8000 && address <= 0x9FFF) {
@@ -191,7 +183,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
         m_oam[address - 0xFE00] = value;
     } else {
         std::cerr << "Memory device GPU does not support reading the address " <<
-                     address << '\n';
+                  address << '\n';
     }
 }
 
@@ -326,8 +318,8 @@ void GPU::renderWindowScanline() {
         // Tilemap 1 uses unsigned indexes, whereas tilemap 0 uses signed indexes. Either way,
         // we need to find the absolute index of the tile within VRAM.
         uint16_t absoluteTileIndex = (tileMap() == 1)
-                ? static_cast<uint16_t>(tilesetIndex + tileIndex * 0x10)
-                : static_cast<uint16_t>(tilesetIndex + static_cast<int8_t>(tileIndex) * 0x10);
+                                     ? static_cast<uint16_t>(tilesetIndex + tileIndex * 0x10)
+                                     : static_cast<uint16_t>(tilesetIndex + static_cast<int8_t>(tileIndex) * 0x10);
 
         // We find the index of the row we are talking about by adding our Y offset, times two, as
         // rows are two bytes long.
@@ -348,63 +340,6 @@ void GPU::renderWindowScanline() {
 }
 
 void GPU::renderSpriteScanline() {
-    /*
-    // Walk the Sprite Attibute Table
-    for (uint8_t sprite = 0; sprite < 40; ++sprite) {
-        // Each sprite takes up 4 bytes in the SAT
-        const uint8_t index = sprite * 4;
-        const uint8_t yPos = m_oam[index] - 16;
-        const uint8_t xPos = m_oam[index + 1] - 8;
-        const uint8_t tileNumber = m_oam[index + 2];
-        const uint8_t flags = m_oam[index + 3];
-
-        const bool yFlip = (flags >> 6) & 1u;
-        const bool xFlip = (flags >> 5) & 1u;
-
-        const bool usePalette0 = (flags >> 4) & 1u;
-
-        // 8x16 or 8x8 mode?
-        const uint8_t ySize = spriteSize() ? 16 : 8;
-
-        // Is this sprite on the current scanline?
-        if ((m_currentY >= yPos) && (m_currentY < (yPos + ySize))) {
-            // Do we read the sprite backwards in the Y axis?
-            const uint8_t line = yFlip ?
-                    (m_currentY - yPos - ySize) * -1 :
-                    m_currentY - yPos;
-
-            // Each tile takes up 16 bytes, and every line takes up 2 bytes
-            const uint16_t dataAddress = tileNumber * 16 + line * 2;
-            const uint8_t dataLow = m_vram[dataAddress];
-            const uint8_t dataHigh = m_vram[static_cast<uint16_t>(dataAddress + 1)];
-
-            // Walk through each pixel in the row
-            // Data is read from right to left and drawn from left to right
-            for (int i = 7; i >= 0; --i) {
-                const uint8_t offset = xFlip ? ((i - 7) * -1) : i;
-
-                const uint8_t colourIndexLow = (dataLow >> offset) & 1u;
-                const uint8_t colourIndexHigh = (dataHigh >> offset) & 1u;
-                const uint8_t colourIndex = (colourIndexHigh << 1u) | colourIndexLow;
-
-                const Colour colour = usePalette0 ?
-                        getPaletteColour(m_spritePalette0, colourIndex) :
-                        getPaletteColour(m_spritePalette1, colourIndex);
-
-                // White is transparent for sprites
-                if (colour == COLOUR_100) continue;
-
-                int xIndex = 0 - i + 7 + xPos;
-                if ((m_currentY < 0) || (m_currentY > 143) ||
-                        (index < 0) || (index > 159)) {
-                    continue;
-                }
-
-                m_frameBuffer[m_currentY * 160 + xIndex] = colour;
-            }
-        }
-    }*/
-
     // Walk the Sprite Attribute Table backwards
     for (int i = 156; i >= 0; i -= 4) {
         const uint8_t spriteYMinus16 = m_oam[i];
@@ -413,58 +348,59 @@ void GPU::renderSpriteScanline() {
 
         const uint8_t flags = m_oam[i + 3];
 
-        // Is the sprite on the current scanline?
-        if ((spriteY <= m_currentY) && ((spriteY + spriteHeight) > m_currentY)) {
-            const uint8_t spriteXMinus8 = m_oam[i + 1];
-            const uint8_t spriteX = spriteXMinus8 - 8;
-            uint8_t tileNumber = m_oam[i + 2];
+        // Ensure that the sprite is on the current scanline
+        if (spriteY > m_currentY || (spriteY + spriteHeight) <= m_currentY) continue;
 
-            if (spriteHeight == 16) {
-                // In 8x16 mode, the lower bit of the tile number is ignored.
-                tileNumber &= 0xFE;
-            }
+        const uint8_t spriteXMinus8 = m_oam[i + 1];
+        const uint8_t spriteX = spriteXMinus8 - 8;
+        uint8_t tileNumber = m_oam[i + 2];
 
-            // Each tile is 16 bytes
-            const uint16_t absoluteTileIndex = tileNumber * 16;
+        if (spriteHeight == 16) {
+            // In 8x16 mode, the lower bit of the tile number is ignored.
+            tileNumber &= 0xFE;
+        }
 
-            // We need to find the our current line in the tile
-            bool yFlip = (flags >> 6) & 1u;
-            const uint8_t tileYOffset = yFlip ?
-                    ((spriteHeight - 1) - (m_currentY - spriteY)) :
-                    (m_currentY - spriteY);
+        // Each tile is 16 bytes
+        const uint16_t absoluteTileIndex = tileNumber * 16;
 
-            const uint16_t rowIndex = absoluteTileIndex + tileYOffset * 2;
-            const uint8_t rowLow = m_vram[rowIndex];
-            const uint8_t rowHigh = m_vram[static_cast<uint16_t>(rowIndex + 1)];
+        // We need to find the our current line in the tile
+        bool yFlip = (flags >> 6) & 1u;
+        const uint8_t tileYOffset = yFlip ?
+                                    ((spriteHeight - 1) - (m_currentY - spriteY)) :
+                                    (m_currentY - spriteY);
 
-            // Loop through the row
-            for (int x = 0; x < 8; ++x) {
-                int pixelX = spriteX + x;
-                // Is the pixel on screen?
-                if (pixelX >= 0 && pixelX < 160) {
-                    const bool xFlip = (flags >> 5) & 1u;
-                    const uint8_t pos = xFlip ? x : (7 - x);
+        const uint16_t rowIndex = absoluteTileIndex + tileYOffset * 2;
+        const uint8_t rowLow = m_vram[rowIndex];
+        const uint8_t rowHigh = m_vram[static_cast<uint16_t>(rowIndex + 1)];
 
-                    const uint8_t pixelLow = ((rowLow >> pos) & 1u) ? 1 : 0;
-                    const uint8_t pixelHigh = ((rowHigh >> pos) & 1u) ? 2 : 0;
-                    const uint8_t pixel = pixelLow + pixelHigh;
+        // Loop through the row
+        for (int x = 0; x < 8; ++x) {
+            int pixelX = spriteX + x;
 
-                    const bool usePallete0 = (flags >> 4) & 1u;
-                    const Colour colour = usePallete0 ?
-                            getPaletteColour(m_spritePalette0, pixel) :
-                            getPaletteColour(m_spritePalette1, pixel);
+            // Is the pixel on screen?
+            if (pixelX < 0 || pixelX >= 160) continue;
 
-                    // If the pixel is not transparent
-                    if (pixel != 0) {
-                        const uint16_t index = m_currentY * 160 + pixelX;
+            const bool xFlip = (flags >> 5) & 1u;
+            const uint8_t pos = xFlip ? x : (7 - x);
 
-                        // Render above BG?
-                        const bool hasPriority0 = ((flags >> 7u) & 1u) == 0;
-                        const bool bgPixelIsEmpty = m_frameBuffer[index] == getPaletteColour(m_bgPalette, 0);
-                        if (hasPriority0 || bgPixelIsEmpty) {
-                            m_frameBuffer[index] = colour;
-                        }
-                    }
+            const uint8_t pixelLow = ((rowLow >> pos) & 1u) ? 1 : 0;
+            const uint8_t pixelHigh = ((rowHigh >> pos) & 1u) ? 2 : 0;
+            const uint8_t pixel = pixelLow + pixelHigh;
+
+            const bool usePallete0 = (flags >> 4) & 1u;
+            const Colour colour = usePallete0 ?
+                                  getPaletteColour(m_spritePalette0, pixel) :
+                                  getPaletteColour(m_spritePalette1, pixel);
+
+            // If the pixel is not transparent
+            if (pixel != 0) {
+                const uint16_t index = m_currentY * 160 + pixelX;
+
+                // Render above BG?
+                const bool hasPriority0 = ((flags >> 7u) & 1u) == 0;
+                const bool bgPixelIsEmpty = m_frameBuffer[index] == getPaletteColour(m_bgPalette, 0);
+                if (hasPriority0 || bgPixelIsEmpty) {
+                    m_frameBuffer[index] = colour;
                 }
             }
         }
@@ -478,14 +414,10 @@ bool GPU::switchMode(GPUMode newMode) {
 
     // Should we request a STAT interrupt?
     switch (newMode) {
-        case GPUMode::HORIZONTAL_BLANK:
-            return statInterruptEnabled(StatInterrupt::HBLANK);
-        case GPUMode::VERTICAL_BLANK:
-            return statInterruptEnabled(StatInterrupt::VBLANK);
-        case GPUMode::SCANLINE_OAM:
-            return statInterruptEnabled(StatInterrupt::OAM);
-        default:
-            return false;
+        case GPUMode::HORIZONTAL_BLANK: return statInterruptEnabled(StatInterrupt::HBLANK);
+        case GPUMode::VERTICAL_BLANK:   return statInterruptEnabled(StatInterrupt::VBLANK);
+        case GPUMode::SCANLINE_OAM:     return statInterruptEnabled(StatInterrupt::OAM);
+        default:                        return false;
     }
 }
 
@@ -493,9 +425,9 @@ Colour GPU::getPaletteColour(uint8_t palette, uint8_t index) const {
     const uint8_t value = (palette >> (index * 2)) & 0b11u;
     switch (value) {
         case 0: return COLOUR_100; // White (off)
-        case 1: return COLOUR_66; // Light grey (33% on)
-        case 2: return COLOUR_33;    // Dark grey (66% on)
-        case 3: return COLOUR_0;       // Black (on)
+        case 1: return COLOUR_66;  // Light grey (33% on)
+        case 2: return COLOUR_33;  // Dark grey (66% on)
+        case 3: return COLOUR_0;   // Black (on)
         default:
             // Unreachable!
             std::cerr << "unreachable: GPU::getPalletteColour was passed an out-of-bounds index.\n";
