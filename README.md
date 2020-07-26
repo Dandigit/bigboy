@@ -9,7 +9,7 @@ A work-in-progress Gameboy emulator. See the write-up on [my blog](https://dandi
 <p>
 
 ## Features
-- Plays Tetris and Pokemon
+- Plays Tetris, Pokemon Red/Blue/Gold/Silver, TMNT II, Link's Awakening
 - Faithful green screen tint
 - (Hopefully) multiplatform
 - Supports MBC1/MBC3/MBC5
