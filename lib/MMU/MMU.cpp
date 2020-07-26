@@ -18,7 +18,7 @@ uint8_t MMU::readByte(uint16_t address) const {
         return device->readByte(address);
     }
 
-    std::cerr << "note: no memory device registered for address: " << address << '\n';
+    std::cerr << "warning: no memory device registered for address: " << address << '\n';
     return 0xFF; // Return bogus
 }
 
@@ -27,7 +27,7 @@ void MMU::writeByte(uint16_t address, uint8_t value) {
         return device->writeByte(address, value);
     }
 
-    std::cerr << "note: no memory device registered for address: " << address << '\n';
+    std::cerr << "warning: no memory device registered for address: " << address << '\n';
     // Do nothing.
 }
 

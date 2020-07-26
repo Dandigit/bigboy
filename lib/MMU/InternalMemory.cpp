@@ -43,7 +43,7 @@ uint8_t InternalMemory::readByte(uint16_t address) const {
         return m_if;
     }
 
-    std::cerr << "note: memory device InternalMemory does not support reading the address" << address << '\n';
+    std::cerr << "warning: memory device InternalMemory does not support reading the address" << address << '\n';
     return 0xFF;
 }
 
@@ -70,7 +70,7 @@ void InternalMemory::writeByte(uint16_t address, uint8_t value) {
         // Interrupt Flag Register
         m_if = value;
     } else {
-        std::cerr << "note: memory device InternalMemory does not support writing to the address " << address << '\n';
+        std::cerr << "warning: memory device InternalMemory does not support writing to the address " << address << '\n';
     }
 }
 

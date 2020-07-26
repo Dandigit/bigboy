@@ -102,7 +102,7 @@ uint8_t Joypad::readByte(const uint16_t address) const {
         return m_joyp;
     }
 
-    std::cerr << "note: memory device Joypad does not support reading the address " <<
+    std::cerr << "warning: memory device Joypad does not support reading the address " <<
             address << '\n';
     return 0xFF; // Bogus value
 }
@@ -117,7 +117,7 @@ void Joypad::writeByte(const uint16_t address, const uint8_t value) {
         m_joyp |= (value & mask);
         updateRegister();
     } else {
-        std::cerr << "note: memory device Joypad does not support writing to the address " <<
+        std::cerr << "warning: memory device Joypad does not support writing to the address " <<
                   address << '\n';
         // Do nothing
     }

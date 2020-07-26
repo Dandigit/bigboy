@@ -15,7 +15,7 @@ uint8_t Serial::readByte(uint16_t address) const {
         case 0xFF02:
             return m_control;
         default:
-            std::cerr << "note: memory device Serial does not support reading the address " << address << '\n';
+            std::cerr << "warning: memory device Serial does not support reading the address " << address << '\n';
             return 0xFF;
     }
 }
@@ -33,6 +33,6 @@ void Serial::writeByte(uint16_t address, uint8_t value) {
             }
             break;
         default:
-            std::cerr << "note: memory device Serial does not support writing to the address " << address << '\n';
+            std::cerr << "warning: memory device Serial does not support writing to the address " << address << '\n';
     }
 }

@@ -37,7 +37,7 @@ uint8_t NoMBC::readByte(const uint16_t address) const {
         }
     }
 
-    std::cerr << "note: memory device Cartridge (" << serialise(m_header.mbcType) <<
+    std::cerr << "warning: memory device Cartridge (" << serialise(m_header.mbcType) <<
             ") does not support reading the address " << std::to_string(address) << '\n';
     return 0xFF;
 }
@@ -48,7 +48,7 @@ void NoMBC::writeByte(const uint16_t address, const uint8_t value) {
             m_header.mbcType == MBCType::ROM_RAM_BATTERY)) {
         m_ram[address - 0xA000] = value;
     } else {
-        std::cerr << "note: memory device Cartridge (" << serialise(m_header.mbcType) <<
+        std::cerr << "warning: memory device Cartridge (" << serialise(m_header.mbcType) <<
                   ") does not support writing to the address " << std::to_string(address) << '\n';
     }
 }
@@ -81,7 +81,7 @@ uint8_t MBC1::readByte(const uint16_t address) const {
         return m_ram[address - 0xA000 + 0x2000 * ramBankNumber];
     }
 
-    std::cerr << "note: memory device Cartridge (" << serialise(m_header.mbcType) <<
+    std::cerr << "warning: memory device Cartridge (" << serialise(m_header.mbcType) <<
               ") does not support reading the address " << std::to_string(address) << '\n';
     return 0xFF;
 }
@@ -104,7 +104,7 @@ void MBC1::writeByte(const uint16_t address, const uint8_t value) {
         const uint8_t ramBankNumber = m_romRamModeSelect ? 0 : m_ramBankNumber;
         m_ram[address - 0xA000 + 0x2000 * ramBankNumber] = value;
     } else {
-        std::cerr << "note: memory device Cartridge (" << serialise(m_header.mbcType) <<
+        std::cerr << "warning: memory device Cartridge (" << serialise(m_header.mbcType) <<
                   ") does not support writing to the address " << std::to_string(address) << '\n';
     }
 }
@@ -158,7 +158,7 @@ void MBC3::writeByte(uint16_t address, uint8_t value) {
             std::time_t currentClock = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
             std::tm* currentTime = std::localtime(&currentClock);
             if (!currentTime) {
-                std::cerr << "Could not get the current time\n";
+                std::cerr << "warning: could not get the current time\n";
                 return;
             }
 
@@ -201,11 +201,11 @@ void MBC3::writeByte(uint16_t address, uint8_t value) {
                     break;
             }
         } else {
-            std::cerr << "note: memory device Cartridge (" << serialise(m_header.mbcType) <<
+            std::cerr << "warning: memory device Cartridge (" << serialise(m_header.mbcType) <<
                       ") does not support writing to the address " << std::to_string(address) << '\n';
         }
     } else {
-        std::cerr << "note: memory device Cartridge (" << serialise(m_header.mbcType) <<
+        std::cerr << "warning: memory device Cartridge (" << serialise(m_header.mbcType) <<
                   ") does not support writing to the address " << std::to_string(address) << '\n';
     }
 }
@@ -231,7 +231,7 @@ uint8_t MBC5::readByte(const uint16_t address) const {
         return m_ram[address - 0xA000 + 0x2000 * m_ramBankNumber];
     }
 
-    std::cerr << "note: memory device Cartridge (" << serialise(m_header.mbcType) <<
+    std::cerr << "warning: memory device Cartridge (" << serialise(m_header.mbcType) <<
               ") does not support reading the address " << std::to_string(address) << '\n';
     return 0xFF;
 }
@@ -251,7 +251,7 @@ void MBC5::writeByte(const uint16_t address, const uint8_t value) {
                 m_header.mbcType == MBCType::MBC1_RAM_BATTERY)) {
         m_ram[address - 0xA000 + 0x2000 * m_ramBankNumber] = value;
     } else {
-        std::cerr << "note: memory device Cartridge (" << serialise(m_header.mbcType) <<
+        std::cerr << "warning: memory device Cartridge (" << serialise(m_header.mbcType) <<
                   ") does not support writing to the address " << std::to_string(address) << '\n';
     }
 }

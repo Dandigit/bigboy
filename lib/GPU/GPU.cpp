@@ -115,7 +115,7 @@ uint8_t GPU::readByte(uint16_t address) const {
 
     if (address >= 0x8000 && address <= 0x9FFF) {
         if (getMode() == GPUMode::SCANLINE_VRAM) {
-            std::cerr << "note: tried to read VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
+            std::cerr << "warning: tried to read VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
             return 0xFF; // Bogus value.
         }
 
@@ -124,7 +124,7 @@ uint8_t GPU::readByte(uint16_t address) const {
         return m_oam[address - 0xFE00];
     }
 
-    std::cerr << "note: memory device GPU does not support reading the address " << address << '\n';
+    std::cerr << "warning: memory device GPU does not support reading the address " << address << '\n';
     return 0xFF;
 }
 
@@ -147,32 +147,43 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
             // Only bits 3-7 are writable
             m_status = (value & 0xF8) | (m_status & 0x07);
             return;
-        case 0xFF42:m_scrollY = value;
+        case 0xFF42:
+            m_scrollY = value;
             return;
-        case 0xFF43:m_scrollX = value;
+        case 0xFF43:
+            m_scrollX = value;
             return;
-        case 0xFF44:m_currentY = 0;
+        case 0xFF44:
+            m_currentY = 0;
             return;
-        case 0xFF45:m_currentYCompare = value;
+        case 0xFF45:
+            m_currentYCompare = value;
             return;
-        case 0xFF46:launchDMATransfer(value);
+        case 0xFF46:
+            launchDMATransfer(value);
             return;
-        case 0xFF47:m_bgPalette = value;
+        case 0xFF47:
+            m_bgPalette = value;
             return;
-        case 0xFF48:m_spritePalette0 = value;
+        case 0xFF48:
+            m_spritePalette0 = value;
             return;
-        case 0xFF49:m_spritePalette1 = value;
+        case 0xFF49:
+            m_spritePalette1 = value;
             return;
-        case 0xFF4A:m_windowY = value;
+        case 0xFF4A:
+            m_windowY = value;
             return;
-        case 0xFF4B:m_windowX = value;
+        case 0xFF4B:
+            m_windowX = value;
             return;
-        default:break;
+        default:
+            break;
     }
 
     if (address >= 0x8000 && address <= 0x9FFF) {
         if (getMode() == GPUMode::SCANLINE_VRAM) {
-            std::cerr << "note: tried to write to VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
+            std::cerr << "warning: tried to write to VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
             return; // Do nothing.
         }
 
@@ -180,7 +191,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
         m_oam[address - 0xFE00] = value;
     } else {
-        std::cerr << "note: memory device GPU does not support reading the address " << address << '\n';
+        std::cerr << "warning: memory device GPU does not support reading the address " << address << '\n';
     }
 }
 
