@@ -40,6 +40,8 @@ int main(int argc, char** argv) {
     CPU cpu{};
     cpu.load(readCartridgeFile(argv[1]));
 
+    std::cout << cpu.getGameTitle();
+
     // Create the main window
     sf::RenderWindow window{
         sf::VideoMode{SCREEN_WIDTH * SCREEN_SCALE, SCREEN_HEIGHT * SCREEN_SCALE},

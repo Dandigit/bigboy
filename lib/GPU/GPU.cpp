@@ -3,6 +3,38 @@
 
 #include <iostream>
 
+const Colour Colour::DARKEST{
+#ifdef BIGBOY_SCREEN_TINT
+        15, 56, 15, 255
+#else
+        0, 0, 0, 255
+#endif
+};
+
+const Colour Colour::DARK{
+#ifdef BIGBOY_SCREEN_TINT
+        48, 98, 48, 255
+#else
+        192, 192, 192, 255
+#endif
+};
+
+const Colour Colour::LIGHT{
+#ifdef BIGBOY_SCREEN_TINT
+        139, 172, 15, 255
+#else
+        96, 96, 96, 255
+#endif
+};
+
+const Colour Colour::LIGHTEST{
+#ifdef BIGBOY_SCREEN_TINT
+        155, 188, 15, 255
+#else
+        0, 0, 0, 255
+#endif
+};
+
 const std::array<Colour, 160 * 144>& GPU::getCurrentFrame() const {
     return m_frameBuffer;
 }
@@ -136,7 +168,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
             m_control = value;
             if (wasEnabled && !displayEnable()) {
                 // Display has been turned off. We need to clear the screen.
-                m_frameBuffer.fill(COLOUR_0);
+                m_frameBuffer.fill(Colour::LIGHTEST);
                 m_currentY = 153;
                 m_clock = 456;
                 switchMode(GPUMode::VERTICAL_BLANK);
@@ -216,7 +248,7 @@ void GPU::renderBackgroundScanline() {
         // If BG is disabled, render a white background and exit early
         for (int x = 0; x < 160; x++) {
             int index = (m_currentY * 160) + x;
-            m_frameBuffer[index] = COLOUR_100;
+            m_frameBuffer[index] = Colour::LIGHTEST;
         }
 
         return;
@@ -432,10 +464,10 @@ bool GPU::switchMode(GPUMode newMode) {
 Colour GPU::getPaletteColour(uint8_t palette, uint8_t index) const {
     const uint8_t value = (palette >> (index * 2)) & 0b11u;
     switch (value) {
-        case 0: return COLOUR_100; // White (off)
-        case 1: return COLOUR_66;  // Light grey (33% on)
-        case 2: return COLOUR_33;  // Dark grey (66% on)
-        case 3: return COLOUR_0;   // Black (on)
+        case 0: return Colour::LIGHTEST; // White (off)
+        case 1: return Colour::LIGHT;    // Light grey (33% on)
+        case 2: return Colour::DARK;     // Dark grey (66% on)
+        case 3: return Colour::DARKEST;  // Black (on)
         default:
             // Unreachable!
             std::cerr << "fatal: unreachable: GPU::getPalletteColour was passed an out-of-bounds index.\n";

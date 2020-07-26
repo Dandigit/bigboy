@@ -1,7 +1,8 @@
 #ifndef BIGBOY_GPU_H
 #define BIGBOY_GPU_H
 
-#include <bigboy/GPU/TileSet.h>
+#include <array>
+
 #include <bigboy/MMU/MemoryDevice.h>
 
 enum class GPUMode {
@@ -19,6 +20,11 @@ enum class StatInterrupt : uint8_t {
 };
 
 struct Colour {
+    static const Colour DARKEST;
+    static const Colour DARK;
+    static const Colour LIGHT;
+    static const Colour LIGHTEST;
+
     uint8_t r;
     uint8_t g;
     uint8_t b;
@@ -27,38 +33,10 @@ struct Colour {
     bool operator==(const Colour& colour) const {
         return colour.r == r && colour.g == g && colour.b == b && colour.a == a;
     }
-};
 
-constexpr Colour COLOUR_0 = Colour{
-#ifdef BIGBOY_SCREEN_TINT
-        15, 56, 15, 255
-#else
-        0, 0, 0, 255
-#endif
-};
-
-constexpr Colour COLOUR_33 = Colour{
-#ifdef BIGBOY_SCREEN_TINT
-        48, 98, 48, 255
-#else
-        192, 192, 192, 255
-#endif
-};
-
-constexpr Colour COLOUR_66 = Colour{
-#ifdef BIGBOY_SCREEN_TINT
-        139, 172, 15, 255
-#else
-        96, 96, 96, 255
-#endif
-};
-
-constexpr Colour COLOUR_100 = Colour{
-#ifdef BIGBOY_SCREEN_TINT
-        155, 188, 15, 255
-#else
-        0, 0, 0, 255
-#endif
+    bool operator!=(const Colour& colour) const {
+        return !(*this == colour);
+    }
 };
 
 class GPU : public MemoryDevice {
