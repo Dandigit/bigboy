@@ -2,6 +2,7 @@
 #define BIGBOY_CARTRIDGE_H
 
 #include <array>
+#include <memory>
 
 #include <bigboy/Cartridge/CartridgeHeader.h>
 #include <bigboy/MMU/MemoryDevice.h>

@@ -2,6 +2,7 @@
 #define BIGBOY_CARTRIDGEHEADER_H
 
 #include <string>
+#include <vector>
 
 // 0147: Cartridge Type
 // Specifies which Memory Bank Controller (if any) is used in

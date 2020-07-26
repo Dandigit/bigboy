@@ -8,7 +8,7 @@ CartridgeHeader makeCartridgeHeader(const std::vector<uint8_t>& rom) {
     // FIXME: properly support CGB flag
     for (size_t i = 0x0134; i < 0x0143; ++i) {
         auto c = static_cast<unsigned char>(rom[i]);
-        
+
         if (c == '\0') break;
         title.push_back(c);
     }
