@@ -16,9 +16,9 @@
 // eventually this has been supposed to be used to colorize monochrome games
 // that include fixed palette data at a special location in ROM.
 enum class CGBFlag {
-    GB = 0b01,     // Uses GB features only
-    GB_CGB = 0b11, // Uses CGB features but works on GB
-    CGB = 0b10,    // Uses CGB features and does not work on GB
+    CGB_GB = 0x80, // Uses CGB features but works on GB
+    CGB = 0xC0,    // Uses CGB features and does not work on GB
+    GB,            // Uses GB features only; default
 };
 
 // 0147: Cartridge Type
@@ -100,7 +100,6 @@ struct CartridgeHeader {
 
 CartridgeHeader makeCartridgeHeader(const std::vector<uint8_t>& rom);
 
-CGBFlag toCGBFlag(uint8_t byte);
 uint32_t ramSizeInBytes(RAMSize ramSize);
 
 std::string serialise(MBCType mbcType);

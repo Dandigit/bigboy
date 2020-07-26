@@ -4,13 +4,13 @@
 #include <iostream>
 
 CartridgeHeader makeCartridgeHeader(const std::vector<uint8_t>& rom) {
-    auto cgbFlag = toCGBFlag(rom[0x0143]);
+    auto cgbFlag = static_cast<CGBFlag>(rom[0x0143]);
     auto mbcType = static_cast<MBCType>(rom[0x0147]);
     auto romSize = static_cast<ROMSize>(rom[0x0148]);
     auto ramSize = static_cast<RAMSize>(rom[0x0149]);
     auto destinationCode = static_cast<DestinationCode>(rom[0x014A]);
 
-    const size_t titleEndIndex = (cgbFlag == CGBFlag::GB_CGB || cgbFlag == CGBFlag::CGB)
+    const size_t titleEndIndex = (cgbFlag == CGBFlag::CGB_GB || cgbFlag == CGBFlag::CGB)
             ? 0x0142
             : 0x0143;
     std::string title;
@@ -23,14 +23,6 @@ CartridgeHeader makeCartridgeHeader(const std::vector<uint8_t>& rom) {
     }
 
     return CartridgeHeader{std::move(title), mbcType, romSize, ramSize, destinationCode};
-}
-
-CGBFlag toCGBFlag(const uint8_t byte) {
-    switch (byte) {
-        case 0x80: return CGBFlag::GB_CGB;
-        case 0xC0: return CGBFlag::CGB;
-        default:   return CGBFlag::GB;
-    }
 }
 
 uint32_t ramSizeInBytes(const RAMSize ramSize) {
