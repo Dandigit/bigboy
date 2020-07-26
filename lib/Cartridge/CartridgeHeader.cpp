@@ -1,8 +1,5 @@
 #include <bigboy/Cartridge/CartridgeHeader.h>
 
-#include <vector>
-#include <iostream>
-
 CartridgeHeader makeCartridgeHeader(const std::vector<uint8_t>& rom) {
     auto cgbFlag = static_cast<CGBFlag>(rom[0x0143]);
     auto mbcType = static_cast<MBCType>(rom[0x0147]);
