@@ -42,7 +42,7 @@ uint8_t Timer::readByte(uint16_t address) const {
         case 0xFF07: return m_tac;
     }
 
-    std::cerr << "Memory device Timer does not support reading the address " << address << '\n';
+    std::cerr << "note: memory device Timer does not support reading the address " << address << '\n';
     return 0xFF;
 }
 
@@ -62,7 +62,7 @@ void Timer::writeByte(uint16_t address, uint8_t value) {
             return;
     }
 
-    std::cerr << "Memory device Timer does not support writing to the address " << address << '\n';
+    std::cerr << "note: memory device Timer does not support writing to the address " << address << '\n';
 }
 
 void Timer::reset() {

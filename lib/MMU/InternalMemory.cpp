@@ -1,6 +1,7 @@
 #include <bigboy/MMU/InternalMemory.h>
 
 #include <string>
+#include <iostream>
 
 std::vector<AddressSpace> InternalMemory::addressSpaces() const {
     return {{0xC000, 0xFDFF}, {0xFF80, 0xFFFF}, {0xFF0F, 0xFF0F}};
@@ -42,8 +43,8 @@ uint8_t InternalMemory::readByte(uint16_t address) const {
         return m_if;
     }
 
-    throw std::runtime_error{"The memory device InternalMemory does not own the address: " +
-            std::to_string(address)};
+    std::cerr << "note: memory device InternalMemory does not support reading the address" << address << '\n';
+    return 0xFF;
 }
 
 void InternalMemory::writeByte(uint16_t address, uint8_t value) {
@@ -69,8 +70,7 @@ void InternalMemory::writeByte(uint16_t address, uint8_t value) {
         // Interrupt Flag Register
         m_if = value;
     } else {
-        throw std::runtime_error{"The memory device InternalMemory does not own the address: " +
-                                 std::to_string(address)};
+        std::cerr << "note: memory device InternalMemory does not support writing to the address " << address << '\n';
     }
 }
 

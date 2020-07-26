@@ -105,8 +105,6 @@ uint8_t GPU::readByte(uint16_t address) const {
         case 0xFF43: return m_scrollX;
         case 0xFF44: return m_currentY;
         case 0xFF45: return m_currentYCompare;
-        case 0xFF46: std::cerr << "Cannot read DMA!" << '\n';
-            return 0xFF;
         case 0xFF47: return m_bgPalette;
         case 0xFF48: return m_spritePalette0;
         case 0xFF49: return m_spritePalette1;
@@ -117,7 +115,7 @@ uint8_t GPU::readByte(uint16_t address) const {
 
     if (address >= 0x8000 && address <= 0x9FFF) {
         if (getMode() == GPUMode::SCANLINE_VRAM) {
-            std::cerr << "Tried to read VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
+            std::cerr << "note: tried to read VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
             return 0xFF; // Bogus value.
         }
 
@@ -126,7 +124,7 @@ uint8_t GPU::readByte(uint16_t address) const {
         return m_oam[address - 0xFE00];
     }
 
-    std::cerr << "Memory device GPU does not support reading the address " << address << '\n';
+    std::cerr << "note: memory device GPU does not support reading the address " << address << '\n';
     return 0xFF;
 }
 
@@ -174,7 +172,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
 
     if (address >= 0x8000 && address <= 0x9FFF) {
         if (getMode() == GPUMode::SCANLINE_VRAM) {
-            std::cerr << "Tried to write to VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
+            std::cerr << "note: tried to write to VRAM while GPU was in mode 3 (SCANLINE_VRAM)\n";
             return; // Do nothing.
         }
 
@@ -182,8 +180,7 @@ void GPU::writeByte(uint16_t address, uint8_t value) {
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
         m_oam[address - 0xFE00] = value;
     } else {
-        std::cerr << "Memory device GPU does not support reading the address " <<
-                  address << '\n';
+        std::cerr << "note: memory device GPU does not support reading the address " << address << '\n';
     }
 }
 
@@ -430,7 +427,7 @@ Colour GPU::getPaletteColour(uint8_t palette, uint8_t index) const {
         case 3: return COLOUR_0;   // Black (on)
         default:
             // Unreachable!
-            std::cerr << "unreachable: GPU::getPalletteColour was passed an out-of-bounds index.\n";
-            exit(2);
+            std::cerr << "fatal: unreachable: GPU::getPalletteColour was passed an out-of-bounds index.\n";
+            exit(-1);
     }
 }

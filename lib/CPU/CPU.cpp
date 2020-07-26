@@ -1692,8 +1692,8 @@ uint8_t CPU::step() {
         case OpCode::CB:
             return stepPrefix();
         default:
-            std::cerr << "Unknown instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
-            exit(1);
+            std::cerr << "fatal: unknown instruction: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\n";
+            std::exit(1);
     }
 }
 
@@ -2213,7 +2213,7 @@ uint8_t CPU::stepPrefix() {
         case PrefixOpCode::RES_7_HL:
             return RES_b_HL(BitOperand::BIT7);
         default:
-            std::cerr << "Unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\nTerminating bigboy...\n";
-            exit(1);
+            std::cerr << "fatal: unknown prefix instructon: " << std::bitset<8>{static_cast<uint8_t>(current)} << ".\n";
+            std::exit(-1);
     }
 }

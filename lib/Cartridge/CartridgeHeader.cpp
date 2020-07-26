@@ -19,24 +19,6 @@ CartridgeHeader makeCartridgeHeader(const std::vector<uint8_t>& rom) {
     return CartridgeHeader{std::move(title), mbcType, romSize, ramSize, destinationCode};
 }
 
-#if 0
-uint32_t romSizeInBytes(const ROMSize romSize) {
-    switch (romSize) {
-        case ROMSize::KB_32: return 32768;
-        case ROMSize::KB_64: return 65536;
-        case ROMSize::KB_128: return 131072;
-        case ROMSize::KB_256: return 262144;
-        case ROMSize::KB_512: return 524288;
-        case ROMSize::MB_1: return 1048576;
-        case ROMSize::MB_2: return 2097152;
-        case ROMSize::MB_4: return 4194304;
-        case ROMSize::MB_1_1: ?
-        case ROMSize::MB_1_2: ?
-        case ROMSize::MB_1_5: ?
-    }
-}
-#endif
-
 uint32_t ramSizeInBytes(const RAMSize ramSize) {
     switch (ramSize) {
         case RAMSize::NONE: return 0;
