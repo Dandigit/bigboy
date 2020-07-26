@@ -13,12 +13,12 @@ A work-in-progress Gameboy emulator. See the write-up on [my blog](https://dandi
 - Faithful green screen tint
 - (Hopefully) multiplatform
 - Supports MBC1/MBC3/MBC5
+- Supports real-time clock
 - Passes Blargg's CPU tests
 
 ## Still working on it
 - Dr. Mario gets to the title screen and menu, before disabling the display and rendering the game unplayable
 - No audio support (that's what all the "No memory device registered for ..." are)
-- No real-time clock in MBC3
 - No support for other MBC chips
 - No graphical interface
 

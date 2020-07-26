@@ -6,6 +6,7 @@
 
 #include <bigboy/Cartridge/CartridgeHeader.h>
 #include <bigboy/MMU/MemoryDevice.h>
+#include <chrono>
 
 class Cartridge : public MemoryDevice {
 public:
@@ -115,6 +116,9 @@ private:
     //    - Bit 6  Halt (0=Active, 1=Stop Timer)
     //    - Bit 7  Day Counter Carry Bit (1=Counter Overflow)
     uint8_t m_rtcDaysHigher = 0x00;
+
+    // Time since the clock started/was reset
+    std::chrono::time_point<std::chrono::system_clock> clockStartTime = std::chrono::system_clock::now();
 
     // Notes: The Day Counter
     // The total 9 bits of the Day Counter allow to count days in range from 0-511 (0-1FFh).

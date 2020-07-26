@@ -155,18 +155,31 @@ void MBC3::writeByte(uint16_t address, uint8_t value) {
         if (m_latchClockData == 0x00 && value == 0x01) {
             m_latchClockData = 0x02;
 
-            std::time_t currentClock = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-            std::tm* currentTime = std::localtime(&currentClock);
-            if (!currentTime) {
-                std::cerr << "warning: could not get the current time\n";
+            std::time_t sinceClockStartTime =
+                    std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) -
+                    std::chrono::system_clock::to_time_t(clockStartTime);
+
+            std::tm* latchedTm = new std::tm{
+                m_rtcSeconds,
+                m_rtcMinutes,
+                m_rtcHours,
+                0,0,0,0,
+                (m_rtcDaysHigher << 8u) | m_rtcDaysLower,
+            };
+            std::time_t latchedTime = std::mktime(latchedTm) + sinceClockStartTime;
+            delete latchedTm;
+            latchedTm = std::localtime(&latchedTime);
+
+            if (!latchedTm) {
+                std::cerr << "warning: could not latch the clock\n";
                 return;
             }
 
-            m_rtcSeconds = currentTime->tm_sec;
-            m_rtcMinutes = currentTime->tm_min;
-            m_rtcHours = currentTime->tm_hour;
-            m_rtcDaysLower = (currentTime->tm_yday & 0b11111111u);
-            m_rtcDaysHigher = (currentTime->tm_yday >> 8u);
+            m_rtcSeconds = latchedTm->tm_sec;
+            m_rtcMinutes = latchedTm->tm_min;
+            m_rtcHours = latchedTm->tm_hour;
+            m_rtcDaysLower = (latchedTm->tm_yday & 0b11111111u);
+            m_rtcDaysHigher = ((latchedTm->tm_yday >> 8u) & 1u);
         } else {
             m_latchClockData = value;
         }
@@ -200,6 +213,9 @@ void MBC3::writeByte(uint16_t address, uint8_t value) {
                     m_rtcDaysHigher = value;
                     break;
             }
+
+            // Reset the clock
+            clockStartTime = std::chrono::system_clock::now();
         } else {
             std::cerr << "warning: memory device Cartridge (" << serialise(m_header.mbcType) <<
                       ") does not support writing to the address " << std::to_string(address) << '\n';
