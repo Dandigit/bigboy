@@ -31,9 +31,14 @@ void handleInputs(CPU& cpu) {
     handleInput(cpu, sf::Keyboard::A, InputEvent::A_PRESSED, InputEvent::A_RELEASED);
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cerr << "fatal: invalid command line arguments\n- usage: bigboy [rom_path]\n";
+        return -1;
+    }
+
     CPU cpu{};
-    cpu.load(readCartridgeFile("./resources/games/Pokemon Red.gb"));
+    cpu.load(readCartridgeFile(argv[1]));
 
     // Create the main window
     sf::RenderWindow window{

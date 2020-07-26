@@ -6,9 +6,9 @@
 
 enum class GPUMode {
     HORIZONTAL_BLANK = 0, // 204 cycles (H-Blank)
-    VERTICAL_BLANK = 1, // 4560 cycles  (V-Blank)
-    SCANLINE_OAM = 2, // 80 cycles      (Searching OAM-RAM)
-    SCANLINE_VRAM = 3 // 172 cycles     (Transferring Data to LCD Driver)
+    VERTICAL_BLANK = 1,   // 4560 cycles  (V-Blank)
+    SCANLINE_OAM = 2,     // 80 cycles      (Searching OAM-RAM)
+    SCANLINE_VRAM = 3     // 172 cycles     (Transferring Data to LCD Driver)
 };
 
 enum class StatInterrupt : uint8_t {
