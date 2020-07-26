@@ -1,8 +1,25 @@
 #ifndef BIGBOY_CARTRIDGEHEADER_H
 #define BIGBOY_CARTRIDGEHEADER_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
+
+// 0143: CGB Flag
+// In older cartridges this byte has been part of the Title (see above).
+// In CGB cartridges the upper bit is used to enable CGB functions.
+// This is required, otherwise the CGB switches itself into Non-CGB-Mode.
+//  - 80h: Game supports CGB functions, but works on old gameboys also.
+//  - C0h: Game works on CGB only (physically the same as 80h).
+// Values with Bit 7 set, and either Bit 2 or 3 set, will switch the gameboy
+// into a special non-CGB-mode with uninitialized palettes. Purpose unknown,
+// eventually this has been supposed to be used to colorize monochrome games
+// that include fixed palette data at a special location in ROM.
+enum class CGBFlag {
+    GB = 0b01,     // Uses GB features only
+    GB_CGB = 0b11, // Uses CGB features but works on GB
+    CGB = 0b10,    // Uses CGB features and does not work on GB
+};
 
 // 0147: Cartridge Type
 // Specifies which Memory Bank Controller (if any) is used in
@@ -83,7 +100,7 @@ struct CartridgeHeader {
 
 CartridgeHeader makeCartridgeHeader(const std::vector<uint8_t>& rom);
 
-//uint32_t romSizeInBytes(ROMSize romSize);
+CGBFlag toCGBFlag(uint8_t byte);
 uint32_t ramSizeInBytes(RAMSize ramSize);
 
 std::string serialise(MBCType mbcType);
