@@ -14,6 +14,60 @@ std::vector<AddressSpace> Cartridge::addressSpaces() const {
     return {{0x0000, 0x7FFF}, {0xA000, 0xBFFF}};
 }
 
+void Cartridge::loadRamIfSupported(const std::string &filename) {
+    switch (m_header.mbcType) {
+        case MBCType::ROM_RAM_BATTERY:
+        case MBCType::MBC1_RAM_BATTERY:
+        case MBCType::MBC3_RAM_BATTERY:
+        case MBCType::MBC3_TIMER_BATTERY:
+        case MBCType::MBC3_TIMER_RAM_BATTERY:
+        case MBCType::MBC5_RAM_BATTERY: {
+            std::ifstream saveFile{filename, std::ios::in | std::ios::binary | std::ios::ate};
+            if (!saveFile.is_open()) {
+                std::cerr << "warning: could not read save file '" << filename << "'\n";
+                break;
+            }
+
+            saveFile.seekg(0, std::ios::end);
+            const size_t length = saveFile.tellg();
+            saveFile.seekg(0, std::ios::beg);
+
+            if (m_ram.size() != length) {
+                std::cerr << "fatal: corrupt save file '" << filename << "'\n";
+                std::exit(-1);
+            }
+
+            saveFile.read(reinterpret_cast<char*>(m_ram.data()), length);
+            std::cout << "note: read save file: " << length << " bytes\n";
+
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void Cartridge::saveRamIfSupported(const std::string &filename) const {
+    switch (m_header.mbcType) {
+        case MBCType::ROM_RAM_BATTERY:
+        case MBCType::MBC1_RAM_BATTERY:
+        case MBCType::MBC3_RAM_BATTERY:
+        case MBCType::MBC3_TIMER_BATTERY:
+        case MBCType::MBC3_TIMER_RAM_BATTERY:
+        case MBCType::MBC5_RAM_BATTERY: {
+            std::ofstream saveFile{filename, std::ios::out | std::ios::binary | std::ios::trunc};
+            if (!saveFile.is_open()) {
+                std::cerr << "warning: could not write save file '" << filename << "'\n";
+                break;
+            }
+            saveFile.write(reinterpret_cast<const char*>(m_ram.data()), m_ram.size());
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 const std::string& Cartridge::getGameTitle() const {
     return m_header.title;
 }
@@ -271,9 +325,12 @@ void MBC5::writeByte(const uint16_t address, const uint8_t value) {
     }
 }
 
-std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom, std::vector<uint8_t> ram) {
+std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom) {
     CartridgeHeader header = makeCartridgeHeader(rom);
+
+    std::vector<uint8_t> ram;
     ram.resize(ramSizeInBytes(header.ramSize));
+
     switch (header.mbcType) {
         case MBCType::ROM:
         case MBCType::ROM_RAM:
@@ -315,5 +372,5 @@ std::unique_ptr<Cartridge> readCartridgeFile(const std::string& filename) {
     file.read(reinterpret_cast<char*>(rom.data()), length);
     file.close();
 
-    return makeCartridge(std::move(rom), std::vector<uint8_t>{});
+    return makeCartridge(std::move(rom));
 }

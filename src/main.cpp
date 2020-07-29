@@ -37,8 +37,10 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    CPU cpu{};
-    cpu.load(readCartridgeFile(argv[1]));
+    std::unique_ptr<Cartridge> cartridge{readCartridgeFile(argv[1])};
+    cartridge->loadRamIfSupported("./saves/" + cartridge->getGameTitle() + ".sav");
+
+    CPU cpu{*cartridge};
 
     // Create the main window
     sf::RenderWindow window{
@@ -59,6 +61,7 @@ int main(int argc, char** argv) {
         while (window.pollEvent(event)) {
             switch (event.type) {
                 case sf::Event::Closed:
+                    cartridge->saveRamIfSupported("./saves/" + cartridge->getGameTitle() + ".sav");
                     window.close();
                     break;
                 default:

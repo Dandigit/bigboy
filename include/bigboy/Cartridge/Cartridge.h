@@ -15,6 +15,9 @@ public:
 
     std::vector<AddressSpace> addressSpaces() const override;
 
+    void loadRamIfSupported(const std::string& filename);
+    void saveRamIfSupported(const std::string& filename) const;
+
     const std::string& getGameTitle() const;
 
 protected:
@@ -153,7 +156,7 @@ private:
     uint8_t m_ramBankNumber = 0x00;
 };
 
-std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom, std::vector<uint8_t> ram);
+std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom);
 std::unique_ptr<Cartridge> readCartridgeFile(const std::string& filename);
 
 #endif //BIGBOY_CARTRIDGE_H
