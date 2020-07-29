@@ -60,7 +60,10 @@ void Cartridge::saveRamIfSupported(const std::string &filename) const {
                 std::cerr << "warning: could not write save file '" << filename << "'\n";
                 break;
             }
+
             saveFile.write(reinterpret_cast<const char*>(m_ram.data()), m_ram.size());
+            std::cout << "note: wrote save file '" << filename << "', " << m_ram.size() << " bytes\n";
+
             break;
         }
         default:
