@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     sf::RenderWindow window{
         sf::VideoMode{SCREEN_WIDTH * SCREEN_SCALE, SCREEN_HEIGHT * SCREEN_SCALE},
         "Bigboy - " + cpu.getGameTitle()};
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(59);
 
     sf::Texture frameTexture{};
     frameTexture.create(160,144);

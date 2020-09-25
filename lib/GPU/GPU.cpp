@@ -387,6 +387,10 @@ void GPU::renderSpriteScanline() {
         const uint8_t spriteHeight = spriteSize() ? 16 : 8;
 
         const uint8_t flags = m_oam[i + 3];
+        const bool usePalette0 = (flags >> 4u) & 1u;
+        const bool xFlip = (flags >> 5u) & 1u;
+        const bool yFlip = (flags >> 6u) & 1u;
+        const bool hasPriority0 = (flags >> 7u) & 1u;
 
         // Ensure that the sprite is on the current scanline
         if (spriteY > m_currentY || (spriteY + spriteHeight) <= m_currentY) continue;
@@ -404,7 +408,7 @@ void GPU::renderSpriteScanline() {
         const uint16_t absoluteTileIndex = tileNumber * 16;
 
         // We need to find the our current line in the tile
-        bool yFlip = (flags >> 6) & 1u;
+
         const uint8_t tileYOffset = yFlip ?
                                     ((spriteHeight - 1) - (m_currentY - spriteY)) :
                                     (m_currentY - spriteY);
@@ -415,33 +419,28 @@ void GPU::renderSpriteScanline() {
 
         // Loop through the row
         for (int x = 0; x < 8; ++x) {
-            int pixelX = spriteX + x;
+            const int pixelX = spriteX + x;
 
-            // Is the pixel on screen?
+            // Ensure that the pixel is on screen
             if (pixelX < 0 || pixelX >= 160) continue;
 
-            const bool xFlip = (flags >> 5) & 1u;
             const uint8_t pos = xFlip ? x : (7 - x);
 
-            const uint8_t pixelLow = ((rowLow >> pos) & 1u) ? 1 : 0;
-            const uint8_t pixelHigh = ((rowHigh >> pos) & 1u) ? 2 : 0;
-            const uint8_t pixel = pixelLow + pixelHigh;
+            const uint8_t pixelLow = (rowLow >> pos) & 1u;
+            const uint8_t pixelHigh = (rowHigh >> pos) & 1u;
+            const uint8_t pixel = (pixelHigh << 1u) | pixelLow;
 
-            const bool usePallete0 = (flags >> 4) & 1u;
-            const Colour colour = usePallete0 ?
-                                  getPaletteColour(m_spritePalette0, pixel) :
-                                  getPaletteColour(m_spritePalette1, pixel);
+            const uint8_t palette = usePalette0
+                    ? m_spritePalette0
+                    : m_spritePalette1;
+            const Colour colour = getPaletteColour(palette, pixel);
 
-            // If the pixel is not transparent
-            if (pixel != 0) {
-                const uint16_t index = m_currentY * 160 + pixelX;
+            const uint16_t index = m_currentY * 160 + pixelX;
+            const bool bgPixelIsEmpty = m_frameBuffer[index] == getPaletteColour(m_bgPalette, 0);
 
-                // Render above BG?
-                const bool hasPriority0 = ((flags >> 7u) & 1u) == 0;
-                const bool bgPixelIsEmpty = m_frameBuffer[index] == getPaletteColour(m_bgPalette, 0);
-                if (hasPriority0 || bgPixelIsEmpty) {
+            // Ensure that the pixel is not transparent and that it has the appropriate priority
+            if (pixel != 0 && (hasPriority0 || bgPixelIsEmpty)) {
                     m_frameBuffer[index] = colour;
-                }
             }
         }
     }
