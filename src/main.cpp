@@ -1,14 +1,12 @@
 #include <iostream>
 
 #include <SFML/Graphics.hpp>
-#include "imgui/imgui.h"
-#include "imgui/imgui-SFML.h"
 
 #include <bigboy/CPU/CPU.h>
 
 constexpr unsigned long SCREEN_WIDTH = 160;
 constexpr unsigned long SCREEN_HEIGHT = 144;
-constexpr unsigned long SCREEN_SCALE = 3;
+constexpr unsigned long SCREEN_SCALE = 4;
 
 void handleInput(CPU& cpu,
         const sf::Keyboard::Key key,
@@ -46,11 +44,9 @@ int main(int argc, char** argv) {
 
     // Create the main window
     sf::RenderWindow window{
-        sf::VideoMode{SCREEN_WIDTH * SCREEN_SCALE + 500, SCREEN_HEIGHT * SCREEN_SCALE + 500},
+        sf::VideoMode{SCREEN_WIDTH * SCREEN_SCALE, SCREEN_HEIGHT * SCREEN_SCALE},
         "Bigboy - " + cpu.getGameTitle()};
     window.setFramerateLimit(59);
-
-    ImGui::SFML::Init(window);
 
     sf::Texture frameTexture{};
     frameTexture.create(160,144);
@@ -63,7 +59,6 @@ int main(int argc, char** argv) {
         // Handle all events triggered since the last iteration
         sf::Event event{};
         while (window.pollEvent(event)) {
-            ImGui::SFML::ProcessEvent(event);
             switch (event.type) {
                 case sf::Event::Closed:
                     cartridge->saveRamIfSupported("./saves/" + cartridge->getGameTitle() + ".sav");
@@ -75,17 +70,12 @@ int main(int argc, char** argv) {
             }
         }
 
-        ImGui::SFML::Update(window, deltaClock.restart());
-
-        ImGui::ShowDemoWindow();
-
         handleInputs(cpu);
         frameTexture.update(reinterpret_cast<const sf::Uint8*>(cpu.stepFrame().data()));
 
         window.clear(sf::Color::Black);
         window.draw(frameSprite);
 
-        ImGui::SFML::Render(window);
         window.display();
     }
 
