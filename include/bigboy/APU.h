@@ -1,7 +1,7 @@
 #ifndef BIGBOY_APU_H
 #define BIGBOY_APU_H
 
-#include "MemoryDevice.h"
+#include <bigboy/MemoryDevice.h>
 
 class APU : public MemoryDevice {
 public:

@@ -5,8 +5,8 @@
 #include <memory>
 #include <chrono>
 
-#include "CartridgeHeader.h"
-#include "MemoryDevice.h"
+#include <bigboy/CartridgeHeader.h>
+#include <bigboy/MemoryDevice.h>
 
 class Cartridge : public MemoryDevice {
 public:

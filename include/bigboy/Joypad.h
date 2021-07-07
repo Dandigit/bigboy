@@ -1,7 +1,7 @@
 #ifndef BIGBOY_JOYPAD_H
 #define BIGBOY_JOYPAD_H
 
-#include "MemoryDevice.h"
+#include <bigboy/MemoryDevice.h>
 
 enum class InputEvent {
     UP_PRESSED,
