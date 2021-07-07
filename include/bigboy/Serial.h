@@ -1,7 +1,7 @@
 #ifndef BIGBOY_SERIAL_H
 #define BIGBOY_SERIAL_H
 
-#include <bigboy/MMU/MemoryDevice.h>
+#include "MemoryDevice.h"
 
 class Serial : public MemoryDevice {
 public:

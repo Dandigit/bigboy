@@ -1,34 +1,4 @@
-#include <bigboy/CPU/Registers.h>
-
-uint8_t& Registers::get(RegisterOperand target) {
-    switch (target) {
-        case RegisterOperand::B: return b;
-        case RegisterOperand::C: return c;
-        case RegisterOperand::D: return d;
-        case RegisterOperand::E: return e;
-        case RegisterOperand::H: return h;
-        case RegisterOperand::L: return l;
-        case RegisterOperand::A: return a;
-    }
-}
-
-uint16_t& Registers::get(RegisterPairOperand target) {
-    switch (target) {
-        case RegisterPairOperand::BC: return BC();
-        case RegisterPairOperand::DE: return DE();
-        case RegisterPairOperand::HL: return HL();
-        case RegisterPairOperand::SP: return sp;
-    }
-}
-
-uint16_t& Registers::get(RegisterPairStackOperand target) {
-    switch (target) {
-        case RegisterPairStackOperand::BC: return BC();
-        case RegisterPairStackOperand::DE: return DE();
-        case RegisterPairStackOperand::HL: return HL();
-        case RegisterPairStackOperand::AF: return AF();
-    }
-}
+#include <bigboy/Registers.h>
 
 uint16_t& Registers::BC() {
     #ifdef BIGBOY_BIG_ENDIAN
@@ -80,6 +50,45 @@ uint16_t& Registers::AF() {
 uint16_t Registers::AF() const {
     return static_cast<uint16_t>(a) << 8u
            | static_cast<uint16_t>(f);
+}
+
+uint8_t& Registers::get(RegisterOperand target) {
+    switch (target) {
+        case RegisterOperand::B: return b;
+        case RegisterOperand::C: return c;
+        case RegisterOperand::D: return d;
+        case RegisterOperand::E: return e;
+        case RegisterOperand::H: return h;
+        case RegisterOperand::L: return l;
+        case RegisterOperand::A: return a;
+    }
+}
+
+uint16_t& Registers::get(RegisterPairOperand target) {
+    switch (target) {
+        case RegisterPairOperand::BC: return BC();
+        case RegisterPairOperand::DE: return DE();
+        case RegisterPairOperand::HL: return HL();
+        case RegisterPairOperand::SP: return sp;
+    }
+}
+
+uint16_t& Registers::get(RegisterPairStackOperand target) {
+    switch (target) {
+        case RegisterPairStackOperand::BC: return BC();
+        case RegisterPairStackOperand::DE: return DE();
+        case RegisterPairStackOperand::HL: return HL();
+        case RegisterPairStackOperand::AF: return AF();
+    }
+}
+
+bool Registers::get(ConditionOperand condition) const {
+    switch (condition) {
+        case ConditionOperand::NZ: return !getZeroFlag();
+        case ConditionOperand::Z:  return getZeroFlag();
+        case ConditionOperand::NC: return !getCarryFlag();
+        case ConditionOperand::C:  return getCarryFlag();
+    }
 }
 
 void Registers::reset() {

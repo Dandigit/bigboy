@@ -1,4 +1,5 @@
 #include <bigboy/Joypad.h>
+
 #include <iostream>
 
 bool Joypad::update() {

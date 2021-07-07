@@ -1,15 +1,10 @@
 #ifndef BIGBOY_CPU_H
 #define BIGBOY_CPU_H
 
-#include <bigboy/Cartridge/Cartridge.h>
-#include <bigboy/CPU/OpCode.h>
-#include <bigboy/CPU/PrefixOpCode.h>
-#include <bigboy/CPU/Registers.h>
-#include <bigboy/GPU/GPU.h>
-#include <bigboy/Joypad.h>
-#include <bigboy/MMU/MMU.h>
-#include <bigboy/Serial.h>
-#include <bigboy/Timer.h>
+#include "MMU.h"
+#include "OpCode.h"
+#include "PrefixOpCode.h"
+#include "Registers.h"
 
 enum class BitOperand : uint8_t {
     BIT0 = 0, // 000
@@ -45,28 +40,22 @@ constexpr uint8_t INTERRUPT_COUNT = 5;
 
 class CPU {
 public:
-    explicit CPU(Cartridge& cartridge);
-
-    void load(Cartridge& cartridge);
+    explicit CPU(MMU& mmu);
     void reset();
 
-    const std::array<Colour, 160*144>& stepFrame();
-    void handleInput(InputEvent event);
+    uint8_t step();
 
-    std::string getGameTitle() const;
+    void requestInterrupt(Interrupt interrupt);
+    void handleInterrupts();
 
 private:
-    void update();
+    uint8_t stepPrefix();
 
     uint8_t nextByte();
     uint16_t nextWord();
 
-    uint8_t step();
-    uint8_t stepPrefix();
-
     std::string disassembleCurrent();
 
-    void handleInterrupts();
     void serviceInterrupt(Interrupt interrupt);
 
     bool isInterruptServicable(Interrupt interrupt) const;
@@ -75,25 +64,8 @@ private:
 
     void enableInterrupt(Interrupt interrupt);
     void disableInterrupt(Interrupt interrupt);
-    void requestInterrupt(Interrupt interrupt);
+
     void unrequestInterrupt(Interrupt interrupt);
-
-    bool getZeroFlag()      const { return (m_registers.f >> ZERO_FLAG_BYTE_POSITION) & 1u; }
-    bool getSubtractFlag()  const { return (m_registers.f >> SUBTRACT_FLAG_BYTE_POSITION) & 1u; }
-    bool getHalfCarryFlag() const { return (m_registers.f >> HALF_CARRY_FLAG_BYTE_POSITION) & 1u; }
-    bool getCarryFlag()     const { return (m_registers.f >> CARRY_FLAG_BYTE_POSITION) & 1u; }
-
-    void setZeroFlag()      { m_registers.f |= (1u << ZERO_FLAG_BYTE_POSITION); }
-    void setSubtractFlag()  { m_registers.f |= (1u << SUBTRACT_FLAG_BYTE_POSITION); }
-    void setHalfCarryFlag() { m_registers.f |= (1u << HALF_CARRY_FLAG_BYTE_POSITION); }
-    void setCarryFlag()     { m_registers.f |= (1u << CARRY_FLAG_BYTE_POSITION); }
-
-    void clearZeroFlag()      { m_registers.f &= ~(1u << ZERO_FLAG_BYTE_POSITION); }
-    void clearSubtractFlag()  { m_registers.f &= ~(1u << SUBTRACT_FLAG_BYTE_POSITION); }
-    void clearHalfCarryFlag() { m_registers.f &= ~(1u << HALF_CARRY_FLAG_BYTE_POSITION); }
-    void clearCarryFlag()     { m_registers.f &= ~(1u << CARRY_FLAG_BYTE_POSITION); }
-
-    bool getCondition(ConditionOperand condition) const;
 
     void load(uint8_t& target, uint8_t value);
 
@@ -310,39 +282,23 @@ private:
 
     uint8_t RST(ResetOperand address);
 
-    std::reference_wrapper<Cartridge> m_cartridge;
-    GPU m_gpu{m_mmu};
-    Joypad m_joypad{};
-    Serial m_serial{};
-    Timer m_timer{};
-
-    MMU m_mmu{};
+    MMU& m_mmu;
 
     Registers m_registers{};
 
     // Total number of cycles since execution began
-    uint64_t m_clock = 0;
+    uint64_t m_clock;
 
-    uint16_t m_pc = 0; // Program counter.
+    uint16_t m_pc; // Program counter.
 
     // Are we halted? HALT will set this, and interrupts will reset this.
-    bool m_halted = false;
+    bool m_halted;
 
     // Are we stopped? STOP will set this.
-    bool m_stopped = false;
+    bool m_stopped;
 
     // Interrupt master enable flag. EI/DI will set/reset this.
-    bool m_ime = false;
-
-    static constexpr uint8_t ZERO_FLAG_BYTE_POSITION = 7;
-    static constexpr uint8_t SUBTRACT_FLAG_BYTE_POSITION = 6;
-    static constexpr uint8_t HALF_CARRY_FLAG_BYTE_POSITION = 5;
-    static constexpr uint8_t CARRY_FLAG_BYTE_POSITION = 4;
-
-    // Make friends with all the tests
-    friend class CPUTest_registerPairs_Test;
-    friend class CPUTest_flags_Test;
-    friend class CPUTest_ADDA_r_Test;
+    bool m_ime;
 };
 
 #endif //BIGBOY_CPU_H

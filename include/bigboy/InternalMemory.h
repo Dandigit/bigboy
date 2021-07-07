@@ -4,7 +4,7 @@
 #include <array>
 #include <cstdint>
 
-#include <bigboy/MMU/MemoryDevice.h>
+#include "MemoryDevice.h"
 
 class InternalMemory : public MemoryDevice {
 public:

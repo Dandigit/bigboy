@@ -3,10 +3,10 @@
 
 #include <array>
 #include <memory>
-
-#include <bigboy/Cartridge/CartridgeHeader.h>
-#include <bigboy/MMU/MemoryDevice.h>
 #include <chrono>
+
+#include "CartridgeHeader.h"
+#include "MemoryDevice.h"
 
 class Cartridge : public MemoryDevice {
 public:
@@ -15,8 +15,8 @@ public:
 
     std::vector<AddressSpace> addressSpaces() const override;
 
-    void loadRamIfSupported(const std::string& filename);
-    void saveRamIfSupported(const std::string& filename) const;
+    bool loadRamFileIfSupported(const std::string& path);
+    bool saveRamFileIfSupported(const std::string& path) const;
 
     const std::string& getGameTitle() const;
 
@@ -43,7 +43,6 @@ public:
 class MBC1 : public Cartridge {
 public:
     MBC1(std::vector<uint8_t> rom, std::vector<uint8_t> ram, CartridgeHeader header);
-    ~MBC1() override;
 
     uint8_t readByte(uint16_t address) const override;
     void writeByte(uint16_t address, uint8_t value) override;
@@ -157,6 +156,6 @@ private:
 };
 
 std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom);
-std::unique_ptr<Cartridge> readCartridgeFile(const std::string& filename);
+std::unique_ptr<Cartridge> loadRomFile(const std::string& path);
 
 #endif //BIGBOY_CARTRIDGE_H

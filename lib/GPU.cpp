@@ -1,7 +1,8 @@
-#include <bigboy/GPU/GPU.h>
-#include <bigboy/MMU/MMU.h>
+#include <bigboy/GPU.h>
 
 #include <iostream>
+
+#include <bigboy/MMU.h>
 
 const Colour Colour::DARKEST{
 #ifdef BIGBOY_SCREEN_TINT

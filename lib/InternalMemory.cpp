@@ -1,4 +1,4 @@
-#include <bigboy/MMU/InternalMemory.h>
+#include <bigboy/InternalMemory.h>
 
 #include <string>
 #include <iostream>

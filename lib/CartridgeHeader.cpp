@@ -1,4 +1,4 @@
-#include <bigboy/Cartridge/CartridgeHeader.h>
+#include <bigboy/CartridgeHeader.h>
 
 CartridgeHeader makeCartridgeHeader(const std::vector<uint8_t>& rom) {
     auto cgbFlag = static_cast<CGBFlag>(rom[0x0143]);

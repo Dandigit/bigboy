@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <bigboy/MMU/AddressSpace.h>
+#include "AddressSpace.h"
 
 class MMU;
 

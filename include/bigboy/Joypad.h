@@ -1,19 +1,7 @@
 #ifndef BIGBOY_JOYPAD_H
 #define BIGBOY_JOYPAD_H
 
-#include <bigboy/MMU/MemoryDevice.h>
-
-struct KeyState {
-    bool up = false;
-    bool down = false;
-    bool left = false;
-    bool right = false;
-
-    bool a = false;
-    bool b = false;
-    bool start = false;
-    bool select = false;
-};
+#include "MemoryDevice.h"
 
 enum class InputEvent {
     UP_PRESSED,
@@ -39,6 +27,18 @@ enum class InputEvent {
 
     SELECT_PRESSED,
     SELECT_RELEASED,
+};
+
+struct KeyState {
+    bool up = false;
+    bool down = false;
+    bool left = false;
+    bool right = false;
+
+    bool a = false;
+    bool b = false;
+    bool start = false;
+    bool select = false;
 };
 
 class Joypad : public MemoryDevice {

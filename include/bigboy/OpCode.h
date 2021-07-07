@@ -787,7 +787,7 @@ enum class OpCode : uint8_t {
     CB = 0b11001011
 };
 
-std::string opCodeToString(OpCode opCode) {
+inline std::string opCodeToString(OpCode opCode) {
     switch (opCode) {
         case OpCode::LD_B_B: return "LD B, B";
         case OpCode::LD_B_C: return "LD B, C";

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <bigboy/MMU/InternalMemory.h>
+#include "InternalMemory.h"
 
 class MMU {
     // MMU does own some general system memory that belongs nowhere else:

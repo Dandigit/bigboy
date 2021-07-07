@@ -1,4 +1,4 @@
-#include <bigboy/Cartridge/Cartridge.h>
+#include <bigboy/Cartridge.h>
 
 #include <algorithm>
 #include <fstream>
@@ -14,7 +14,7 @@ std::vector<AddressSpace> Cartridge::addressSpaces() const {
     return {{0x0000, 0x7FFF}, {0xA000, 0xBFFF}};
 }
 
-void Cartridge::loadRamIfSupported(const std::string &filename) {
+bool Cartridge::loadRamFileIfSupported(const std::string& path) {
     switch (m_header.mbcType) {
         case MBCType::ROM_RAM_BATTERY:
         case MBCType::MBC1_RAM_BATTERY:
@@ -22,10 +22,10 @@ void Cartridge::loadRamIfSupported(const std::string &filename) {
         case MBCType::MBC3_TIMER_BATTERY:
         case MBCType::MBC3_TIMER_RAM_BATTERY:
         case MBCType::MBC5_RAM_BATTERY: {
-            std::ifstream saveFile{filename, std::ios::in | std::ios::binary | std::ios::ate};
+            std::ifstream saveFile{path, std::ios::in | std::ios::binary | std::ios::ate};
             if (!saveFile.is_open()) {
-                std::cerr << "warning: could not read save file '" << filename << "'\n";
-                break;
+                std::cerr << "warning: could not read save file '" << path << "'\n";
+                return false;
             }
 
             saveFile.seekg(0, std::ios::end);
@@ -33,8 +33,8 @@ void Cartridge::loadRamIfSupported(const std::string &filename) {
             saveFile.seekg(0, std::ios::beg);
 
             if (m_ram.size() != length) {
-                std::cerr << "fatal: corrupt save file '" << filename << "'\n";
-                std::exit(-1);
+                std::cerr << "warning: corrupt save file '" << path << "' was not read\n";
+                return false;
             }
 
             saveFile.read(reinterpret_cast<char*>(m_ram.data()), length);
@@ -45,9 +45,11 @@ void Cartridge::loadRamIfSupported(const std::string &filename) {
         default:
             break;
     }
+
+    return true;
 }
 
-void Cartridge::saveRamIfSupported(const std::string &filename) const {
+bool Cartridge::saveRamFileIfSupported(const std::string &filename) const {
     switch (m_header.mbcType) {
         case MBCType::ROM_RAM_BATTERY:
         case MBCType::MBC1_RAM_BATTERY:
@@ -58,7 +60,7 @@ void Cartridge::saveRamIfSupported(const std::string &filename) const {
             std::ofstream saveFile{filename, std::ios::out | std::ios::binary | std::ios::trunc};
             if (!saveFile.is_open()) {
                 std::cerr << "warning: could not write save file '" << filename << "'\n";
-                break;
+                return false;
             }
 
             saveFile.write(reinterpret_cast<const char*>(m_ram.data()), m_ram.size());
@@ -69,6 +71,8 @@ void Cartridge::saveRamIfSupported(const std::string &filename) const {
         default:
             break;
     }
+
+    return true;
 }
 
 const std::string& Cartridge::getGameTitle() const {
@@ -111,12 +115,6 @@ void NoMBC::writeByte(const uint16_t address, const uint8_t value) {
 
 MBC1::MBC1(std::vector<uint8_t> rom, std::vector<uint8_t> ram, CartridgeHeader header) :
         Cartridge{std::move(rom), std::move(ram), std::move(header)} {
-}
-
-MBC1::~MBC1() {
-    if (m_header.mbcType == MBCType::MBC1_RAM_BATTERY) {
-        // TODO: save RAM
-    }
 }
 
 uint8_t MBC1::readByte(const uint16_t address) const {
@@ -359,11 +357,11 @@ std::unique_ptr<Cartridge> makeCartridge(std::vector<uint8_t> rom) {
     }
 }
 
-std::unique_ptr<Cartridge> readCartridgeFile(const std::string& filename) {
-    std::ifstream file{filename};
+std::unique_ptr<Cartridge> loadRomFile(const std::string& path) {
+    std::ifstream file{path};
     if (!file.is_open()) {
-        std::cerr << "fatal: ROM file '" << filename << "' could not be opened.";
-        std::exit(-1);
+        std::cerr << "warning: ROM file '" << path << "' could not be opened.";
+        return nullptr;
     }
 
     file.seekg(0, std::ios::end);

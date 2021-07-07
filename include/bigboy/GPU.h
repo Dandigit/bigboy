@@ -3,21 +3,7 @@
 
 #include <array>
 
-#include <bigboy/MMU/MemoryDevice.h>
-
-enum class GPUMode {
-    HORIZONTAL_BLANK = 0, // 204 cycles (H-Blank)
-    VERTICAL_BLANK = 1,   // 4560 cycles  (V-Blank)
-    SCANLINE_OAM = 2,     // 80 cycles      (Searching OAM-RAM)
-    SCANLINE_VRAM = 3     // 172 cycles     (Transferring Data to LCD Driver)
-};
-
-enum class StatInterrupt : uint8_t {
-    HBLANK = 3, // Horizontal blank, bit 3
-    VBLANK = 4, // Vertical blank, bit 4
-    OAM = 5,    // OAM read, bit 5
-    LYC = 6,    // LY coincidence, bit 6
-};
+#include <bigboy/MemoryDevice.h>
 
 struct Colour {
     static const Colour DARKEST;
@@ -37,6 +23,20 @@ struct Colour {
     bool operator!=(const Colour& colour) const {
         return !(*this == colour);
     }
+};
+
+enum class GPUMode {
+    HORIZONTAL_BLANK = 0, // 204 cycles (H-Blank)
+    VERTICAL_BLANK = 1,   // 4560 cycles  (V-Blank)
+    SCANLINE_OAM = 2,     // 80 cycles      (Searching OAM-RAM)
+    SCANLINE_VRAM = 3     // 172 cycles     (Transferring Data to LCD Driver)
+};
+
+enum class StatInterrupt : uint8_t {
+    HBLANK = 3, // Horizontal blank, bit 3
+    VBLANK = 4, // Vertical blank, bit 4
+    OAM = 5,    // OAM read, bit 5
+    LYC = 6,    // LY coincidence, bit 6
 };
 
 class GPU : public MemoryDevice {

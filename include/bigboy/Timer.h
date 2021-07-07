@@ -1,7 +1,7 @@
 #ifndef BIGBOY_TIMER_H
 #define BIGBOY_TIMER_H
 
-#include <bigboy/MMU/MemoryDevice.h>
+#include "MemoryDevice.h"
 
 enum class FrequencySelect {
     HZ_4096 = 0b00,

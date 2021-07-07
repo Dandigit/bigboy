@@ -2,33 +2,33 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <bigboy/CPU/CPU.h>
+#include <bigboy/Emulator.h>
 
 constexpr unsigned long SCREEN_WIDTH = 160;
 constexpr unsigned long SCREEN_HEIGHT = 144;
 constexpr unsigned long SCREEN_SCALE = 4;
 
-void handleInput(CPU& cpu,
+void handleInput(Emulator& emulator,
         const sf::Keyboard::Key key,
         const InputEvent pressEvent,
         const InputEvent releaseEvent) {
     if (sf::Keyboard::isKeyPressed(key)) {
-        cpu.handleInput(pressEvent);
+        emulator.handleInput(pressEvent);
     } else {
-        cpu.handleInput(releaseEvent);
+        emulator.handleInput(releaseEvent);
     }
 }
 
-void handleInputs(CPU& cpu) {
-    handleInput(cpu, sf::Keyboard::Down, InputEvent::DOWN_PRESSED, InputEvent::DOWN_RELEASED);
-    handleInput(cpu, sf::Keyboard::Up, InputEvent::UP_PRESSED, InputEvent::UP_RELEASED);
-    handleInput(cpu, sf::Keyboard::Left, InputEvent::LEFT_PRESSED, InputEvent::LEFT_RELEASED);
-    handleInput(cpu, sf::Keyboard::Right, InputEvent::RIGHT_PRESSED, InputEvent::RIGHT_RELEASED);
+void handleInputs(Emulator& emulator) {
+    handleInput(emulator, sf::Keyboard::Down, InputEvent::DOWN_PRESSED, InputEvent::DOWN_RELEASED);
+    handleInput(emulator, sf::Keyboard::Up, InputEvent::UP_PRESSED, InputEvent::UP_RELEASED);
+    handleInput(emulator, sf::Keyboard::Left, InputEvent::LEFT_PRESSED, InputEvent::LEFT_RELEASED);
+    handleInput(emulator, sf::Keyboard::Right, InputEvent::RIGHT_PRESSED, InputEvent::RIGHT_RELEASED);
 
-    handleInput(cpu, sf::Keyboard::Z, InputEvent::START_PRESSED, InputEvent::START_RELEASED);
-    handleInput(cpu, sf::Keyboard::X, InputEvent::SELECT_PRESSED, InputEvent::SELECT_RELEASED);
-    handleInput(cpu, sf::Keyboard::S, InputEvent::B_PRESSED, InputEvent::B_RELEASED);
-    handleInput(cpu, sf::Keyboard::A, InputEvent::A_PRESSED, InputEvent::A_RELEASED);
+    handleInput(emulator, sf::Keyboard::Z, InputEvent::START_PRESSED, InputEvent::START_RELEASED);
+    handleInput(emulator, sf::Keyboard::X, InputEvent::SELECT_PRESSED, InputEvent::SELECT_RELEASED);
+    handleInput(emulator, sf::Keyboard::S, InputEvent::B_PRESSED, InputEvent::B_RELEASED);
+    handleInput(emulator, sf::Keyboard::A, InputEvent::A_PRESSED, InputEvent::A_RELEASED);
 }
 
 int main(int argc, char** argv) {
@@ -37,15 +37,18 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    std::unique_ptr<Cartridge> cartridge{readCartridgeFile(argv[1])};
-    cartridge->loadRamIfSupported("./saves/" + cartridge->getGameTitle() + ".sav");
+    Emulator emulator{};
+    if (!emulator.loadRomFile(argv[1])) {
+        std::exit(-1);
+    }
 
-    CPU cpu{*cartridge};
+    const std::string savePath = "./saves/" + emulator.getGameTitle() + ".sav";
+    emulator.loadRamFileIfSupported(savePath);
 
     // Create the main window
     sf::RenderWindow window{
         sf::VideoMode{SCREEN_WIDTH * SCREEN_SCALE, SCREEN_HEIGHT * SCREEN_SCALE},
-        "Bigboy - " + cpu.getGameTitle()};
+        "Bigboy - " + emulator.getGameTitle()};
     window.setFramerateLimit(59);
 
     sf::Texture frameTexture{};
@@ -61,7 +64,7 @@ int main(int argc, char** argv) {
         while (window.pollEvent(event)) {
             switch (event.type) {
                 case sf::Event::Closed:
-                    cartridge->saveRamIfSupported("./saves/" + cartridge->getGameTitle() + ".sav");
+                    emulator.saveRamFileIfSupported(savePath);
                     window.close();
                     break;
                 default:
@@ -70,8 +73,9 @@ int main(int argc, char** argv) {
             }
         }
 
-        handleInputs(cpu);
-        frameTexture.update(reinterpret_cast<const sf::Uint8*>(cpu.stepFrame().data()));
+        handleInputs(emulator);
+
+        frameTexture.update(reinterpret_cast<const sf::Uint8*>(emulator.update().data()));
 
         window.clear(sf::Color::Black);
         window.draw(frameSprite);
