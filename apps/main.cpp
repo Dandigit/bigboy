@@ -1,9 +1,53 @@
 #include <iostream>
 
+#include <SDL.h>
+
 #include <bigboy/Emulator.h>
 
-int main() {
-    std::cout << "hello, world!";
+constexpr unsigned int SCREEN_SCALE = 4;
+constexpr unsigned int SCREEN_WIDTH = 160 * SCREEN_SCALE;
+constexpr unsigned int SCREEN_HEIGHT = 144 * SCREEN_SCALE;
+
+
+int main(int argc, char** argv) {
+    // Initialise SDL
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        std::cerr << "fatal: SDL could not initialise: " << SDL_GetError() << '\n';
+        std::abort();
+    }
+
+    // The window we'll be rendering to
+    SDL_Window* window = SDL_CreateWindow(
+            "Bigboy (SDL) - $ROM_TITLE",
+            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+            SCREEN_WIDTH, SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN);
+    if (!window) {
+        std::cerr << "fatal: SDL could not create window: " << SDL_GetError() << '\n';
+        std::abort();
+    }
+
+    // The surface contained by the window
+    SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
+
+    // Fill the surface white
+    SDL_FillRect(screenSurface, nullptr, SDL_MapRGB(screenSurface->format, 255, 255, 255));
+
+    // Update the surface
+    SDL_UpdateWindowSurface(window);
+
+    // Wait two seconds
+    SDL_Delay(2000);
+
+    // Destroy window
+    SDL_DestroyWindow(window);
+    window = nullptr;
+    screenSurface = nullptr;
+
+    // Quit SDL subsystems
+    SDL_Quit();
+
+    return 0;
 }
 
 /*constexpr unsigned long SCREEN_WIDTH = 160;
