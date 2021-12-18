@@ -9,7 +9,7 @@ project(
 
 # Only do these if this is the main project, and not if it is included through add_subdirectory
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
     # Let's ensure -std=c++xx instead of -std=g++xx
     set(CMAKE_CXX_EXTENSIONS OFF)
 
