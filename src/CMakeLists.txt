@@ -1,3 +1,11 @@
+include(TestBigEndian)
+test_big_endian(BIGBOY_BIG_ENDIAN)
+if(${BIGBOY_BIG_ENDIAN})
+    add_compile_definitions(BIGBOY_BIG_ENDIAN)
+endif()
+
+add_compile_definitions(BIGBOY_SCREEN_TINT)
+
 add_library(bigboy
         APU.cpp
         ../include/bigboy/APU.h
