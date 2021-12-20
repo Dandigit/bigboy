@@ -10,12 +10,14 @@ void Emulator::reset() {
     m_cpu.reset();
     m_cartridge.reset();
     m_gpu.reset();
+    m_apu.reset();
     m_joypad.reset();
     m_timer.reset();
     //m_serial.reset();
 
     m_mmu.reset();
     m_mmu.registerDevice(m_gpu);
+    m_mmu.registerDevice(m_apu);
     m_mmu.registerDevice(m_joypad);
     m_mmu.registerDevice(m_timer);
     m_mmu.registerDevice(m_serial);

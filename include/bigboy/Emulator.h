@@ -1,6 +1,7 @@
 #ifndef BIGBOY_EMULATOR_H
 #define BIGBOY_EMULATOR_H
 
+#include <bigboy/APU.h>
 #include <bigboy/Cartridge.h>
 #include <bigboy/CPU.h>
 #include <bigboy/GPU.h>
@@ -30,6 +31,7 @@ private:
 
     MMU m_mmu{};
     GPU m_gpu{m_mmu};
+    APU m_apu{};
     Joypad m_joypad{};
     Serial m_serial{};
     Timer m_timer{};
