@@ -46,6 +46,18 @@ public:
         if (!m_screen) {
             throw std::runtime_error{"SDL could not create texture: " + std::string{SDL_GetError()}};
         }
+
+        // Initialise audio
+        SDL_AudioSpec audioSpec;
+        audioSpec.freq = 44100;
+        audioSpec.format = AUDIO_F32SYS;
+        audioSpec.channels = 1;
+        audioSpec.samples = 4096;
+        audioSpec.callback = nullptr;
+        audioSpec.userdata = this;
+
+        SDL_OpenAudio(&audioSpec, nullptr);
+        SDL_PauseAudio(0);
     }
 
     ~App() {
@@ -68,8 +80,16 @@ public:
         while (m_running) {
             handleEvents();
 
-            const std::array<Colour, 160*144>& frame = m_emulator.update();
-            auto framePixels = reinterpret_cast<const uint8_t*>(frame.data());
+            // If not finished playing samples, continue? Or block until finished playing samples...
+
+            Frame frame = m_emulator.update();
+            std::cout << "got " << frame.audio.size() << " samples this frame\n";
+            SDL_QueueAudio(1, frame.audio.data(), frame.audio.size() * sizeof(float));
+            while ((SDL_GetQueuedAudioSize(1)) > frame.audio.size() * sizeof(float)) {
+                SDL_Delay(1);
+            }
+
+            auto framePixels = reinterpret_cast<const uint8_t*>(frame.video.data());
             uint8_t* screenPixels;
             int pitch = 0;
 

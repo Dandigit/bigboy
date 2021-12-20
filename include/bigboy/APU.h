@@ -10,16 +10,24 @@ class APU : public MemoryDevice {
 public:
     void reset();
 
+    void update(uint8_t cycles); // Step n times
+
+    // Collect all samples that have accumulated since we last collected
+    std::vector<float> collectSamples();
+
     std::vector<AddressSpace> addressSpaces() const;
     uint8_t readByte(uint16_t address) const;
     void writeByte(uint16_t address, uint8_t value);
 
 private:
-    void update(uint8_t cycles);
+    void step();
 
-    void stepCh1();
+    float stepCh1();
 
     bool isEnabled() const { return (m_enable >> 7u) & 1u; }
+
+    uint16_t ch1Frequency() const { return ((m_ch1FrequencyHigh & 0b00000111) << 8u) | m_ch1FrequencyLow; }
+    uint8_t ch1Duty() const { return m_ch1LengthAndDuty >> 6u; }
 
     // Control registers
     uint8_t m_terminalControl; // NR50: FF24 0x77
@@ -33,6 +41,12 @@ private:
     uint8_t m_ch1FrequencyLow; // NR13: 0xFF13
     uint8_t m_ch1FrequencyHigh; // NR14: 0xFF14
 
+    uint16_t m_ch1FrequencyTimer;
+    uint8_t m_ch1DutyPosition;
+
+    uint8_t m_cyclesSinceSample;
+
+    std::vector<float> m_sampleBuffer;
 
     static inline const std::array<std::bitset<8>, 4> m_wavePatternDuties{
             0b00000001,  // 12.5%

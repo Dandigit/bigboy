@@ -23,18 +23,20 @@ void Emulator::reset() {
     m_mmu.registerDevice(m_serial);
 }
 
-const std::array<Colour, 160*144>& Emulator::update() {
+Frame Emulator::update() {
     while (m_clock < 70224) {
         step();
     }
 
     m_clock -= 70224;
-    return m_gpu.getCurrentFrame();
+    return {m_gpu.getCurrentFrame(), m_apu.collectSamples()};
 }
 
 void Emulator::step() {
     const uint8_t cycles = m_cpu.step();
     m_clock += cycles;
+
+    m_apu.update(cycles);
 
     const bool joypadRequest = m_joypad.update();
     if (joypadRequest) {

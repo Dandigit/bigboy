@@ -9,12 +9,17 @@
 #include <bigboy/Serial.h>
 #include <bigboy/Timer.h>
 
+struct Frame {
+    const std::array<Colour, 160*144>& video;
+    const std::vector<float> audio;
+};
+
 class Emulator {
 public:
     Emulator();
     void reset();
 
-    const std::array<Colour, 160*144>& update();
+    Frame update();
     void handleInput(InputEvent event);
 
     bool loadRomFile(const std::string& path);
