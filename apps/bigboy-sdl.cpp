@@ -1,3 +1,4 @@
+#include <deque>
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
@@ -18,7 +19,7 @@ public:
         m_emulator.loadRamFileIfSupported(savePath);
 
         // Initialise SDL
-        if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
             throw std::runtime_error{"SDL could not initialise: " + std::string{SDL_GetError()}};
         }
 
@@ -54,7 +55,6 @@ public:
         audioSpec.channels = 1;
         audioSpec.samples = 4096;
         audioSpec.callback = nullptr;
-        audioSpec.userdata = this;
 
         SDL_OpenAudio(&audioSpec, nullptr);
         SDL_PauseAudio(0);
@@ -76,18 +76,14 @@ public:
 
     void run() {
         m_running = true;
-
+        std::vector<float> audioBuffer;
+        
         while (m_running) {
             handleEvents();
 
             // If not finished playing samples, continue? Or block until finished playing samples...
 
             Frame frame = m_emulator.update();
-            std::cout << "got " << frame.audio.size() << " samples this frame\n";
-            SDL_QueueAudio(1, frame.audio.data(), frame.audio.size() * sizeof(float));
-            while ((SDL_GetQueuedAudioSize(1)) > frame.audio.size() * sizeof(float)) {
-                SDL_Delay(1);
-            }
 
             auto framePixels = reinterpret_cast<const uint8_t*>(frame.video.data());
             uint8_t* screenPixels;
@@ -106,6 +102,21 @@ public:
 
             // Present our changes to the window
             SDL_RenderPresent(m_renderer);
+
+            std::cout << "got " << frame.audio.size() << " samples this frame\n";
+            audioBuffer.insert(audioBuffer.end(), frame.audio.begin(), frame.audio.end());
+            if (audioBuffer.size() >= 4096) {
+                SDL_QueueAudio(1, audioBuffer.data(), 4096 * sizeof(float));
+                while ((SDL_GetQueuedAudioSize(1)) > 4096 * sizeof(float)) {
+                    SDL_Delay(1);
+                }
+                std::cout << "audio buffer full!!\n";
+
+                audioBuffer.erase(audioBuffer.begin(), audioBuffer.begin() + 4095);
+                std::cout << "audio buffer cleared to " << audioBuffer.size() << " elements\n";
+            }
+
+
         }
     }
 

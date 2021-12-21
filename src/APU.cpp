@@ -4,6 +4,7 @@
 
 void APU::reset() {
     m_sampleBuffer.clear();
+    m_cyclesSinceSample = 0;
 
     m_terminalControl = 0x77;
     m_terminalChannelSelect = 0xF3;
@@ -15,8 +16,6 @@ void APU::reset() {
     m_ch1FrequencyLow = 0xFF;
     m_ch1FrequencyHigh = 0xBF;
     m_ch1FrequencyTimer = (2048 - ch1Frequency()) * 4;
-
-    m_cyclesSinceSample = 0;
 }
 
 std::vector<float> APU::collectSamples() {
@@ -26,6 +25,7 @@ std::vector<float> APU::collectSamples() {
 }
 
 void APU::update(uint8_t cycles) {
+    // x4 for t-cycles?
     for (int i = cycles; i > 0; --i) {
         step();
     }
@@ -34,6 +34,7 @@ void APU::update(uint8_t cycles) {
 void APU::step() {
     float ch1Amplitude = stepCh1();
 
+    // 95 = cpu clock speed (cycles/sec) / sample rate (samples/sec) = cycles/sample
     if (++m_cyclesSinceSample >= 95) {
         m_sampleBuffer.push_back(ch1Amplitude);
         std::cout << "play " << ch1Amplitude << "\n";
